@@ -70,17 +70,19 @@ function Reveal({
   children,
   className = '',
   as: Tag = 'div',
+  ...rest
 }: {
   children: ReactNode
   className?: string
   as?: ElementType
-}) {
+} & Record<string, unknown>) {
   const { ref, visible } = useReveal()
   const Comp = Tag
   return (
     <Comp
       ref={ref}
       className={`reveal ${visible ? 'is-in' : ''} ${className}`.trim()}
+      {...rest}
     >
       {children}
     </Comp>
@@ -103,7 +105,6 @@ function App() {
       const r = card.getBoundingClientRect()
       const x = (e.clientX - r.left) / r.width - 0.5
       const y = (e.clientY - r.top) / r.height - 0.5
-      // Gentler tilt — less visual clutter
       card.style.setProperty('--tilt-x', `${(-y * 3).toFixed(2)}deg`)
       card.style.setProperty('--tilt-y', `${(x * 3).toFixed(2)}deg`)
     }
@@ -145,7 +146,6 @@ function App() {
         const box = el.getBoundingClientRect()
         const mid = box.top + box.height / 2
         const rel = Math.max(-1.2, Math.min(1.2, (mid - vh / 2) / vh))
-        // Tonéd-down parallax — less overlap risk
         el.style.setProperty('--py', `${(rel * 22 * s).toFixed(2)}px`)
         el.style.setProperty('--px', `${(rel * 6 * s).toFixed(2)}px`)
         el.style.setProperty('--pz', `${(-Math.abs(rel) * 8 * s).toFixed(2)}px`)
@@ -209,14 +209,11 @@ function App() {
             <a href="#product" onClick={closeMenu}>
               Product
             </a>
-            <a href="#why" onClick={closeMenu}>
-              Why us
-            </a>
             <a href="#packs" onClick={closeMenu}>
               Packs
             </a>
             <a href="#book" onClick={closeMenu}>
-              Pay
+              Order
             </a>
             <a className="nav-cta" href={`tel:${PHONE_TEL}`} onClick={closeMenu}>
               Call
@@ -235,37 +232,32 @@ function App() {
           </svg>
         </span>
         <span className="float-call-text">
-          <strong>Call to book</strong>
+          <strong>Call</strong>
           <small>{PHONE_DISPLAY}</small>
         </span>
       </a>
 
       <main id="top">
+        {/* ——— Hero: calm, one idea ——— */}
         <section className="snap-section hero">
           <div className="layer layer-a" aria-hidden="true" />
           <div className="layer layer-b" aria-hidden="true" />
           <div className="hero-grid">
             <div className="hero-copy">
-              <p className="eyebrow">Acharya Dhunro Pasal · traditional snack</p>
               <h1>
                 Corn Puff <em>Pipes</em>
               </h1>
               <p className="lede">
-                Handmade pipe-shaped puffs from traditional (non-hybrid) maize — rooted in local snack
-                culture, made with nutrition in mind. Book a bag, party pack, or bulk order from
-                Acharya Dhunro Pasal with one call.
+                Traditional maize snacks — light, pipe-shaped, handmade.
               </p>
               <div className="hero-actions">
                 <a className="btn btn-primary" href={`tel:${PHONE_TEL}`}>
-                  Call to book / order
+                  Call to order
                 </a>
-                <a className="btn btn-secondary" href="#book">
+                <a className="btn btn-ghost" href="#book">
                   Scan to pay
                 </a>
               </div>
-              <p className="hero-phone">
-                <a href={`tel:${PHONE_TEL}`}>{PHONE_DISPLAY}</a>
-              </p>
             </div>
 
             <div className="hero-visual">
@@ -279,20 +271,18 @@ function App() {
                     loading="eager"
                   />
                 </div>
-                <figcaption className="hero-photo-badge">Traditional maize</figcaption>
               </figure>
             </div>
           </div>
         </section>
 
+        {/* ——— Product ——— */}
         <section id="product" className="snap-section section product">
           <div className="section-inner">
             <Reveal className="section-head">
-              <p className="eyebrow">The product</p>
-              <h2>What are Corn Puff Pipes?</h2>
+              <h2>Pipe-shaped maize puffs</h2>
               <p className="section-sub">
-                Light, crunchy puffed corn shaped like tiny pipes — crafted from traditional maize at
-                Acharya Dhunro Pasal.
+                Made from traditional (non-hybrid) maize at Acharya Dhunro Pasal.
               </p>
             </Reveal>
 
@@ -326,29 +316,23 @@ function App() {
               </Reveal>
             </div>
 
-            <div className="product-grid">
-              <Reveal className="product-story">
-                <p>
-                  Corn Puff Pipes start with traditional (non-hybrid) maize — the kind of grain that
-                  has fed families for generations. We puff it into light, pipe-shaped snacks that
-                  honor handmade snack culture: simple ingredients, careful craft, and a crunch that
-                  feels familiar.
-                </p>
-                <p>
-                  Nutrition matters. Choosing traditional maize is about more than nostalgia — it is
-                  about real grain character, a cleaner snack story, and food that belongs on a shared
-                  table. No tobacco, no gimmick beyond the shape, the snap, and the plant it comes
-                  from.
-                </p>
+            <Reveal className="nutrition-strip">
+              <p>
+                <strong>Traditional maize</strong> — real grain character, cleaner snack story,
+                shareable crunch.
+              </p>
+            </Reveal>
+
+            <Reveal as="details" className="disclose">
+              <summary>More about the maize</summary>
+              <div className="disclose-body">
                 <ul className="story-list">
-                  <li>Traditional (non-hybrid) maize</li>
-                  <li>Handmade snack culture</li>
-                  <li>Nutrition-minded, shareable crunch</li>
+                  <li>Non-hybrid maize — grain families know</li>
+                  <li>Handmade snack craft, not factory filler</li>
+                  <li>Nutrition-minded: light puffs from real maize</li>
+                  <li>No tobacco — just the shape, the snap, the plant</li>
                 </ul>
-              </Reveal>
-              <Reveal className="product-card" as="aside">
-                <h3>At a glance</h3>
-                <dl>
+                <dl className="glance">
                   <div>
                     <dt>Shop</dt>
                     <dd>Acharya Dhunro Pasal</dd>
@@ -361,228 +345,183 @@ function App() {
                     <dt>Maize</dt>
                     <dd>Traditional (non-hybrid)</dd>
                   </div>
-                  <div>
-                    <dt>Craft</dt>
-                    <dd>Handmade snack tradition</dd>
-                  </div>
                 </dl>
-              </Reveal>
-            </div>
+              </div>
+            </Reveal>
           </div>
         </section>
 
+        {/* ——— Why (collapsed) ——— */}
         <section id="why" className="snap-section section why">
           <div className="section-inner">
             <Reveal className="section-head">
-              <p className="eyebrow">Why buy</p>
-              <h2>From plant to pipe — snack with a story</h2>
-              <p className="section-sub">
-                Leaf-green roots, kernel-gold crunch — reasons that go beyond the bowl.
-              </p>
+              <h2>Why these puffs</h2>
+              <p className="section-sub">Traditional grain. Handmade crunch. Easy to order.</p>
             </Reveal>
-            <div className="cards">
-              <Reveal className="card frame-3d" as="article">
-                <div className="frame-3d-inner card-body" data-tilt>
-                  <div className="card-icon" aria-hidden="true">
-                    🌱
-                  </div>
-                  <h3>Traditional maize</h3>
-                  <p>
-                    Non-hybrid grain with character — closer to the maize plant families know, not
-                    just a factory filler.
-                  </p>
-                </div>
-              </Reveal>
-              <Reveal className="card frame-3d" as="article">
-                <div className="frame-3d-inner card-body" data-tilt>
-                  <div className="card-icon" aria-hidden="true">
-                    🥗
-                  </div>
-                  <h3>Nutrition matters</h3>
-                  <p>
-                    A snack story that starts with real maize — light puffs you can feel good about
-                    sharing.
-                  </p>
-                </div>
-              </Reveal>
-              <Reveal className="card frame-3d" as="article">
-                <div className="frame-3d-inner card-body" data-tilt>
-                  <div className="card-icon" aria-hidden="true">
-                    👐
-                  </div>
-                  <h3>Handmade culture</h3>
-                  <p>
-                    Rooted in traditional snack craft — playful pipe shapes with a serious respect for
-                    how snacks used to be made.
-                  </p>
-                </div>
-              </Reveal>
-              <Reveal className="card frame-3d" as="article">
-                <div className="frame-3d-inner card-body" data-tilt>
-                  <div className="card-icon" aria-hidden="true">
-                    📞
-                  </div>
-                  <h3>Easy to book</h3>
-                  <p>
-                    Call Acharya Dhunro Pasal to order, or scan the Global IME QR to pay — simple from
-                    first crunch to checkout.
-                  </p>
-                </div>
-              </Reveal>
-            </div>
-          </div>
-        </section>
 
-        <section id="packs" className="snap-section section packs">
-          <div className="section-inner">
-            <Reveal className="section-head">
-              <p className="eyebrow">Packs</p>
-              <h2>Packs for every table</h2>
-              <p className="section-sub">
-                Everyday bags, gathering packs, or bulk for events — tell us what you need when you
-                call.
-              </p>
-            </Reveal>
-            <div className="pack-grid">
-              <Reveal className="pack frame-3d" as="article">
-                <div className="frame-3d-inner pack-body" data-tilt>
-                  <span className="pack-label">Everyday</span>
-                  <h3>Snack bags</h3>
-                  <p>
-                    Personal-size bags of traditional-maize puffs for desks, lunchboxes, and quiet
-                    crunch moments.
-                  </p>
-                  <a href={`tel:${PHONE_TEL}`} className="pack-link">
-                    Call for snack bags →
-                  </a>
-                </div>
-              </Reveal>
-              <Reveal className="pack pack-featured frame-3d" as="article">
-                <div className="frame-3d-inner pack-body" data-tilt>
-                  <div className="pack-thumb">
-                    <img src={`${BASE}product/basket.jpg`} alt="" aria-hidden="true" loading="lazy" />
-                  </div>
-                  <span className="pack-label">Crowd favorite</span>
-                  <h3>Party packs</h3>
-                  <p>
-                    Bigger share formats for gatherings — handmade snack culture that looks good on
-                    the table and disappears fast.
-                  </p>
-                  <a href={`tel:${PHONE_TEL}`} className="pack-link">
-                    Call for party packs →
-                  </a>
-                </div>
-              </Reveal>
-              <Reveal className="pack frame-3d" as="article">
-                <div className="frame-3d-inner pack-body" data-tilt>
-                  <div className="pack-thumb">
-                    <img src={`${BASE}product/bulk.jpg`} alt="" aria-hidden="true" loading="lazy" />
-                  </div>
-                  <span className="pack-label">Custom</span>
-                  <h3>Bulk / events</h3>
-                  <p>
-                    Planning a bigger run or community moment? Call with quantity and timing — we will
-                    talk traditional packs.
-                  </p>
-                  <a href={`tel:${PHONE_TEL}`} className="pack-link">
-                    Call about bulk →
-                  </a>
-                </div>
-              </Reveal>
-            </div>
-          </div>
-        </section>
-
-        <section id="book" className="snap-section section book">
-          <div className="section-inner book-grid">
-            <Reveal className="book-copy">
-              <p className="eyebrow">Book / order</p>
-              <h2>Call Acharya Dhunro Pasal</h2>
-              <p>
-                Ready for Corn Puff Pipes made from traditional maize? Call to book snack bags, party
-                packs, or bulk. Prefer email? The form opens a mailto — call and QR are the fastest
-                path.
-              </p>
-              <a className="btn btn-primary btn-lg" href={`tel:${PHONE_TEL}`}>
-                Call {PHONE_DISPLAY}
-              </a>
-              <a className="email-pill" href={MAILTO}>
-                Or email {EMAIL}
-              </a>
-
-              <div className="order-form-wrap book-form">
-                {formState === 'success' ? (
-                  <div className="form-success" role="status">
-                    <h3>Almost there</h3>
-                    <p>
-                      Your mail client should open with a pre-filled message. Or just call{' '}
-                      <a href={`tel:${PHONE_TEL}`}>
-                        <strong>{PHONE_DISPLAY}</strong>
-                      </a>
-                      .
-                    </p>
-                    <button
-                      type="button"
-                      className="btn btn-secondary"
-                      onClick={() => {
-                        setFormState('idle')
-                        setName('')
-                        setEmail('')
-                        setMessage('')
-                      }}
-                    >
-                      Write another
-                    </button>
-                  </div>
-                ) : (
-                  <form className="order-form" onSubmit={handleSubmit}>
-                    <label>
-                      Name
-                      <input
-                        type="text"
-                        name="name"
-                        autoComplete="name"
-                        required
-                        value={name}
-                        onChange={(e) => setName(e.target.value)}
-                        placeholder="Your name"
-                      />
-                    </label>
-                    <label>
-                      Email
-                      <input
-                        type="email"
-                        name="email"
-                        autoComplete="email"
-                        required
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        placeholder="you@example.com"
-                      />
-                    </label>
-                    <label>
-                      Message
-                      <textarea
-                        name="message"
-                        required
-                        rows={4}
-                        value={message}
-                        onChange={(e) => setMessage(e.target.value)}
-                        placeholder="Snack bags, party pack, quantity, timing…"
-                      />
-                    </label>
-                    <button type="submit" className="btn btn-secondary btn-block">
-                      Email an inquiry
-                    </button>
-                  </form>
-                )}
+            <Reveal className="why-compact">
+              <div className="why-line">
+                <span aria-hidden="true">🌱</span>
+                <p>
+                  <strong>Traditional maize</strong> — non-hybrid grain with character.
+                </p>
+              </div>
+              <div className="why-line">
+                <span aria-hidden="true">👐</span>
+                <p>
+                  <strong>Handmade culture</strong> — playful pipes, serious craft.
+                </p>
+              </div>
+              <div className="why-line">
+                <span aria-hidden="true">📞</span>
+                <p>
+                  <strong>Easy to book</strong> — call or scan the QR.
+                </p>
               </div>
             </Reveal>
 
+            <Reveal as="details" className="disclose">
+              <summary>Nutrition & craft details</summary>
+              <div className="disclose-body">
+                <p>
+                  Choosing traditional maize is about real grain character and food that belongs on a
+                  shared table — a snack story that starts with the plant, not a gimmick.
+                </p>
+                <ul className="story-list">
+                  <li>Closer to the maize plant families know</li>
+                  <li>Light puffs you can feel good about sharing</li>
+                  <li>Rooted in how snacks used to be made</li>
+                </ul>
+              </div>
+            </Reveal>
+          </div>
+        </section>
+
+        {/* ——— Packs (progressive disclosure) ——— */}
+        <section id="packs" className="snap-section section packs">
+          <div className="section-inner">
+            <Reveal className="section-head">
+              <h2>Packs</h2>
+              <p className="section-sub">Snack bags, party packs, or bulk — tell us when you call.</p>
+            </Reveal>
+
+            <Reveal as="details" className="disclose disclose-packs" open>
+              <summary>Compare pack sizes</summary>
+              <div className="disclose-body pack-grid">
+                <article className="pack-simple">
+                  <h3>Snack bags</h3>
+                  <p>Everyday personal size.</p>
+                  <a href={`tel:${PHONE_TEL}`} className="pack-link">
+                    Call →
+                  </a>
+                </article>
+                <article className="pack-simple pack-simple-featured">
+                  <h3>Party packs</h3>
+                  <p>Share formats for gatherings.</p>
+                  <a href={`tel:${PHONE_TEL}`} className="pack-link">
+                    Call →
+                  </a>
+                </article>
+                <article className="pack-simple">
+                  <h3>Bulk / events</h3>
+                  <p>Custom quantity & timing.</p>
+                  <a href={`tel:${PHONE_TEL}`} className="pack-link">
+                    Call →
+                  </a>
+                </article>
+              </div>
+            </Reveal>
+          </div>
+        </section>
+
+        {/* ——— Book / Pay — breathe ——— */}
+        <section id="book" className="snap-section section book">
+          <div className="section-inner book-grid">
+            <Reveal className="book-copy">
+              <h2>Call to order</h2>
+              <p>Acharya Dhunro Pasal — snack bags, party packs, or bulk.</p>
+              <a className="btn btn-primary btn-lg" href={`tel:${PHONE_TEL}`}>
+                {PHONE_DISPLAY}
+              </a>
+              <a className="email-link" href={MAILTO}>
+                {EMAIL}
+              </a>
+
+              <details className="disclose book-form-disclose">
+                <summary>Email an inquiry instead</summary>
+                <div className="disclose-body order-form-wrap">
+                  {formState === 'success' ? (
+                    <div className="form-success" role="status">
+                      <h3>Almost there</h3>
+                      <p>
+                        Your mail client should open. Or call{' '}
+                        <a href={`tel:${PHONE_TEL}`}>
+                          <strong>{PHONE_DISPLAY}</strong>
+                        </a>
+                        .
+                      </p>
+                      <button
+                        type="button"
+                        className="btn btn-secondary"
+                        onClick={() => {
+                          setFormState('idle')
+                          setName('')
+                          setEmail('')
+                          setMessage('')
+                        }}
+                      >
+                        Write another
+                      </button>
+                    </div>
+                  ) : (
+                    <form className="order-form" onSubmit={handleSubmit}>
+                      <label>
+                        Name
+                        <input
+                          type="text"
+                          name="name"
+                          autoComplete="name"
+                          required
+                          value={name}
+                          onChange={(e) => setName(e.target.value)}
+                          placeholder="Your name"
+                        />
+                      </label>
+                      <label>
+                        Email
+                        <input
+                          type="email"
+                          name="email"
+                          autoComplete="email"
+                          required
+                          value={email}
+                          onChange={(e) => setEmail(e.target.value)}
+                          placeholder="you@example.com"
+                        />
+                      </label>
+                      <label>
+                        Message
+                        <textarea
+                          name="message"
+                          required
+                          rows={3}
+                          value={message}
+                          onChange={(e) => setMessage(e.target.value)}
+                          placeholder="Pack type, quantity, timing…"
+                        />
+                      </label>
+                      <button type="submit" className="btn btn-secondary btn-block">
+                        Open email
+                      </button>
+                    </form>
+                  )}
+                </div>
+              </details>
+            </Reveal>
+
             <Reveal className="pay-panel">
-              <p className="eyebrow">Payment</p>
               <h2>Scan to pay</h2>
-              <p className="pay-label">Global IME / Roman Acharya</p>
+              <p className="pay-label">Global IME · Roman Acharya</p>
               <figure className="qr-frame">
                 <div className="qr-quiet">
                   <img
@@ -594,10 +533,7 @@ function App() {
                   />
                 </div>
               </figure>
-              <p className="pay-hint">
-                Keep the code fully visible on screen for a clean scan. After paying, call or message
-                to confirm your order.
-              </p>
+              <p className="pay-hint">Pay, then call to confirm.</p>
             </Reveal>
           </div>
         </section>
@@ -609,20 +545,15 @@ function App() {
             <PipeMark size={36} />
             <div>
               <strong>Acharya Dhunro Pasal</strong>
-              <p>
-                Corn Puff Pipes — traditional maize snacks, handmade crunch shaped like tiny pipes.
-              </p>
+              <p>Corn Puff Pipes — traditional maize.</p>
               <a className="footer-phone" href={`tel:${PHONE_TEL}`}>
                 {PHONE_DISPLAY}
               </a>
             </div>
           </div>
           <div className="footer-meta">
-            <p>© {YEAR} Acharya Dhunro Pasal. All rights reserved.</p>
-            <p className="privacy-stub">
-              Call or scan to pay are primary. Optional email via mailto — this page does not store
-              form data on a server.
-            </p>
+            <p>© {YEAR} Acharya Dhunro Pasal</p>
+            <p className="privacy-stub">Call or scan to pay. Email via mailto — nothing stored here.</p>
           </div>
         </div>
       </footer>
