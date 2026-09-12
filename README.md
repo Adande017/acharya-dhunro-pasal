@@ -20,4 +20,6 @@ npm run dev
 npm run build
 ```
 
-Live (Vercel): https://acharya-dhunro-pasal.vercel.app
+Live (GitHub Pages): https://adande017.github.io/acharya-dhunro-pasal/
+
+Repo: https://github.com/Adande017/acharya-dhunro-pasal
