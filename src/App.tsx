@@ -27,9 +27,9 @@ function PipeMark({ size = 36 }: { size?: number }) {
     >
       <defs>
         <linearGradient id={gid} x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stopColor="#F5D15A" />
-          <stop offset="55%" stopColor="#E8C040" />
-          <stop offset="100%" stopColor="#5A9A3C" />
+          <stop offset="0%" stopColor="#F5C84A" />
+          <stop offset="45%" stopColor="#E8A820" />
+          <stop offset="100%" stopColor="#4A8C3A" />
         </linearGradient>
       </defs>
       <rect width="64" height="64" rx="14" fill={`url(#${gid})`} />
@@ -38,7 +38,7 @@ function PipeMark({ size = 36 }: { size?: number }) {
         fill="#1A2414"
       />
       <circle cx="46" cy="40" r="7" fill="#1A2414" />
-      <circle cx="46" cy="40" r="3.2" fill="#F5D15A" />
+      <circle cx="46" cy="40" r="3.2" fill="#F5C84A" />
     </svg>
   )
 }

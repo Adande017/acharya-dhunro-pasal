@@ -1,55 +1,97 @@
-/* Maize yellow → white/cream + leaf-green accents (traditional maize plant story) */
+/* Neumorphism Evolved — cream/yellow base + Frosted Green / Green Valley + saffron CTAs */
 :root {
   --phi: 1.6180339887;
+  --phi-major: 61.8%;
+  --phi-minor: 38.2%;
   --hue: 52;
 
-  /* Warm maize yellows → cream/white */
-  --yellow-0: hsl(48 40% 98%);
-  --yellow-1: hsl(48 48% 94%);
-  --yellow-2: hsl(50 62% 86%);
-  --yellow-3: hsl(48 78% 58%);
-  --yellow-4: hsl(46 72% 46%);
-  --yellow-5: hsl(44 55% 36%);
-  --yellow-6: hsl(42 40% 24%);
+  /* Soft yellow → white / cream (needed for extruded soft shadows) */
+  --yellow-0: hsl(48 42% 98%);
+  --yellow-1: hsl(48 46% 94%);
+  --yellow-2: hsl(50 58% 88%);
+  --yellow-3: hsl(46 78% 58%);
+  --yellow-4: hsl(42 72% 48%);
+  --yellow-5: hsl(38 62% 38%);
+  --yellow-6: hsl(36 42% 26%);
 
   --cream: var(--yellow-0);
   --cream-warm: var(--yellow-1);
   --corn-soft: var(--yellow-2);
   --corn: var(--yellow-3);
-  --corn-hot: hsl(50 90% 72%);
+  --corn-hot: hsl(48 88% 72%);
   --corn-deep: var(--yellow-4);
   --amber: var(--yellow-5);
   --amber-deep: var(--yellow-6);
 
-  /* Maize plant / leaf greens (primary accent — replaces red/coral) */
-  --leaf-0: hsl(118 28% 94%);
-  --leaf-1: hsl(122 32% 82%);
-  --leaf-2: hsl(128 36% 42%);
+  /* Surface matched to cream for neumorphism extrusion */
+  --neu-surface: hsl(48 40% 95%);
+  --neu-surface-raised: hsl(48 38% 97%);
+  --neu-surface-sunken: hsl(48 36% 91%);
+
+  /* Frosted Green / Green Valley accents (no red) */
+  --frosted-green: hsl(118 32% 92%);
+  --green-valley: hsl(128 38% 38%);
+  --leaf-0: hsl(118 30% 94%);
+  --leaf-1: hsl(122 34% 84%);
+  --leaf-2: hsl(128 36% 40%);
   --leaf-3: hsl(138 40% 28%);
-  --leaf-4: hsl(148 38% 18%);
+  --leaf-4: hsl(148 36% 18%);
   --leaf: var(--leaf-2);
   --leaf-deep: var(--leaf-3);
   --leaf-ink: var(--leaf-4);
 
-  /* Text */
-  --ink: hsl(140 18% 12%);
-  --charcoal: hsl(140 12% 16%);
-  --charcoal-soft: hsl(140 8% 26%);
-  --muted: hsl(140 6% 40%);
+  /* Saffron / maize gold — CTAs & highlights */
+  --saffron-0: hsl(42 90% 94%);
+  --saffron-1: hsl(40 88% 72%);
+  --saffron: hsl(38 92% 52%);
+  --saffron-deep: hsl(34 82% 42%);
+  --saffron-ink: hsl(32 55% 22%);
+
+  /* Text — accessible contrast on cream */
+  --ink: hsl(140 22% 12%);
+  --charcoal: hsl(140 14% 16%);
+  --charcoal-soft: hsl(140 10% 28%);
+  --muted: hsl(140 8% 40%);
   --white: #ffffff;
-  --success: var(--leaf-2);
+  --success: var(--green-valley);
 
   --font-display: 'Fraunces', Georgia, serif;
   --font-body: 'DM Sans', system-ui, sans-serif;
 
-  --radius: 20px;
-  --radius-sm: 12px;
+  --radius: 22px;
+  --radius-sm: 14px;
   --radius-lg: 28px;
-  --shadow-float:
-    0 2px 4px rgba(28, 40, 20, 0.05),
-    0 12px 28px rgba(28, 40, 20, 0.08),
-    0 28px 56px rgba(28, 40, 20, 0.09);
-  --shadow-soft: 0 14px 40px rgba(28, 40, 20, 0.09);
+  --radius-pill: 999px;
+
+  /* Neumorphism Evolved — refined dual shadows (not heavy 2020 clay) */
+  --neu-dark: rgba(56, 72, 40, 0.14);
+  --neu-light: rgba(255, 255, 255, 0.92);
+  --neu-dark-soft: rgba(56, 72, 40, 0.09);
+  --neu-light-soft: rgba(255, 255, 255, 0.75);
+
+  --shadow-neu:
+    8px 8px 18px var(--neu-dark),
+    -6px -6px 14px var(--neu-light);
+  --shadow-neu-sm:
+    4px 4px 10px var(--neu-dark-soft),
+    -3px -3px 8px var(--neu-light-soft);
+  --shadow-neu-lg:
+    12px 12px 28px var(--neu-dark),
+    -8px -8px 20px var(--neu-light);
+  --shadow-neu-inset:
+    inset 4px 4px 10px var(--neu-dark-soft),
+    inset -3px -3px 8px var(--neu-light);
+  --shadow-neu-press:
+    inset 5px 5px 12px var(--neu-dark),
+    inset -3px -3px 8px var(--neu-light-soft);
+  --shadow-neu-lift:
+    10px 10px 22px var(--neu-dark),
+    -7px -7px 16px var(--neu-light);
+
+  /* Legacy aliases → neu */
+  --shadow-float: var(--shadow-neu-lg);
+  --shadow-soft: var(--shadow-neu);
+
   --nav-h: 72px;
   --phone: '+9779845044572';
   --phone-display: '+977 984-5044572';
@@ -68,21 +110,31 @@
 @supports (color: oklch(0.7 0.12 100)) {
   :root {
     --yellow-0: oklch(0.985 0.012 100);
-    --yellow-1: oklch(0.955 0.03 98);
-    --yellow-2: oklch(0.9 0.07 95);
+    --yellow-1: oklch(0.955 0.028 98);
+    --yellow-2: oklch(0.92 0.055 95);
     --yellow-3: oklch(0.84 0.14 92);
-    --yellow-4: oklch(0.7 0.13 88);
-    --yellow-5: oklch(0.52 0.09 85);
-    --yellow-6: oklch(0.34 0.06 80);
-    --corn-hot: oklch(0.9 0.12 95);
-    --leaf-0: oklch(0.95 0.02 145);
-    --leaf-1: oklch(0.88 0.05 145);
-    --leaf-2: oklch(0.52 0.1 145);
+    --yellow-4: oklch(0.72 0.13 85);
+    --yellow-5: oklch(0.54 0.1 78);
+    --yellow-6: oklch(0.36 0.06 72);
+    --corn-hot: oklch(0.9 0.11 95);
+    --neu-surface: oklch(0.96 0.022 98);
+    --neu-surface-raised: oklch(0.975 0.015 100);
+    --neu-surface-sunken: oklch(0.935 0.025 98);
+    --frosted-green: oklch(0.95 0.025 145);
+    --green-valley: oklch(0.48 0.1 145);
+    --leaf-0: oklch(0.955 0.02 145);
+    --leaf-1: oklch(0.9 0.045 145);
+    --leaf-2: oklch(0.5 0.1 145);
     --leaf-3: oklch(0.4 0.09 150);
     --leaf-4: oklch(0.28 0.06 155);
-    --ink: oklch(0.22 0.02 145);
+    --saffron-0: oklch(0.96 0.04 85);
+    --saffron-1: oklch(0.86 0.12 85);
+    --saffron: oklch(0.76 0.16 75);
+    --saffron-deep: oklch(0.62 0.14 70);
+    --saffron-ink: oklch(0.32 0.06 65);
+    --ink: oklch(0.22 0.025 145);
     --charcoal: oklch(0.28 0.02 145);
-    --charcoal-soft: oklch(0.36 0.015 145);
+    --charcoal-soft: oklch(0.38 0.018 145);
     --muted: oklch(0.5 0.015 140);
   }
 }
@@ -105,7 +157,7 @@ body {
   min-width: 320px;
   min-height: 100vh;
   background:
-    linear-gradient(180deg, var(--yellow-1) 0%, var(--cream) 35%, var(--white) 100%);
+    linear-gradient(180deg, var(--yellow-1) 0%, var(--cream) 40%, var(--white) 100%);
   color: var(--charcoal);
   overflow-x: clip;
 }
@@ -134,7 +186,7 @@ button {
 }
 
 :focus-visible {
-  outline: 3px solid var(--leaf);
+  outline: 3px solid var(--saffron);
   outline-offset: 3px;
 }
 
