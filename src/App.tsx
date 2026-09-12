@@ -122,6 +122,51 @@ function App() {
     }
   }, [])
 
+  useEffect(() => {
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)')
+    if (reduceMotion.matches) return
+
+    const strengthOf = (mode: string | undefined) => {
+      if (mode === 'fast') return 1
+      if (mode === 'slow') return 0.4
+      return 0.68
+    }
+
+    let frame = 0
+    let queued = false
+
+    const apply = () => {
+      queued = false
+      const vh = window.innerHeight || 1
+      document.querySelectorAll<HTMLElement>('[data-parallax]').forEach((el) => {
+        const s = strengthOf(el.dataset.parallax)
+        const box = el.getBoundingClientRect()
+        const mid = box.top + box.height / 2
+        const rel = Math.max(-1.2, Math.min(1.2, (mid - vh / 2) / vh))
+        el.style.setProperty('--py', `${(rel * 46 * s).toFixed(2)}px`)
+        el.style.setProperty('--px', `${(rel * 12 * s).toFixed(2)}px`)
+        el.style.setProperty('--pz', `${(-Math.abs(rel) * 18 * s).toFixed(2)}px`)
+        el.style.setProperty('--pr', `${(rel * 2.6 * s).toFixed(3)}deg`)
+      })
+    }
+
+    const onScroll = () => {
+      if (queued) return
+      queued = true
+      frame = requestAnimationFrame(apply)
+    }
+
+    window.addEventListener('scroll', onScroll, { passive: true })
+    window.addEventListener('resize', onScroll, { passive: true })
+    apply()
+
+    return () => {
+      window.removeEventListener('scroll', onScroll)
+      window.removeEventListener('resize', onScroll)
+      cancelAnimationFrame(frame)
+    }
+  }, [])
+
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault()
     const subject = encodeURIComponent(
@@ -220,7 +265,7 @@ function App() {
             </div>
 
             <div className="hero-visual">
-              <figure className="frame-3d hero-photo" data-tilt>
+              <figure className="frame-3d hero-photo" data-tilt data-parallax="slow">
                 <div className="frame-3d-inner">
                   <img
                     src={`${BASE}product/closeup.jpg`}
@@ -248,7 +293,7 @@ function App() {
 
             <div className="product-gallery" aria-label="Product photos">
               <Reveal className="gallery-card frame-3d" as="figure">
-                <div className="frame-3d-inner" data-tilt>
+                <div className="frame-3d-inner" data-tilt data-parallax="mid">
                   <img
                     src={`${BASE}product/closeup.jpg`}
                     alt="Close-up of Corn Puff Pipes showing individual pipe-shaped corn puffs"
@@ -257,7 +302,7 @@ function App() {
                 </div>
               </Reveal>
               <Reveal className="gallery-card frame-3d" as="figure">
-                <div className="frame-3d-inner" data-tilt>
+                <div className="frame-3d-inner" data-tilt data-parallax="fast">
                   <img
                     src={`${BASE}product/basket.jpg`}
                     alt="Wicker basket filled with long Corn Puff Pipes snacks"
@@ -266,7 +311,7 @@ function App() {
                 </div>
               </Reveal>
               <Reveal className="gallery-card frame-3d" as="figure">
-                <div className="frame-3d-inner" data-tilt>
+                <div className="frame-3d-inner" data-tilt data-parallax="slow">
                   <img
                     src={`${BASE}product/bulk.jpg`}
                     alt="Bulk pile of wavy Corn Puff Pipes corn snacks"

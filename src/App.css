@@ -2,8 +2,11 @@
   min-height: 100vh;
   overflow-x: clip;
   background:
-    radial-gradient(ellipse 80% 50% at 10% -10%, rgba(245, 197, 66, 0.35), transparent 60%),
-    radial-gradient(ellipse 60% 40% at 100% 20%, rgba(255, 215, 106, 0.25), transparent 55%),
+    radial-gradient(ellipse 80% 50% at 10% -10%, rgba(245, 197, 66, 0.4), transparent 62%),
+    radial-gradient(ellipse 60% 45% at 100% 18%, rgba(255, 215, 106, 0.3), transparent 56%),
+    radial-gradient(ellipse 55% 40% at 52% 48%, rgba(212, 160, 23, 0.12), transparent 70%),
+    radial-gradient(ellipse 70% 38% at 82% 86%, rgba(245, 197, 66, 0.2), transparent 62%),
+    radial-gradient(ellipse 45% 30% at 8% 78%, rgba(196, 92, 38, 0.08), transparent 65%),
     var(--cream);
 }
 
@@ -22,15 +25,27 @@
   transform: translateY(0) scale(1);
 }
 
-/* Soft 3D frames */
-.frame-3d {
-  perspective: 900px;
+/* Soft 3D frames + scroll parallax vars */
+.frame-3d,
+[data-parallax] {
   --tilt-x: 0deg;
   --tilt-y: 0deg;
+  --px: 0px;
+  --py: 0px;
+  --pz: 0px;
+  --pr: 0deg;
+}
+
+.frame-3d {
+  perspective: 900px;
 }
 
 .frame-3d-inner {
-  transform: rotateX(var(--tilt-x)) rotateY(var(--tilt-y)) translateZ(0);
+  transform:
+    translate3d(var(--px), var(--py), var(--pz))
+    rotateX(var(--tilt-x))
+    rotateY(var(--tilt-y))
+    rotateZ(var(--pr));
   transform-style: preserve-3d;
   transition: transform 0.25s ease-out;
   border-radius: inherit;
@@ -367,7 +382,11 @@
   position: relative;
   padding: calc(var(--nav-h) + 1.5rem) 0 3rem;
   overflow: hidden;
-  background: linear-gradient(165deg, var(--yellow-1), var(--cream) 45%, var(--yellow-2));
+  background:
+    radial-gradient(ellipse 72% 62% at 78% 40%, rgba(245, 197, 66, 0.48), transparent 64%),
+    radial-gradient(ellipse 48% 42% at 14% 78%, rgba(196, 92, 38, 0.12), transparent 66%),
+    radial-gradient(ellipse 40% 36% at 88% 88%, rgba(255, 215, 106, 0.28), transparent 60%),
+    linear-gradient(165deg, var(--yellow-1), var(--cream) 42%, var(--yellow-2));
 }
 
 .layer {
@@ -378,8 +397,9 @@
 
 .layer-a {
   background:
-    radial-gradient(ellipse 55% 45% at 75% 25%, rgba(245, 197, 66, 0.55), transparent 70%),
-    radial-gradient(ellipse 35% 35% at 12% 70%, rgba(196, 92, 38, 0.12), transparent 70%);
+    radial-gradient(ellipse 58% 50% at 76% 28%, rgba(245, 197, 66, 0.58), transparent 72%),
+    radial-gradient(ellipse 40% 38% at 18% 68%, rgba(196, 92, 38, 0.14), transparent 70%),
+    radial-gradient(ellipse 36% 30% at 60% 92%, rgba(255, 215, 106, 0.22), transparent 68%);
   transform: translateZ(-40px) scale(1.08);
 }
 
@@ -458,14 +478,26 @@
 
 .hero-photo {
   position: relative;
-  width: min(100%, 400px);
+  width: min(100%, 420px);
   margin: 0;
-  border-radius: var(--radius-lg);
-  background: var(--cream-warm);
-  box-shadow: var(--shadow-float);
-  border: 3px solid color-mix(in srgb, var(--white) 70%, var(--corn));
+  border-radius: 0;
+  background: transparent;
+  border: none;
+  box-shadow: none;
   aspect-ratio: 4 / 5;
   animation: float-y 5.5s ease-in-out infinite;
+}
+
+.hero-photo::before {
+  content: '';
+  position: absolute;
+  inset: 6% 8%;
+  background:
+    radial-gradient(ellipse 70% 65% at 50% 48%, rgba(245, 197, 66, 0.5), transparent 72%),
+    radial-gradient(ellipse 50% 45% at 40% 60%, rgba(212, 160, 23, 0.28), transparent 70%);
+  filter: blur(32px);
+  z-index: 0;
+  pointer-events: none;
 }
 
 @keyframes float-y {
@@ -481,15 +513,20 @@
 .hero-photo .frame-3d-inner {
   width: 100%;
   height: 100%;
-  overflow: hidden;
-  border-radius: calc(var(--radius-lg) - 4px);
+  overflow: visible;
+  border-radius: 0;
+  position: relative;
+  z-index: 1;
 }
 
 .hero-photo img {
-  width: 100%;
-  height: 100%;
+  width: 116%;
+  height: 116%;
+  margin: -8%;
   object-fit: cover;
   object-position: center;
+  -webkit-mask-image: radial-gradient(ellipse 78% 74% at 50% 46%, #000 38%, transparent 76%);
+  mask-image: radial-gradient(ellipse 78% 74% at 50% 46%, #000 38%, transparent 76%);
 }
 
 .hero-photo-badge {
@@ -511,8 +548,11 @@
 
 /* ——— Product ——— */
 .product {
-  background: linear-gradient(180deg, var(--white), var(--cream));
-  border-block: 1px solid color-mix(in srgb, var(--amber) 12%, transparent);
+  background:
+    radial-gradient(ellipse 70% 48% at 22% 28%, rgba(245, 197, 66, 0.22), transparent 62%),
+    radial-gradient(ellipse 55% 42% at 88% 72%, rgba(255, 215, 106, 0.18), transparent 58%),
+    linear-gradient(180deg, var(--cream), var(--yellow-1) 42%, var(--cream));
+  border-block: none;
 }
 
 .product-grid {
@@ -543,27 +583,43 @@
 }
 
 .gallery-card {
+  position: relative;
   margin: 0;
-  border-radius: var(--radius);
-  background: var(--cream-warm);
-  border: 1px solid color-mix(in srgb, var(--amber) 16%, transparent);
-  box-shadow: var(--shadow-soft);
+  border-radius: 0;
+  background: transparent;
+  border: none;
+  box-shadow: none;
   aspect-ratio: 4 / 3;
-  overflow: hidden;
+  overflow: visible;
+}
+
+.gallery-card::before {
+  content: '';
+  position: absolute;
+  inset: 8%;
+  background: radial-gradient(ellipse at 50% 50%, rgba(245, 197, 66, 0.38), transparent 70%);
+  filter: blur(24px);
+  z-index: 0;
+  pointer-events: none;
 }
 
 .gallery-card .frame-3d-inner {
   width: 100%;
   height: 100%;
-  overflow: hidden;
+  overflow: visible;
+  position: relative;
+  z-index: 1;
 }
 
 .gallery-card img {
-  width: 100%;
-  height: 100%;
+  width: 118%;
+  height: 118%;
+  margin: -9%;
   object-fit: cover;
   object-position: center;
   transition: transform 0.4s ease;
+  -webkit-mask-image: radial-gradient(ellipse 86% 80% at 50% 50%, #000 44%, transparent 80%);
+  mask-image: radial-gradient(ellipse 86% 80% at 50% 50%, #000 44%, transparent 80%);
 }
 
 .gallery-card:hover img {
@@ -1072,5 +1128,15 @@
     opacity: 1;
     transform: none;
     transition: none;
+  }
+  [data-parallax],
+  [data-parallax] .frame-3d-inner {
+    --px: 0px;
+    --py: 0px;
+    --pz: 0px;
+    --pr: 0deg;
+  }
+  .frame-3d-inner {
+    transform: rotateX(var(--tilt-x)) rotateY(var(--tilt-y));
   }
 }
