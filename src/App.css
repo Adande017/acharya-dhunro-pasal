@@ -406,7 +406,7 @@
 .layer-b {
   background:
     radial-gradient(circle at 90% 80%, rgba(255, 255, 255, 0.4), transparent 40%);
-  mix-blend-mode: soft-light;
+  mix-blend-mode: normal; /* was soft-light — washed photos */
 }
 
 .hero-grid {
@@ -525,8 +525,8 @@
   margin: -8%;
   object-fit: cover;
   object-position: center;
-  -webkit-mask-image: radial-gradient(ellipse 78% 74% at 50% 46%, #000 38%, transparent 76%);
-  mask-image: radial-gradient(ellipse 78% 74% at 50% 46%, #000 38%, transparent 76%);
+  -webkit-mask-image: radial-gradient(ellipse 92% 90% at 50% 48%, #000 62%, transparent 92%);
+  mask-image: radial-gradient(ellipse 92% 90% at 50% 48%, #000 62%, transparent 92%);
 }
 
 .hero-photo-badge {
@@ -618,8 +618,8 @@
   object-fit: cover;
   object-position: center;
   transition: transform 0.4s ease;
-  -webkit-mask-image: radial-gradient(ellipse 86% 80% at 50% 50%, #000 44%, transparent 80%);
-  mask-image: radial-gradient(ellipse 86% 80% at 50% 50%, #000 44%, transparent 80%);
+  -webkit-mask-image: radial-gradient(ellipse 95% 92% at 50% 50%, #000 68%, transparent 96%);
+  mask-image: radial-gradient(ellipse 95% 92% at 50% 50%, #000 68%, transparent 96%);
 }
 
 .gallery-card:hover img {
