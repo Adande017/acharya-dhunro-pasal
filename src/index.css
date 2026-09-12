@@ -1,0 +1,154 @@
+/* φ ≈ 1.618 — golden-ratio yellow/gold system (hue ~48°) */
+:root {
+  --phi: 1.6180339887;
+  --hue: 48;
+
+  /* Lightness ladder (cream → deep amber), stepped ~1/φ */
+  --l-0: 96.5%; /* cream */
+  --l-1: 91%;   /* soft cream */
+  --l-2: 84%;   /* light yellow */
+  --l-3: 74%;   /* corn gold */
+  --l-4: 58%;   /* rich gold  ≈ 74/φ^0.7 */
+  --l-5: 45.7%; /* amber      ≈ 74/φ */
+  --l-6: 28.2%; /* deep amber ≈ 74/φ² */
+
+  /* Chroma steps (stronger mid, softer ends) */
+  --c-soft: 0.045;
+  --c-mid: 0.12;
+  --c-rich: 0.145;
+  --c-deep: 0.11;
+
+  /* Named scale (oklch when supported; hsl fallbacks) */
+  --yellow-0: hsl(48 55% 96.5%);
+  --yellow-1: hsl(48 58% 91%);
+  --yellow-2: hsl(47 72% 84%);
+  --yellow-3: hsl(46 85% 62%);
+  --yellow-4: hsl(43 78% 48%);
+  --yellow-5: hsl(38 72% 38%);
+  --yellow-6: hsl(32 65% 26%);
+
+  --cream: var(--yellow-0);
+  --cream-warm: var(--yellow-1);
+  --corn-soft: var(--yellow-2);
+  --corn: var(--yellow-3);
+  --corn-hot: hsl(48 95% 68%);
+  --corn-deep: var(--yellow-4);
+  --amber: var(--yellow-5);
+  --amber-deep: var(--yellow-6);
+
+  /* Text: charcoal only where contrast needs it */
+  --ink: hsl(32 28% 10%);
+  --charcoal: hsl(30 18% 14%);
+  --charcoal-soft: hsl(30 12% 22%);
+  --muted: hsl(35 10% 38%);
+  --white: #ffffff;
+  --success: hsl(145 28% 36%);
+  --rust: hsl(22 72% 42%);
+
+  --font-display: 'Fraunces', Georgia, serif;
+  --font-body: 'DM Sans', system-ui, sans-serif;
+
+  --radius: 20px;
+  --radius-sm: 12px;
+  --radius-lg: 28px;
+  --shadow-float:
+    0 2px 4px rgba(40, 28, 8, 0.06),
+    0 12px 28px rgba(40, 28, 8, 0.1),
+    0 28px 56px rgba(40, 28, 8, 0.12);
+  --shadow-soft: 0 14px 40px rgba(40, 28, 8, 0.12);
+  --nav-h: 72px;
+  --phone: '+9779845044572';
+  --phone-display: '+977 984-5044572';
+
+  font-family: var(--font-body);
+  line-height: 1.5;
+  font-weight: 400;
+  color: var(--charcoal);
+  background: var(--cream);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+@supports (color: oklch(0.7 0.12 48)) {
+  :root {
+    --yellow-0: oklch(0.965 0.02 92);
+    --yellow-1: oklch(0.91 0.04 90);
+    --yellow-2: oklch(0.88 0.08 88);
+    --yellow-3: oklch(0.82 0.145 85);
+    --yellow-4: oklch(0.68 0.14 78);
+    --yellow-5: oklch(0.52 0.12 68);
+    --yellow-6: oklch(0.36 0.09 58);
+    --corn-hot: oklch(0.88 0.15 90);
+    --ink: oklch(0.2 0.02 60);
+    --charcoal: oklch(0.25 0.02 55);
+    --charcoal-soft: oklch(0.32 0.015 55);
+    --muted: oklch(0.48 0.02 60);
+  }
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-snap-type: y mandatory;
+  scroll-padding-top: 0;
+}
+
+body {
+  min-width: 320px;
+  min-height: 100vh;
+  background: var(--cream);
+  color: var(--charcoal);
+  overflow-x: clip;
+}
+
+img,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button,
+input,
+textarea {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  background: none;
+}
+
+:focus-visible {
+  outline: 3px solid var(--corn-deep);
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+    scroll-snap-type: none;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
