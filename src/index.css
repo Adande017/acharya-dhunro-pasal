@@ -1,49 +1,43 @@
-/* φ ≈ 1.618 — golden-ratio yellow/gold system (hue ~48°) */
+/* Maize yellow → white/cream + leaf-green accents (traditional maize plant story) */
 :root {
   --phi: 1.6180339887;
-  --hue: 48;
+  --hue: 52;
 
-  /* Lightness ladder (cream → deep amber), stepped ~1/φ */
-  --l-0: 96.5%; /* cream */
-  --l-1: 91%;   /* soft cream */
-  --l-2: 84%;   /* light yellow */
-  --l-3: 74%;   /* corn gold */
-  --l-4: 58%;   /* rich gold  ≈ 74/φ^0.7 */
-  --l-5: 45.7%; /* amber      ≈ 74/φ */
-  --l-6: 28.2%; /* deep amber ≈ 74/φ² */
-
-  /* Chroma steps (stronger mid, softer ends) */
-  --c-soft: 0.045;
-  --c-mid: 0.12;
-  --c-rich: 0.145;
-  --c-deep: 0.11;
-
-  /* Named scale (oklch when supported; hsl fallbacks) */
-  --yellow-0: hsl(48 55% 96.5%);
-  --yellow-1: hsl(48 58% 91%);
-  --yellow-2: hsl(47 72% 84%);
-  --yellow-3: hsl(46 85% 62%);
-  --yellow-4: hsl(43 78% 48%);
-  --yellow-5: hsl(38 72% 38%);
-  --yellow-6: hsl(32 65% 26%);
+  /* Warm maize yellows → cream/white */
+  --yellow-0: hsl(48 40% 98%);
+  --yellow-1: hsl(48 48% 94%);
+  --yellow-2: hsl(50 62% 86%);
+  --yellow-3: hsl(48 78% 58%);
+  --yellow-4: hsl(46 72% 46%);
+  --yellow-5: hsl(44 55% 36%);
+  --yellow-6: hsl(42 40% 24%);
 
   --cream: var(--yellow-0);
   --cream-warm: var(--yellow-1);
   --corn-soft: var(--yellow-2);
   --corn: var(--yellow-3);
-  --corn-hot: hsl(48 95% 68%);
+  --corn-hot: hsl(50 90% 72%);
   --corn-deep: var(--yellow-4);
   --amber: var(--yellow-5);
   --amber-deep: var(--yellow-6);
 
-  /* Text: charcoal only where contrast needs it */
-  --ink: hsl(32 28% 10%);
-  --charcoal: hsl(30 18% 14%);
-  --charcoal-soft: hsl(30 12% 22%);
-  --muted: hsl(35 10% 38%);
+  /* Maize plant / leaf greens (primary accent — replaces red/coral) */
+  --leaf-0: hsl(118 28% 94%);
+  --leaf-1: hsl(122 32% 82%);
+  --leaf-2: hsl(128 36% 42%);
+  --leaf-3: hsl(138 40% 28%);
+  --leaf-4: hsl(148 38% 18%);
+  --leaf: var(--leaf-2);
+  --leaf-deep: var(--leaf-3);
+  --leaf-ink: var(--leaf-4);
+
+  /* Text */
+  --ink: hsl(140 18% 12%);
+  --charcoal: hsl(140 12% 16%);
+  --charcoal-soft: hsl(140 8% 26%);
+  --muted: hsl(140 6% 40%);
   --white: #ffffff;
-  --success: hsl(145 28% 36%);
-  --rust: hsl(22 72% 42%);
+  --success: var(--leaf-2);
 
   --font-display: 'Fraunces', Georgia, serif;
   --font-body: 'DM Sans', system-ui, sans-serif;
@@ -52,10 +46,10 @@
   --radius-sm: 12px;
   --radius-lg: 28px;
   --shadow-float:
-    0 2px 4px rgba(40, 28, 8, 0.06),
-    0 12px 28px rgba(40, 28, 8, 0.1),
-    0 28px 56px rgba(40, 28, 8, 0.12);
-  --shadow-soft: 0 14px 40px rgba(40, 28, 8, 0.12);
+    0 2px 4px rgba(28, 40, 20, 0.05),
+    0 12px 28px rgba(28, 40, 20, 0.08),
+    0 28px 56px rgba(28, 40, 20, 0.09);
+  --shadow-soft: 0 14px 40px rgba(28, 40, 20, 0.09);
   --nav-h: 72px;
   --phone: '+9779845044572';
   --phone-display: '+977 984-5044572';
@@ -71,20 +65,25 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
-@supports (color: oklch(0.7 0.12 48)) {
+@supports (color: oklch(0.7 0.12 100)) {
   :root {
-    --yellow-0: oklch(0.965 0.02 92);
-    --yellow-1: oklch(0.91 0.04 90);
-    --yellow-2: oklch(0.88 0.08 88);
-    --yellow-3: oklch(0.82 0.145 85);
-    --yellow-4: oklch(0.68 0.14 78);
-    --yellow-5: oklch(0.52 0.12 68);
-    --yellow-6: oklch(0.36 0.09 58);
-    --corn-hot: oklch(0.88 0.15 90);
-    --ink: oklch(0.2 0.02 60);
-    --charcoal: oklch(0.25 0.02 55);
-    --charcoal-soft: oklch(0.32 0.015 55);
-    --muted: oklch(0.48 0.02 60);
+    --yellow-0: oklch(0.985 0.012 100);
+    --yellow-1: oklch(0.955 0.03 98);
+    --yellow-2: oklch(0.9 0.07 95);
+    --yellow-3: oklch(0.84 0.14 92);
+    --yellow-4: oklch(0.7 0.13 88);
+    --yellow-5: oklch(0.52 0.09 85);
+    --yellow-6: oklch(0.34 0.06 80);
+    --corn-hot: oklch(0.9 0.12 95);
+    --leaf-0: oklch(0.95 0.02 145);
+    --leaf-1: oklch(0.88 0.05 145);
+    --leaf-2: oklch(0.52 0.1 145);
+    --leaf-3: oklch(0.4 0.09 150);
+    --leaf-4: oklch(0.28 0.06 155);
+    --ink: oklch(0.22 0.02 145);
+    --charcoal: oklch(0.28 0.02 145);
+    --charcoal-soft: oklch(0.36 0.015 145);
+    --muted: oklch(0.5 0.015 140);
   }
 }
 
@@ -105,7 +104,8 @@ html {
 body {
   min-width: 320px;
   min-height: 100vh;
-  background: var(--cream);
+  background:
+    linear-gradient(180deg, var(--yellow-1) 0%, var(--cream) 35%, var(--white) 100%);
   color: var(--charcoal);
   overflow-x: clip;
 }
@@ -134,7 +134,7 @@ button {
 }
 
 :focus-visible {
-  outline: 3px solid var(--corn-deep);
+  outline: 3px solid var(--leaf);
   outline-offset: 3px;
 }
 

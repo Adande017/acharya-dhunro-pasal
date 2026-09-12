@@ -27,17 +27,18 @@ function PipeMark({ size = 36 }: { size?: number }) {
     >
       <defs>
         <linearGradient id={gid} x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stopColor="#F5C542" />
-          <stop offset="100%" stopColor="#D4A017" />
+          <stop offset="0%" stopColor="#F5D15A" />
+          <stop offset="55%" stopColor="#E8C040" />
+          <stop offset="100%" stopColor="#5A9A3C" />
         </linearGradient>
       </defs>
       <rect width="64" height="64" rx="14" fill={`url(#${gid})`} />
       <path
         d="M12 38c0-2 1.5-3.5 3.5-3.5H28c6 0 10-3 10-8.5 0-4.5-3-7.5-8-7.5H14.5C13 18.5 12 17.5 12 16s1-2.5 2.5-2.5H30c9 0 15 6 15 14.5S39 42.5 30 42.5H15.5C13.5 42.5 12 41 12 38Z"
-        fill="#1C1408"
+        fill="#1A2414"
       />
-      <circle cx="46" cy="40" r="7" fill="#1C1408" />
-      <circle cx="46" cy="40" r="3.2" fill="#F5C542" />
+      <circle cx="46" cy="40" r="7" fill="#1A2414" />
+      <circle cx="46" cy="40" r="3.2" fill="#F5D15A" />
     </svg>
   )
 }
@@ -102,8 +103,9 @@ function App() {
       const r = card.getBoundingClientRect()
       const x = (e.clientX - r.left) / r.width - 0.5
       const y = (e.clientY - r.top) / r.height - 0.5
-      card.style.setProperty('--tilt-x', `${(-y * 5).toFixed(2)}deg`)
-      card.style.setProperty('--tilt-y', `${(x * 5).toFixed(2)}deg`)
+      // Gentler tilt — less visual clutter
+      card.style.setProperty('--tilt-x', `${(-y * 3).toFixed(2)}deg`)
+      card.style.setProperty('--tilt-y', `${(x * 3).toFixed(2)}deg`)
     }
     const onLeave = (e: Event) => {
       const card = e.currentTarget as HTMLElement
@@ -127,9 +129,9 @@ function App() {
     if (reduceMotion.matches) return
 
     const strengthOf = (mode: string | undefined) => {
-      if (mode === 'fast') return 1
-      if (mode === 'slow') return 0.4
-      return 0.68
+      if (mode === 'fast') return 0.55
+      if (mode === 'slow') return 0.28
+      return 0.42
     }
 
     let frame = 0
@@ -143,10 +145,11 @@ function App() {
         const box = el.getBoundingClientRect()
         const mid = box.top + box.height / 2
         const rel = Math.max(-1.2, Math.min(1.2, (mid - vh / 2) / vh))
-        el.style.setProperty('--py', `${(rel * 46 * s).toFixed(2)}px`)
-        el.style.setProperty('--px', `${(rel * 12 * s).toFixed(2)}px`)
-        el.style.setProperty('--pz', `${(-Math.abs(rel) * 18 * s).toFixed(2)}px`)
-        el.style.setProperty('--pr', `${(rel * 2.6 * s).toFixed(3)}deg`)
+        // Tonéd-down parallax — less overlap risk
+        el.style.setProperty('--py', `${(rel * 22 * s).toFixed(2)}px`)
+        el.style.setProperty('--px', `${(rel * 6 * s).toFixed(2)}px`)
+        el.style.setProperty('--pz', `${(-Math.abs(rel) * 8 * s).toFixed(2)}px`)
+        el.style.setProperty('--pr', `${(rel * 1.2 * s).toFixed(3)}deg`)
       })
     }
 
@@ -243,13 +246,14 @@ function App() {
           <div className="layer layer-b" aria-hidden="true" />
           <div className="hero-grid">
             <div className="hero-copy">
-              <p className="eyebrow">Acharya Dhunro Pasal · snack shop</p>
+              <p className="eyebrow">Acharya Dhunro Pasal · traditional snack</p>
               <h1>
                 Corn Puff <em>Pipes</em>
               </h1>
               <p className="lede">
-                Pipe-shaped puffs of crunchy corn from Acharya Dhunro Pasal — playful to look at,
-                serious about crunch. Book a bag, party pack, or bulk order with one call.
+                Handmade pipe-shaped puffs from traditional (non-hybrid) maize — rooted in local snack
+                culture, made with nutrition in mind. Book a bag, party pack, or bulk order from
+                Acharya Dhunro Pasal with one call.
               </p>
               <div className="hero-actions">
                 <a className="btn btn-primary" href={`tel:${PHONE_TEL}`}>
@@ -269,13 +273,13 @@ function App() {
                 <div className="frame-3d-inner">
                   <img
                     src={`${BASE}product/closeup.jpg`}
-                    alt="Close-up of Corn Puff Pipes — crunchy pipe-shaped corn snacks"
+                    alt="Close-up of Corn Puff Pipes — traditional maize puff snacks"
                     width={800}
                     height={1000}
                     loading="eager"
                   />
                 </div>
-                <figcaption className="hero-photo-badge">Corn Puff Pipes</figcaption>
+                <figcaption className="hero-photo-badge">Traditional maize</figcaption>
               </figure>
             </div>
           </div>
@@ -287,22 +291,23 @@ function App() {
               <p className="eyebrow">The product</p>
               <h2>What are Corn Puff Pipes?</h2>
               <p className="section-sub">
-                Light, crunchy puffed corn shaped like tiny pipes — from Acharya Dhunro Pasal.
+                Light, crunchy puffed corn shaped like tiny pipes — crafted from traditional maize at
+                Acharya Dhunro Pasal.
               </p>
             </Reveal>
 
             <div className="product-gallery" aria-label="Product photos">
               <Reveal className="gallery-card frame-3d" as="figure">
-                <div className="frame-3d-inner" data-tilt data-parallax="mid">
+                <div className="frame-3d-inner" data-tilt data-parallax="slow">
                   <img
                     src={`${BASE}product/closeup.jpg`}
-                    alt="Close-up of Corn Puff Pipes showing individual pipe-shaped corn puffs"
+                    alt="Close-up of Corn Puff Pipes showing individual pipe-shaped maize puffs"
                     loading="lazy"
                   />
                 </div>
               </Reveal>
               <Reveal className="gallery-card frame-3d" as="figure">
-                <div className="frame-3d-inner" data-tilt data-parallax="fast">
+                <div className="frame-3d-inner" data-tilt data-parallax="slow">
                   <img
                     src={`${BASE}product/basket.jpg`}
                     alt="Wicker basket filled with long Corn Puff Pipes snacks"
@@ -314,7 +319,7 @@ function App() {
                 <div className="frame-3d-inner" data-tilt data-parallax="slow">
                   <img
                     src={`${BASE}product/bulk.jpg`}
-                    alt="Bulk pile of wavy Corn Puff Pipes corn snacks"
+                    alt="Bulk pile of Corn Puff Pipes made from traditional maize"
                     loading="lazy"
                   />
                 </div>
@@ -324,19 +329,21 @@ function App() {
             <div className="product-grid">
               <Reveal className="product-story">
                 <p>
-                  Corn Puff Pipes are light, crunchy puffed corn snacks shaped like tiny pipes —
-                  playful to look at, serious about crunch. Think classic corn-puff satisfaction with
-                  a shape that makes people stop mid-reach and say &ldquo;wait… are those pipes?&rdquo;
+                  Corn Puff Pipes start with traditional (non-hybrid) maize — the kind of grain that
+                  has fed families for generations. We puff it into light, pipe-shaped snacks that
+                  honor handmade snack culture: simple ingredients, careful craft, and a crunch that
+                  feels familiar.
                 </p>
                 <p>
-                  Made for sharing: toss a bag on the table, pass them around the couch, or stash a
-                  pack for solo crunch sessions. Snack food only — no tobacco, no gimmick beyond the
-                  shape and the snap.
+                  Nutrition matters. Choosing traditional maize is about more than nostalgia — it is
+                  about real grain character, a cleaner snack story, and food that belongs on a shared
+                  table. No tobacco, no gimmick beyond the shape, the snap, and the plant it comes
+                  from.
                 </p>
                 <ul className="story-list">
-                  <li>Pipe-shaped puffed corn</li>
-                  <li>Crunchy texture, shareable vibe</li>
-                  <li>From Acharya Dhunro Pasal</li>
+                  <li>Traditional (non-hybrid) maize</li>
+                  <li>Handmade snack culture</li>
+                  <li>Nutrition-minded, shareable crunch</li>
                 </ul>
               </Reveal>
               <Reveal className="product-card" as="aside">
@@ -351,12 +358,12 @@ function App() {
                     <dd>Corn Puff Pipes</dd>
                   </div>
                   <div>
-                    <dt>Format</dt>
-                    <dd>Puffed corn snack</dd>
+                    <dt>Maize</dt>
+                    <dd>Traditional (non-hybrid)</dd>
                   </div>
                   <div>
-                    <dt>Shape</dt>
-                    <dd>Tiny pipes</dd>
+                    <dt>Craft</dt>
+                    <dd>Handmade snack tradition</dd>
                   </div>
                 </dl>
               </Reveal>
@@ -368,45 +375,45 @@ function App() {
           <div className="section-inner">
             <Reveal className="section-head">
               <p className="eyebrow">Why buy</p>
-              <h2>Built for snack moments that stick</h2>
+              <h2>From plant to pipe — snack with a story</h2>
               <p className="section-sub">
-                No fake stats — just the reasons people reach for pipe-shaped crunch.
+                Leaf-green roots, kernel-gold crunch — reasons that go beyond the bowl.
               </p>
             </Reveal>
             <div className="cards">
-              <Reveal className="card frame-3d" as="article" >
+              <Reveal className="card frame-3d" as="article">
                 <div className="frame-3d-inner card-body" data-tilt>
                   <div className="card-icon" aria-hidden="true">
-                    🌽
+                    🌱
                   </div>
-                  <h3>Crunch you can hear</h3>
+                  <h3>Traditional maize</h3>
                   <p>
-                    Light, airy corn puffs with a satisfying snap — the kind that turns &ldquo;just
-                    one&rdquo; into a shared bowl.
+                    Non-hybrid grain with character — closer to the maize plant families know, not
+                    just a factory filler.
                   </p>
                 </div>
               </Reveal>
               <Reveal className="card frame-3d" as="article">
                 <div className="frame-3d-inner card-body" data-tilt>
                   <div className="card-icon" aria-hidden="true">
-                    🎭
+                    🥗
                   </div>
-                  <h3>Shape that starts conversations</h3>
+                  <h3>Nutrition matters</h3>
                   <p>
-                    Tiny pipes look playful on the table. Instant icebreaker for parties, game nights,
-                    and office snack runs.
+                    A snack story that starts with real maize — light puffs you can feel good about
+                    sharing.
                   </p>
                 </div>
               </Reveal>
               <Reveal className="card frame-3d" as="article">
                 <div className="frame-3d-inner card-body" data-tilt>
                   <div className="card-icon" aria-hidden="true">
-                    🤝
+                    👐
                   </div>
-                  <h3>Made to share</h3>
+                  <h3>Handmade culture</h3>
                   <p>
-                    Bag-friendly and bowl-friendly. Pass them around without fuss — snack energy that
-                    scales from solo to crew.
+                    Rooted in traditional snack craft — playful pipe shapes with a serious respect for
+                    how snacks used to be made.
                   </p>
                 </div>
               </Reveal>
@@ -430,9 +437,10 @@ function App() {
           <div className="section-inner">
             <Reveal className="section-head">
               <p className="eyebrow">Packs</p>
-              <h2>Pick a pack vibe</h2>
+              <h2>Packs for every table</h2>
               <p className="section-sub">
-                Tell us what you need when you call — snack bags, party packs, or bulk.
+                Everyday bags, gathering packs, or bulk for events — tell us what you need when you
+                call.
               </p>
             </Reveal>
             <div className="pack-grid">
@@ -441,8 +449,8 @@ function App() {
                   <span className="pack-label">Everyday</span>
                   <h3>Snack bags</h3>
                   <p>
-                    Personal-size bags for desks, lunchboxes, and &ldquo;I earned this crunch&rdquo;
-                    moments.
+                    Personal-size bags of traditional-maize puffs for desks, lunchboxes, and quiet
+                    crunch moments.
                   </p>
                   <a href={`tel:${PHONE_TEL}`} className="pack-link">
                     Call for snack bags →
@@ -457,8 +465,8 @@ function App() {
                   <span className="pack-label">Crowd favorite</span>
                   <h3>Party packs</h3>
                   <p>
-                    Bigger share formats for gatherings, watch parties, and &ldquo;bring something
-                    fun&rdquo; assignments.
+                    Bigger share formats for gatherings — handmade snack culture that looks good on
+                    the table and disappears fast.
                   </p>
                   <a href={`tel:${PHONE_TEL}`} className="pack-link">
                     Call for party packs →
@@ -473,8 +481,8 @@ function App() {
                   <span className="pack-label">Custom</span>
                   <h3>Bulk / events</h3>
                   <p>
-                    Planning a bigger run or brand moment? Call with quantity and timing — we&apos;ll
-                    talk options.
+                    Planning a bigger run or community moment? Call with quantity and timing — we will
+                    talk traditional packs.
                   </p>
                   <a href={`tel:${PHONE_TEL}`} className="pack-link">
                     Call about bulk →
@@ -491,8 +499,9 @@ function App() {
               <p className="eyebrow">Book / order</p>
               <h2>Call Acharya Dhunro Pasal</h2>
               <p>
-                Ready for Corn Puff Pipes? Call to book or order snack bags, party packs, or bulk.
-                Prefer email? The form still opens a mailto — call and QR are the fastest path.
+                Ready for Corn Puff Pipes made from traditional maize? Call to book snack bags, party
+                packs, or bulk. Prefer email? The form opens a mailto — call and QR are the fastest
+                path.
               </p>
               <a className="btn btn-primary btn-lg" href={`tel:${PHONE_TEL}`}>
                 Call {PHONE_DISPLAY}
@@ -600,7 +609,9 @@ function App() {
             <PipeMark size={36} />
             <div>
               <strong>Acharya Dhunro Pasal</strong>
-              <p>Corn Puff Pipes — crunchy corn snacks shaped like tiny pipes.</p>
+              <p>
+                Corn Puff Pipes — traditional maize snacks, handmade crunch shaped like tiny pipes.
+              </p>
               <a className="footer-phone" href={`tel:${PHONE_TEL}`}>
                 {PHONE_DISPLAY}
               </a>
