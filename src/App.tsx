@@ -9,6 +9,7 @@ import {
 import './App.css'
 
 const YEAR = new Date().getFullYear()
+const BASE = import.meta.env.BASE_URL
 const PHONE_TEL = '+9779845044572'
 const PHONE_DISPLAY = '+977 984-5044572'
 const EMAIL = 'roms7291@gmail.com'
@@ -222,7 +223,7 @@ function App() {
               <figure className="frame-3d hero-photo" data-tilt>
                 <div className="frame-3d-inner">
                   <img
-                    src="/product/closeup.jpg"
+                    src={`${BASE}product/closeup.jpg`}
                     alt="Close-up of Corn Puff Pipes — crunchy pipe-shaped corn snacks"
                     width={800}
                     height={1000}
@@ -249,7 +250,7 @@ function App() {
               <Reveal className="gallery-card frame-3d" as="figure">
                 <div className="frame-3d-inner" data-tilt>
                   <img
-                    src="/product/closeup.jpg"
+                    src={`${BASE}product/closeup.jpg`}
                     alt="Close-up of Corn Puff Pipes showing individual pipe-shaped corn puffs"
                     loading="lazy"
                   />
@@ -258,7 +259,7 @@ function App() {
               <Reveal className="gallery-card frame-3d" as="figure">
                 <div className="frame-3d-inner" data-tilt>
                   <img
-                    src="/product/basket.jpg"
+                    src={`${BASE}product/basket.jpg`}
                     alt="Wicker basket filled with long Corn Puff Pipes snacks"
                     loading="lazy"
                   />
@@ -267,7 +268,7 @@ function App() {
               <Reveal className="gallery-card frame-3d" as="figure">
                 <div className="frame-3d-inner" data-tilt>
                   <img
-                    src="/product/bulk.jpg"
+                    src={`${BASE}product/bulk.jpg`}
                     alt="Bulk pile of wavy Corn Puff Pipes corn snacks"
                     loading="lazy"
                   />
@@ -406,7 +407,7 @@ function App() {
               <Reveal className="pack pack-featured frame-3d" as="article">
                 <div className="frame-3d-inner pack-body" data-tilt>
                   <div className="pack-thumb">
-                    <img src="/product/basket.jpg" alt="" aria-hidden="true" loading="lazy" />
+                    <img src={`${BASE}product/basket.jpg`} alt="" aria-hidden="true" loading="lazy" />
                   </div>
                   <span className="pack-label">Crowd favorite</span>
                   <h3>Party packs</h3>
@@ -422,7 +423,7 @@ function App() {
               <Reveal className="pack frame-3d" as="article">
                 <div className="frame-3d-inner pack-body" data-tilt>
                   <div className="pack-thumb">
-                    <img src="/product/bulk.jpg" alt="" aria-hidden="true" loading="lazy" />
+                    <img src={`${BASE}product/bulk.jpg`} alt="" aria-hidden="true" loading="lazy" />
                   </div>
                   <span className="pack-label">Custom</span>
                   <h3>Bulk / events</h3>
@@ -531,7 +532,7 @@ function App() {
               <figure className="qr-frame">
                 <div className="qr-quiet">
                   <img
-                    src="/product/payment-qr.png"
+                    src={`${BASE}product/payment-qr.png`}
                     alt="Payment QR code — Global IME, Roman Acharya. Scan to pay for Corn Puff Pipes."
                     width={360}
                     height={360}
