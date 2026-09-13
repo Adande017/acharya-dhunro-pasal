@@ -7,7 +7,7 @@ Snack shop landing page for **Acharya Dhunro Pasal**, featuring **Corn Puff Pipe
 - Call to book/order: **+977 984-5044572**
 - Email: **roms7291@gmail.com**
 - Scan-to-pay QR (Global IME / Roman Acharya)
-- Smooth scroll sections, yellow/gold brand palette
+- Smooth scroll sections, bright maize / leaf-green palette
 
 ## Local preview
 ```bash

@@ -264,7 +264,7 @@ function App() {
               <figure className="frame-3d hero-photo" data-tilt data-parallax="slow">
                 <div className="frame-3d-inner">
                   <img
-                    src={`${BASE}product/closeup-forest.jpg`}
+                    src={`${BASE}product/closeup-bright.jpg`}
                     alt="Close-up of Corn Puff Pipes — traditional maize puff snacks"
                     width={800}
                     height={1000}
@@ -290,7 +290,7 @@ function App() {
               <Reveal className="gallery-card frame-3d" as="figure">
                 <div className="frame-3d-inner" data-tilt data-parallax="slow">
                   <img
-                    src={`${BASE}product/closeup-forest.jpg`}
+                    src={`${BASE}product/closeup-bright.jpg`}
                     alt="Close-up of Corn Puff Pipes showing individual pipe-shaped maize puffs"
                     loading="lazy"
                   />
@@ -299,7 +299,7 @@ function App() {
               <Reveal className="gallery-card frame-3d" as="figure">
                 <div className="frame-3d-inner" data-tilt data-parallax="slow">
                   <img
-                    src={`${BASE}product/basket-forest.jpg`}
+                    src={`${BASE}product/basket-bright.jpg`}
                     alt="Wicker basket filled with long Corn Puff Pipes snacks"
                     loading="lazy"
                   />
@@ -308,7 +308,7 @@ function App() {
               <Reveal className="gallery-card frame-3d" as="figure">
                 <div className="frame-3d-inner" data-tilt data-parallax="slow">
                   <img
-                    src={`${BASE}product/bulk-forest.jpg`}
+                    src={`${BASE}product/bulk-bright.jpg`}
                     alt="Bulk pile of Corn Puff Pipes made from traditional maize"
                     loading="lazy"
                   />

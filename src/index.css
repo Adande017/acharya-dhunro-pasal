@@ -1,22 +1,23 @@
-/* Leafora-inspired — deep forest glassmorphism */
+/* Bright maize sunlight — airy, clean, not clay neu */
 :root {
   --phi: 1.6180339887;
   --phi-major: 61.8%;
   --phi-minor: 38.2%;
 
-  /* Deep forest / near-black */
-  --forest-0: #050a08;
-  --forest-1: #0a1410;
-  --forest-2: #0f1c16;
-  --forest-3: #152820;
-  --forest-4: #1c3428;
+  /* Soft yellow → white / warm maize light */
+  --sun-0: #fffdf8;
+  --sun-1: #fff8e7;
+  --sun-2: #fff3d4;
+  --sun-3: #ffe9b8;
+  --paper: #ffffff;
+  --cream: #fff8e7;
 
-  /* Soft sage / leaf accents */
-  --sage-0: rgba(180, 210, 170, 0.12);
-  --sage-1: #a8c89a;
-  --sage: #8fb87e;
-  --leaf: #6a9a5c;
-  --leaf-deep: #4a7a40;
+  /* Leaf green — readable on light */
+  --sage-0: rgba(74, 140, 58, 0.08);
+  --sage-1: #3d6b32;
+  --sage: #4a7a40;
+  --leaf: #4a8c3a;
+  --leaf-deep: #2f5a28;
 
   /* Warm maize / saffron — primary CTAs */
   --maize-0: #f8e6b0;
@@ -25,22 +26,22 @@
   --saffron-deep: #c88818;
   --saffron-ink: #1a1808;
 
-  /* Glass */
-  --glass: rgba(255, 255, 255, 0.10);
-  --glass-raised: rgba(255, 255, 255, 0.14);
-  --glass-strong: rgba(255, 255, 255, 0.16);
-  --glass-border: rgba(255, 255, 255, 0.18);
-  --glass-border-soft: rgba(255, 255, 255, 0.14);
+  /* Light frosted glass — not dual-shadow clay */
+  --glass: rgba(255, 255, 255, 0.58);
+  --glass-raised: rgba(255, 255, 255, 0.78);
+  --glass-strong: rgba(255, 255, 255, 0.9);
+  --glass-border: rgba(42, 52, 36, 0.1);
+  --glass-border-soft: rgba(42, 52, 36, 0.07);
   --glass-blur: 22px;
   --glass-blur-strong: 32px;
 
-  /* Text — light on dark */
-  --ink: #f4f7f2;
-  --ink-soft: rgba(244, 247, 242, 0.88);
-  --muted: rgba(220, 230, 215, 0.58);
-  --muted-strong: rgba(220, 230, 215, 0.72);
+  /* Text — dark forest / charcoal on light */
+  --ink: #1a2414;
+  --ink-soft: #2a3424;
+  --muted: #5a6454;
+  --muted-strong: #3d4738;
   --white: #ffffff;
-  --success: var(--sage);
+  --success: var(--leaf-deep);
 
   --font-display: 'Fraunces', Georgia, serif;
   --font-body: 'DM Sans', system-ui, sans-serif;
@@ -51,10 +52,10 @@
   --radius-pill: 999px;
 
   /* Soft refined shadows only — no neumorphism */
-  --shadow-soft: 0 8px 32px rgba(0, 0, 0, 0.28);
-  --shadow-float: 0 16px 48px rgba(0, 0, 0, 0.35);
-  --shadow-sm: 0 4px 16px rgba(0, 0, 0, 0.22);
-  --shadow-glow-saffron: 0 8px 28px rgba(232, 168, 32, 0.28);
+  --shadow-soft: 0 8px 28px rgba(40, 50, 20, 0.08);
+  --shadow-float: 0 18px 44px rgba(40, 50, 20, 0.1);
+  --shadow-sm: 0 4px 14px rgba(40, 50, 20, 0.06);
+  --shadow-glow-saffron: 0 8px 24px rgba(232, 168, 32, 0.28);
 
   --nav-h: 72px;
 
@@ -69,7 +70,7 @@
   line-height: 1.5;
   font-weight: 400;
   color: var(--ink-soft);
-  background: var(--forest-1);
+  background: var(--sun-1);
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -88,13 +89,13 @@ html {
   scroll-behavior: smooth;
   scroll-snap-type: y mandatory;
   scroll-padding-top: 0;
-  color-scheme: dark;
+  color-scheme: light;
 }
 
 body {
   min-width: 320px;
   min-height: 100vh;
-  background: var(--forest-1);
+  background: var(--sun-1);
   color: var(--ink-soft);
   overflow-x: clip;
 }
