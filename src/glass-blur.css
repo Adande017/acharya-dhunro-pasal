@@ -1,0 +1,52 @@
+/*
+ * Glass frost safeguard — BOTH properties required.
+ * LightningCSS may strip unprefixed backdrop-filter during minify;
+ * vite preserveBackdropFilter plugin re-injects it, and this file
+ * duplicates critical blur so frost remains unmistakable.
+ */
+.glass,
+.disclose,
+.hero-photo,
+.gallery-card,
+.nutrition-strip,
+.why-line,
+.pack-simple,
+.pay-panel,
+.nav,
+.nav-toggle,
+.btn-secondary {
+  -webkit-backdrop-filter: blur(var(--glass-blur, 22px));
+  backdrop-filter: blur(var(--glass-blur, 22px));
+}
+
+.nav,
+.pay-panel {
+  -webkit-backdrop-filter: blur(var(--glass-blur-strong, 32px));
+  backdrop-filter: blur(var(--glass-blur-strong, 32px));
+}
+
+.nav-toggle,
+.btn-secondary,
+.pack-simple {
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+}
+
+@supports ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
+  .glass,
+  .disclose,
+  .hero-photo,
+  .gallery-card,
+  .nutrition-strip,
+  .why-line,
+  .pack-simple,
+  .pay-panel {
+    -webkit-backdrop-filter: blur(var(--glass-blur, 22px));
+    backdrop-filter: blur(var(--glass-blur, 22px));
+  }
+  .nav,
+  .pay-panel {
+    -webkit-backdrop-filter: blur(var(--glass-blur-strong, 32px));
+    backdrop-filter: blur(var(--glass-blur-strong, 32px));
+  }
+}

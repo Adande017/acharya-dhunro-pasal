@@ -71,8 +71,9 @@
 /* ——— Glass utility ——— */
 .glass {
   background: var(--glass);
-  backdrop-filter: blur(var(--glass-blur));
+  /* BOTH required — LightningCSS may strip one; vite plugin re-injects */
   -webkit-backdrop-filter: blur(var(--glass-blur));
+  backdrop-filter: blur(var(--glass-blur));
   border: 1px solid var(--glass-border);
   box-shadow: var(--shadow-soft);
 }
@@ -83,9 +84,9 @@
   top: 0;
   z-index: 50;
   height: var(--nav-h);
-  background: rgba(10, 20, 16, 0.55);
-  backdrop-filter: blur(var(--glass-blur-strong));
-  -webkit-backdrop-filter: blur(var(--glass-blur-strong));
+  background: rgba(10, 20, 16, 0.62);
+  -webkit-backdrop-filter: blur(var(--glass-blur-strong))
+  backdrop-filter: blur(var(--glass-blur-strong))
   border-bottom: 1px solid var(--glass-border-soft);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
 }
@@ -178,8 +179,8 @@
   gap: 5px;
   background: var(--glass);
   border: 1px solid var(--glass-border);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px)
+  backdrop-filter: blur(12px)
   flex-shrink: 0;
 }
 
@@ -213,8 +214,8 @@
     align-items: stretch;
     padding: 1rem var(--space-gutter) 1.25rem;
     background: rgba(10, 20, 16, 0.92);
-    backdrop-filter: blur(var(--glass-blur-strong));
-    -webkit-backdrop-filter: blur(var(--glass-blur-strong));
+    -webkit-backdrop-filter: blur(var(--glass-blur-strong))
+    backdrop-filter: blur(var(--glass-blur-strong))
     border-bottom: 1px solid var(--glass-border);
     box-shadow: var(--shadow-float);
     gap: 0.35rem;
@@ -385,8 +386,8 @@
   background: var(--glass-raised);
   color: var(--ink);
   border: 1px solid var(--glass-border);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px)
+  backdrop-filter: blur(12px)
   box-shadow: var(--shadow-sm);
 }
 
@@ -421,8 +422,8 @@
 /* ——— Progressive disclosure — glass ——— */
 .disclose {
   background: var(--glass);
-  backdrop-filter: blur(var(--glass-blur));
-  -webkit-backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur))
+  backdrop-filter: blur(var(--glass-blur))
   border: 1px solid var(--glass-border);
   border-radius: var(--radius);
   box-shadow: var(--shadow-sm);
@@ -564,8 +565,8 @@
   margin: 0;
   border-radius: var(--radius-lg);
   background: var(--glass);
-  backdrop-filter: blur(var(--glass-blur));
-  -webkit-backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur))
+  backdrop-filter: blur(var(--glass-blur))
   border: 1px solid var(--glass-border);
   box-shadow: var(--shadow-float);
   aspect-ratio: 4 / 5;
@@ -635,8 +636,8 @@
   margin: 0;
   border-radius: var(--radius);
   background: var(--glass);
-  backdrop-filter: blur(var(--glass-blur));
-  -webkit-backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur))
+  backdrop-filter: blur(var(--glass-blur))
   border: 1px solid var(--glass-border);
   box-shadow: var(--shadow-soft);
   aspect-ratio: 4 / 3;
@@ -678,8 +679,8 @@
   margin-bottom: var(--space-block-minor);
   padding: 1.15rem 1.35rem;
   background: var(--glass);
-  backdrop-filter: blur(var(--glass-blur));
-  -webkit-backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur))
+  backdrop-filter: blur(var(--glass-blur))
   border: 1px solid var(--glass-border);
   border-radius: var(--radius);
   box-shadow: var(--shadow-sm);
@@ -769,8 +770,8 @@
   align-items: flex-start;
   padding: 1.1rem 1.25rem;
   background: var(--glass);
-  backdrop-filter: blur(var(--glass-blur));
-  -webkit-backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur))
+  backdrop-filter: blur(var(--glass-blur))
   border: 1px solid var(--glass-border);
   border-radius: var(--radius-sm);
   box-shadow: var(--shadow-sm);
@@ -811,8 +812,8 @@
 
 .pack-simple {
   background: var(--glass);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px)
+  backdrop-filter: blur(12px)
   border: 1px solid var(--glass-border-soft);
   border-radius: var(--radius-sm);
   padding: 1.25rem 1.3rem;
@@ -980,8 +981,8 @@
 
 .pay-panel {
   background: var(--glass-raised);
-  backdrop-filter: blur(var(--glass-blur-strong));
-  -webkit-backdrop-filter: blur(var(--glass-blur-strong));
+  -webkit-backdrop-filter: blur(var(--glass-blur-strong))
+  backdrop-filter: blur(var(--glass-blur-strong))
   border: 1px solid var(--glass-border);
   border-radius: var(--radius-lg);
   padding: 2rem 1.75rem 1.75rem;
