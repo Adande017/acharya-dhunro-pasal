@@ -59,10 +59,10 @@
 
   --nav-h: 72px;
 
-  --space-gutter: clamp(1.25rem, 3vw, 1.75rem);
-  --space-section-y: clamp(5rem, 10vw, 8.5rem);
-  --space-block: clamp(2.5rem, 5vw, 4.25rem);
-  --space-block-minor: clamp(1.5rem, 2.5vw, 2.6rem);
+  --space-gutter: clamp(1.1rem, 2.6vw, 1.5rem);
+  --space-section-y: clamp(3.25rem, 6.5vw, 5.5rem);
+  --space-block: clamp(1.65rem, 3.25vw, 2.75rem);
+  --space-block-minor: clamp(1rem, 1.75vw, 1.75rem);
   --phone: '+9779845044572';
   --phone-display: '+977 984-5044572';
 
