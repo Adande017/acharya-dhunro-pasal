@@ -1,100 +1,63 @@
-/* Neumorphism Evolved — cream/yellow base + Frosted Green / Green Valley + saffron CTAs */
+/* Leafora-inspired — deep forest glassmorphism */
 :root {
   --phi: 1.6180339887;
   --phi-major: 61.8%;
   --phi-minor: 38.2%;
-  --hue: 52;
 
-  /* Soft yellow → white / cream (needed for extruded soft shadows) */
-  --yellow-0: hsl(48 42% 98%);
-  --yellow-1: hsl(48 46% 94%);
-  --yellow-2: hsl(50 58% 88%);
-  --yellow-3: hsl(46 78% 58%);
-  --yellow-4: hsl(42 72% 48%);
-  --yellow-5: hsl(38 62% 38%);
-  --yellow-6: hsl(36 42% 26%);
+  /* Deep forest / near-black */
+  --forest-0: #050a08;
+  --forest-1: #0a1410;
+  --forest-2: #0f1c16;
+  --forest-3: #152820;
+  --forest-4: #1c3428;
 
-  --cream: var(--yellow-0);
-  --cream-warm: var(--yellow-1);
-  --corn-soft: var(--yellow-2);
-  --corn: var(--yellow-3);
-  --corn-hot: hsl(48 88% 72%);
-  --corn-deep: var(--yellow-4);
-  --amber: var(--yellow-5);
-  --amber-deep: var(--yellow-6);
+  /* Soft sage / leaf accents */
+  --sage-0: rgba(180, 210, 170, 0.12);
+  --sage-1: #a8c89a;
+  --sage: #8fb87e;
+  --leaf: #6a9a5c;
+  --leaf-deep: #4a7a40;
 
-  /* Surface matched to cream for neumorphism extrusion */
-  --neu-surface: hsl(48 40% 95%);
-  --neu-surface-raised: hsl(48 38% 97%);
-  --neu-surface-sunken: hsl(48 36% 91%);
+  /* Warm maize / saffron — primary CTAs */
+  --maize-0: #f8e6b0;
+  --maize: #f0c84a;
+  --saffron: #e8a820;
+  --saffron-deep: #c88818;
+  --saffron-ink: #1a1808;
 
-  /* Frosted Green / Green Valley accents (no red) */
-  --frosted-green: hsl(118 32% 92%);
-  --green-valley: hsl(128 38% 38%);
-  --leaf-0: hsl(118 30% 94%);
-  --leaf-1: hsl(122 34% 84%);
-  --leaf-2: hsl(128 36% 40%);
-  --leaf-3: hsl(138 40% 28%);
-  --leaf-4: hsl(148 36% 18%);
-  --leaf: var(--leaf-2);
-  --leaf-deep: var(--leaf-3);
-  --leaf-ink: var(--leaf-4);
+  /* Glass */
+  --glass: rgba(255, 255, 255, 0.07);
+  --glass-raised: rgba(255, 255, 255, 0.11);
+  --glass-strong: rgba(255, 255, 255, 0.14);
+  --glass-border: rgba(255, 255, 255, 0.14);
+  --glass-border-soft: rgba(255, 255, 255, 0.1);
+  --glass-blur: 18px;
+  --glass-blur-strong: 28px;
 
-  /* Saffron / maize gold — CTAs & highlights */
-  --saffron-0: hsl(42 90% 94%);
-  --saffron-1: hsl(40 88% 72%);
-  --saffron: hsl(38 92% 52%);
-  --saffron-deep: hsl(34 82% 42%);
-  --saffron-ink: hsl(32 55% 22%);
-
-  /* Text — accessible contrast on cream */
-  --ink: hsl(140 22% 12%);
-  --charcoal: hsl(140 14% 16%);
-  --charcoal-soft: hsl(140 10% 28%);
-  --muted: hsl(140 8% 40%);
+  /* Text — light on dark */
+  --ink: #f4f7f2;
+  --ink-soft: rgba(244, 247, 242, 0.88);
+  --muted: rgba(220, 230, 215, 0.58);
+  --muted-strong: rgba(220, 230, 215, 0.72);
   --white: #ffffff;
-  --success: var(--green-valley);
+  --success: var(--sage);
 
   --font-display: 'Fraunces', Georgia, serif;
   --font-body: 'DM Sans', system-ui, sans-serif;
 
-  --radius: 22px;
-  --radius-sm: 14px;
-  --radius-lg: 28px;
+  --radius: 28px;
+  --radius-sm: 18px;
+  --radius-lg: 32px;
   --radius-pill: 999px;
 
-  /* Neumorphism Evolved — refined dual shadows (not heavy 2020 clay) */
-  --neu-dark: rgba(56, 72, 40, 0.14);
-  --neu-light: rgba(255, 255, 255, 0.92);
-  --neu-dark-soft: rgba(56, 72, 40, 0.09);
-  --neu-light-soft: rgba(255, 255, 255, 0.75);
-
-  --shadow-neu:
-    8px 8px 18px var(--neu-dark),
-    -6px -6px 14px var(--neu-light);
-  --shadow-neu-sm:
-    4px 4px 10px var(--neu-dark-soft),
-    -3px -3px 8px var(--neu-light-soft);
-  --shadow-neu-lg:
-    12px 12px 28px var(--neu-dark),
-    -8px -8px 20px var(--neu-light);
-  --shadow-neu-inset:
-    inset 4px 4px 10px var(--neu-dark-soft),
-    inset -3px -3px 8px var(--neu-light);
-  --shadow-neu-press:
-    inset 5px 5px 12px var(--neu-dark),
-    inset -3px -3px 8px var(--neu-light-soft);
-  --shadow-neu-lift:
-    10px 10px 22px var(--neu-dark),
-    -7px -7px 16px var(--neu-light);
-
-  /* Legacy aliases → neu */
-  --shadow-float: var(--shadow-neu-lg);
-  --shadow-soft: var(--shadow-neu);
+  /* Soft refined shadows only — no neumorphism */
+  --shadow-soft: 0 8px 32px rgba(0, 0, 0, 0.28);
+  --shadow-float: 0 16px 48px rgba(0, 0, 0, 0.35);
+  --shadow-sm: 0 4px 16px rgba(0, 0, 0, 0.22);
+  --shadow-glow-saffron: 0 8px 28px rgba(232, 168, 32, 0.28);
 
   --nav-h: 72px;
 
-  /* Minimalist breathing room — golden ratio */
   --space-gutter: clamp(1.25rem, 3vw, 1.75rem);
   --space-section-y: clamp(5rem, 10vw, 8.5rem);
   --space-block: clamp(2.5rem, 5vw, 4.25rem);
@@ -105,44 +68,12 @@
   font-family: var(--font-body);
   line-height: 1.5;
   font-weight: 400;
-  color: var(--charcoal);
-  background: var(--cream);
+  color: var(--ink-soft);
+  background: var(--forest-1);
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-}
-
-@supports (color: oklch(0.7 0.12 100)) {
-  :root {
-    --yellow-0: oklch(0.985 0.012 100);
-    --yellow-1: oklch(0.955 0.028 98);
-    --yellow-2: oklch(0.92 0.055 95);
-    --yellow-3: oklch(0.84 0.14 92);
-    --yellow-4: oklch(0.72 0.13 85);
-    --yellow-5: oklch(0.54 0.1 78);
-    --yellow-6: oklch(0.36 0.06 72);
-    --corn-hot: oklch(0.9 0.11 95);
-    --neu-surface: oklch(0.96 0.022 98);
-    --neu-surface-raised: oklch(0.975 0.015 100);
-    --neu-surface-sunken: oklch(0.935 0.025 98);
-    --frosted-green: oklch(0.95 0.025 145);
-    --green-valley: oklch(0.48 0.1 145);
-    --leaf-0: oklch(0.955 0.02 145);
-    --leaf-1: oklch(0.9 0.045 145);
-    --leaf-2: oklch(0.5 0.1 145);
-    --leaf-3: oklch(0.4 0.09 150);
-    --leaf-4: oklch(0.28 0.06 155);
-    --saffron-0: oklch(0.96 0.04 85);
-    --saffron-1: oklch(0.86 0.12 85);
-    --saffron: oklch(0.76 0.16 75);
-    --saffron-deep: oklch(0.62 0.14 70);
-    --saffron-ink: oklch(0.32 0.06 65);
-    --ink: oklch(0.22 0.025 145);
-    --charcoal: oklch(0.28 0.02 145);
-    --charcoal-soft: oklch(0.38 0.018 145);
-    --muted: oklch(0.5 0.015 140);
-  }
 }
 
 *,
@@ -157,14 +88,14 @@ html {
   scroll-behavior: smooth;
   scroll-snap-type: y mandatory;
   scroll-padding-top: 0;
+  color-scheme: dark;
 }
 
 body {
   min-width: 320px;
   min-height: 100vh;
-  background:
-    linear-gradient(180deg, var(--yellow-1) 0%, var(--cream) 40%, var(--white) 100%);
-  color: var(--charcoal);
+  background: var(--forest-1);
+  color: var(--ink-soft);
   overflow-x: clip;
 }
 
@@ -192,7 +123,7 @@ button {
 }
 
 :focus-visible {
-  outline: 3px solid var(--saffron);
+  outline: 2px solid var(--saffron);
   outline-offset: 3px;
 }
 
