@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react'
 import {
   splitTypographyProps,
   usePageTypography,
@@ -5,6 +6,7 @@ import {
 } from '@threeui-lp/pageTypography.js'
 import { COMPLETE_SHELF_TYPOGRAPHY } from '@threeui-lp/pageRecipes.js'
 
+import { createAcharyaShelfBlobUrl } from './acharyaCoverAtlas'
 import {
   LandingPageFrame,
   type LandingPageProps,
@@ -31,6 +33,8 @@ export type CompleteShelfAcharyaProps = LandingPageProps &
 /**
  * Thin local wrapper mirroring CompleteShelfLandingPage typography,
  * with sourceUrl rooted at Vite BASE_URL so GitHub project Pages resolve.
+ * Cover textures are swapped at runtime via a blob document so the packaged
+ * complete-shelf-v2.html on disk stays byte-exact.
  */
 export function CompleteShelfAcharya({
   applyScene,
@@ -51,11 +55,36 @@ export function CompleteShelfAcharya({
       type.headingLetterSpacing ?? COMPLETE_SHELF_DEFAULTS.headingLetterSpacing,
   })
 
-  const sourceUrl = `${import.meta.env.BASE_URL}landing-pages/complete-shelf-v2.html`
+  const packagedUrl = `${import.meta.env.BASE_URL}landing-pages/complete-shelf-v2.html`
+  const [sourceUrl, setSourceUrl] = useState(packagedUrl)
+
+  useEffect(() => {
+    let revoked: string | null = null
+    let cancelled = false
+
+    createAcharyaShelfBlobUrl(packagedUrl, import.meta.env.BASE_URL)
+      .then((blobUrl) => {
+        if (cancelled) {
+          URL.revokeObjectURL(blobUrl)
+          return
+        }
+        revoked = blobUrl
+        setSourceUrl(blobUrl)
+      })
+      .catch((err) => {
+        console.warn('[Acharya] cover atlas swap failed; using packaged shelf', err)
+      })
+
+    return () => {
+      cancelled = true
+      if (revoked) URL.revokeObjectURL(revoked)
+    }
+  }, [packagedUrl])
 
   return (
     <LandingPageFrame
       {...frame}
+      key={sourceUrl}
       applyScene={applyScene}
       backgroundCanvasSelector={backgroundCanvasSelector}
       backgroundVisualSelector={backgroundVisualSelector}

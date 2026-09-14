@@ -11,6 +11,36 @@ const PHONE_TEL = '+9779845044572'
 const PHONE_DISPLAY = '+977 984-5044572'
 const EMAIL = 'roms7291@gmail.com'
 const MAILTO = `mailto:${EMAIL}`
+const LOGO_PNG = `${BASE}brand/acharya-dhunro-pasal-logo.png`
+
+/** First logo: yellow→green PipeMark from commit 5beac37. */
+function PipeMark({ size = 36 }: { size?: number }) {
+  const gid = `markGrad-${size}`
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 64 64"
+      aria-hidden="true"
+      className="pipe-mark"
+    >
+      <defs>
+        <linearGradient id={gid} x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stopColor="#F5C84A" />
+          <stop offset="45%" stopColor="#E8A820" />
+          <stop offset="100%" stopColor="#4A8C3A" />
+        </linearGradient>
+      </defs>
+      <rect width="64" height="64" rx="14" fill={`url(#${gid})`} />
+      <path
+        d="M12 38c0-2 1.5-3.5 3.5-3.5H28c6 0 10-3 10-8.5 0-4.5-3-7.5-8-7.5H14.5C13 18.5 12 17.5 12 16s1-2.5 2.5-2.5H30c9 0 15 6 15 14.5S39 42.5 30 42.5H15.5C13.5 42.5 12 41 12 38Z"
+        fill="#1A2414"
+      />
+      <circle cx="46" cy="40" r="7" fill="#1A2414" />
+      <circle cx="46" cy="40" r="3.2" fill="#F5C84A" />
+    </svg>
+  )
+}
 
 /** Map CompleteShelf volume copy → Acharya product story (DOM only; HTML stays byte-exact). */
 const TITLE_SWAPS: Record<string, string> = {
@@ -62,6 +92,25 @@ function applyAcharyaScene(frame: HTMLIFrameElement) {
   if (fallbackKicker) fallbackKicker.textContent = 'Acharya Dhunro Pasal · Catalog'
   if (fallbackTitle) fallbackTitle.textContent = 'Corn Puff Pipes from traditional maize.'
 
+  // Prefer PNG mark in the shelf identity row when present; fall back to SVG inject.
+  const identity = doc.querySelector('.editorial-identity')
+  if (identity && !identity.querySelector('.acharya-identity-mark')) {
+    const mark = doc.createElement('img')
+    mark.className = 'acharya-identity-mark'
+    mark.src = LOGO_PNG
+    mark.alt = ''
+    mark.width = 36
+    mark.height = 36
+    mark.decoding = 'async'
+    mark.style.cssText =
+      'width:36px;height:36px;border-radius:8px;margin-right:10px;flex-shrink:0;display:block;object-fit:cover'
+    identity.insertBefore(mark, identity.firstChild)
+    const idStyle = doc.createElement('style')
+    idStyle.textContent =
+      '.editorial-identity{display:flex;align-items:center;gap:2px;} .editorial-identity .acharya-identity-mark{margin-right:10px;}'
+    doc.head.appendChild(idStyle)
+  }
+
   const syncSelection = () => {
     swapText(doc.getElementById('selection-title'), TITLE_SWAPS)
     swapText(doc.getElementById('pointer-label-title'), TITLE_SWAPS)
@@ -69,7 +118,6 @@ function applyAcharyaScene(frame: HTMLIFrameElement) {
     swapText(doc.getElementById('selection-note'), NOTE_SWAPS)
 
     const note = doc.getElementById('selection-note')?.textContent?.trim()
-    // detail deck: soft rewrite when known CompleteShelf decks appear
     const deck = doc.getElementById('detail-deck')
     if (deck) {
       const t = deck.textContent ?? ''
@@ -97,7 +145,6 @@ function applyAcharyaScene(frame: HTMLIFrameElement) {
       }
     }
 
-    // Fallback grid labels
     doc.querySelectorAll('.fallback-book strong').forEach((node) => {
       swapText(node, TITLE_SWAPS)
     })
@@ -115,7 +162,6 @@ function applyAcharyaScene(frame: HTMLIFrameElement) {
     characterData: true,
   })
 
-  // Keep observer alive for the life of the iframe document
   ;(frame as HTMLIFrameElement & { __acharyaObserver?: MutationObserver }).__acharyaObserver =
     observer
 }
@@ -155,8 +201,21 @@ function App() {
 
       <div className="chrome-rail">
         <div className="chrome-brand">
-          <strong>Acharya Dhunro Pasal</strong>
-          <span>Corn Puff Pipes · traditional maize</span>
+          <div className="chrome-brand-row">
+            <PipeMark size={40} />
+            <img
+              className="chrome-brand-png"
+              src={LOGO_PNG}
+              alt=""
+              width={40}
+              height={40}
+              decoding="async"
+            />
+            <div className="chrome-brand-text">
+              <strong>Acharya Dhunro Pasal</strong>
+              <span>Corn Puff Pipes · traditional maize</span>
+            </div>
+          </div>
         </div>
         <div className="chrome-actions">
           <a className="chrome-btn primary" href={`tel:${PHONE_TEL}`}>
@@ -186,6 +245,17 @@ function App() {
           >
             ×
           </button>
+          <div className="pay-brand">
+            <PipeMark size={48} />
+            <img
+              className="pay-brand-png"
+              src={LOGO_PNG}
+              alt="Acharya Dhunro Pasal"
+              width={48}
+              height={48}
+              decoding="async"
+            />
+          </div>
           <p className="pay-kicker">Global IME · Roman Acharya</p>
           <h2>Scan to pay</h2>
           <p className="pay-copy">

@@ -50,6 +50,59 @@
   min-width: 0;
 }
 
+.chrome-brand-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.chrome-brand-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.pipe-mark {
+  flex-shrink: 0;
+  display: block;
+  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.35));
+}
+
+.chrome-brand-png {
+  /* PNG twin kept in DOM for brand asset use; SVG is the crisp chrome mark */
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.pay-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.pay-brand-png {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  object-fit: cover;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+}
+
+.pay-brand .pipe-mark {
+  /* Prefer the supplied PNG in the pay panel; keep SVG for a11y/structure */
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
 .chrome-brand strong {
   font-family: 'Iowan Old Style', Baskerville, 'Times New Roman', serif;
   font-weight: 400;

@@ -4,6 +4,8 @@ Snack shop landing page for **Acharya Dhunro Pasal**, featuring **Corn Puff Pipe
 
 ## Features
 - Exact CompleteShelf `complete-shelf-v2.html` (SHA-verified, byte-exact in `public/landing-pages/`)
+- Runtime cover-atlas swap → Acharya bright product photos (HTML on disk unchanged)
+- PipeMark logo (SVG chrome + `public/brand/acharya-dhunro-pasal-logo.png`)
 - Acharya brand overlays: Call CTA, email, scan-to-pay QR
 - Typography: Iowan Old Style / Inter, primary `#c87046`
 - Call: **+977 984-5044572** · Email: **roms7291@gmail.com**
