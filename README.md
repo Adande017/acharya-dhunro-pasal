@@ -1,26 +1,17 @@
-# Acharya Dhunro Pasal — Corn Puff Pipes (2.0)
+# Acharya Dhunro Pasal — Corn Puff Pipes
 
-Snack shop landing page for **Acharya Dhunro Pasal**, featuring **Corn Puff Pipes** (pipe-shaped puffed corn snacks) on the exact ThreeUI **CompleteShelf** Three.js presentation.
+Snack shop site for **Acharya Dhunro Pasal** (Kathmandu). Corn Puff Pipes from traditional maize.
 
-## Features
-- Exact CompleteShelf `complete-shelf-v2.html` (SHA-verified, byte-exact in `public/landing-pages/`)
-- Runtime cover-atlas swap → Acharya bright product photos (HTML on disk unchanged)
-- PipeMark logo (SVG chrome + `public/brand/acharya-dhunro-pasal-logo.png`)
-- Acharya brand overlays: Call CTA, email, scan-to-pay QR
-- Typography: Iowan Old Style / Inter, primary `#c87046`
-- Call: **+977 984-5044572** · Email: **roms7291@gmail.com**
+## What changed in 3.0
 
-## Local preview
-```bash
-npm install
-npm run dev
-```
+The previous build wrapped an 880 KB Three.js “CompleteShelf” iframe (WebGL books, jsDelivr import map, blob HTML rewrite, MutationObserver). It was slow, the overlay UI fought the 3D scene, and the sandbox was unsafe (`allow-scripts` + `allow-same-origin`).
 
-## Build
-```bash
-npm run build
-```
+This rewrite is a real shop page:
 
-Live (GitHub Pages): https://adande017.github.io/acharya-dhunro-pasal/
+- Product photos, packs (snack / party / bulk)
+- Call, WhatsApp, email, scan-to-pay (Global IME)
+- No iframe, no WebGL, no third-party JS CDN
 
-Repo: https://github.com/Adande017/acharya-dhunro-pasal
+Call **+977 984-5044572** · Email **roms7291@gmail.com**
+
+Live: https://adande017.github.io/acharya-dhunro-pasal/

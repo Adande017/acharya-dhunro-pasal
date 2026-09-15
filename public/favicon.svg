@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-label="Acharya Dhunro Pasal">
+  <rect width="32" height="32" rx="7" fill="#b5522a"/>
+  <path fill="#5c7a32" d="M16 4.2C13.2 6.4 12.2 8.8 12.4 10.6c1.2-1.4 2.4-2 3.6-2s2.4.6 3.6 2C19.8 8.8 18.8 6.4 16 4.2z"/>
+  <ellipse cx="16" cy="19" rx="6.4" ry="9.1" fill="#f0c94a"/>
+  <ellipse cx="16" cy="19" rx="4.1" ry="7.2" fill="#e2b03a"/>
+</svg>
