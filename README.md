@@ -15,3 +15,12 @@ This rewrite is a real shop page:
 Call **+977 984-5044572** · Email **roms7291@gmail.com**
 
 Live: https://adande017.github.io/acharya-dhunro-pasal/
+
+## Blogspot / Blogger edition
+
+A no-framework copy of the shop (same look, WhatsApp order, scan-to-pay). No React, no iframe, no third-party JS besides Google Fonts.
+
+- Live HTML page: https://adande017.github.io/acharya-dhunro-pasal/blogspot.html
+- Blogger theme file: [`blogspot/blogger-template.xml`](blogspot/blogger-template.xml)
+
+To put this on a `*.blogspot.com` site: Blogger → Theme → Backup and Restore → Upload the XML. The shop fills the page; old posts stay hidden. Images and the QR code load from this GitHub Pages site so they stay in sync.
