@@ -6,6 +6,7 @@ import {
   Phone,
   Plus,
   QrCode,
+  UserRound,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -104,7 +105,7 @@ function WhatsAppIcon({ className }: { className?: string }) {
   );
 }
 
-export function ShopPage() {
+export function ShopPage({ onAccount }: { onAccount?: () => void }) {
   const [payOpen, setPayOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [lightbox, setLightbox] = useState<(typeof GALLERY)[number] | null>(null);
@@ -159,6 +160,12 @@ export function ShopPage() {
           </nav>
 
           <div className="flex items-center gap-2">
+            {onAccount && (
+              <Button type="button" variant="ghost" size="sm" onClick={onAccount}>
+                <UserRound />
+                Account
+              </Button>
+            )}
             <Button asChild size="sm" className="hidden sm:inline-flex">
               <a href={telHref}>
                 <Phone />

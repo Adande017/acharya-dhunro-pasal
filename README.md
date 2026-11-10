@@ -8,6 +8,7 @@ The previous build wrapped an 880 KB Three.js “CompleteShelf” iframe (WebGL 
 
 This rewrite is a real shop page:
 
+- Login / sign-up landing screen with guest access to the shop (account services are not connected)
 - Product photos, packs (snack / party / bulk)
 - Call, WhatsApp, email, scan-to-pay (Global IME)
 - No iframe, no WebGL, no third-party JS CDN
