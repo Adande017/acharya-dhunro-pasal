@@ -105,7 +105,15 @@ function WhatsAppIcon({ className }: { className?: string }) {
   );
 }
 
-export function ShopPage({ onAccount }: { onAccount?: () => void }) {
+export function ShopPage({
+  onAccount,
+  onSignOut,
+  accountNotice = "",
+}: {
+  onAccount?: () => void;
+  onSignOut?: () => void;
+  accountNotice?: string;
+}) {
   const [payOpen, setPayOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [lightbox, setLightbox] = useState<(typeof GALLERY)[number] | null>(null);
@@ -160,12 +168,17 @@ export function ShopPage({ onAccount }: { onAccount?: () => void }) {
           </nav>
 
           <div className="flex items-center gap-2">
-            {onAccount && (
+            {onSignOut ? (
+              <Button type="button" variant="ghost" size="sm" onClick={onSignOut}>
+                <UserRound />
+                Sign out
+              </Button>
+            ) : onAccount ? (
               <Button type="button" variant="ghost" size="sm" onClick={onAccount}>
                 <UserRound />
                 Account
               </Button>
-            )}
+            ) : null}
             <Button asChild size="sm" className="hidden sm:inline-flex">
               <a href={telHref}>
                 <Phone />
@@ -232,6 +245,11 @@ export function ShopPage({ onAccount }: { onAccount?: () => void }) {
       </header>
 
       <main id="top">
+        {accountNotice && (
+          <p className="mx-auto max-w-6xl px-4 pt-4 text-sm text-primary sm:px-6" role="status">
+            {accountNotice}
+          </p>
+        )}
         <section className="relative overflow-hidden bg-hero-wash">
           <div className="mx-auto grid max-w-6xl items-center gap-10 px-4 py-12 sm:px-6 sm:py-16 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] lg:gap-14 lg:py-20">
             <div>
