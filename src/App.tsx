@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import type { User } from "@supabase/supabase-js";
 import { AuthPage } from "./components/auth-page";
+import { CommunityPage } from "./components/community-page";
 import { ShopPage } from "./components/shop-page";
 import { supabase } from "./lib/supabase";
 
@@ -9,6 +10,9 @@ export default function App() {
   const [guest, setGuest] = useState(false);
   const [authReady, setAuthReady] = useState(false);
   const [recoveringPassword, setRecoveringPassword] = useState(false);
+  const [showCommunity, setShowCommunity] = useState(
+    () => window.location.hash !== "#top",
+  );
   const [notice, setNotice] = useState("");
 
   useEffect(() => {
@@ -28,7 +32,13 @@ export default function App() {
         setGuest(false);
       } else if (event === "SIGNED_IN" || event === "SIGNED_OUT") {
         setRecoveringPassword(false);
-        if (session) setGuest(false);
+        if (session) {
+          setGuest(false);
+          setShowCommunity(true);
+          if (window.location.hash !== "#community") {
+            window.history.replaceState(null, "", "#community");
+          }
+        }
       }
       setAuthReady(true);
     });
@@ -60,6 +70,25 @@ export default function App() {
     };
   }, []);
 
+  useEffect(() => {
+    function syncPageFromUrl() {
+      setShowCommunity(
+        window.location.hash === "#community" || window.location.hash === "",
+      );
+    }
+
+    window.addEventListener("popstate", syncPageFromUrl);
+    return () => window.removeEventListener("popstate", syncPageFromUrl);
+  }, []);
+
+  function navigateTo(page: "shop" | "community") {
+    const hash = page === "community" ? "#community" : "#top";
+    if (window.location.hash !== hash) {
+      window.history.pushState(null, "", hash);
+    }
+    setShowCommunity(page === "community");
+  }
+
   async function signOut() {
     if (!supabase) {
       setNotice("Sign-in is not configured yet. You can continue browsing as a guest.");
@@ -90,7 +119,23 @@ export default function App() {
     );
   }
 
-  return (user && !recoveringPassword) || guest ? (
+  if (user && !recoveringPassword) {
+    return showCommunity ? (
+      <CommunityPage
+        user={user}
+        onShop={() => navigateTo("shop")}
+        onSignOut={signOut}
+      />
+    ) : (
+      <ShopPage
+        onCommunity={() => navigateTo("community")}
+        onSignOut={signOut}
+        accountNotice={notice}
+      />
+    );
+  }
+
+  return guest ? (
     <ShopPage
       onAccount={
         user

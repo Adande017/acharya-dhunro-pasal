@@ -19,7 +19,7 @@ Live: https://adande017.github.io/acharya-dhunro-pasal/
 
 ## Account sign-in setup
 
-Email/password accounts use Supabase Auth. The app stores the name as Supabase user metadata; passwords are sent directly to Supabase Auth and are never stored by this site. No service-role key or custom database table is used. Orders still go through WhatsApp/email; the site does not yet save order history to an account.
+Email/password accounts use Supabase Auth. The app stores the name as Supabase user metadata; passwords are sent directly to Supabase Auth and are never stored by this site. Auth does not use a service-role key or an auth-specific user table. Orders still go through WhatsApp/email; the site does not yet save order history to an account.
 
 1. In Supabase, enable the Email provider and choose whether email confirmation is required.
 2. In **Authentication → URL Configuration**, add `http://localhost:5173/` and `https://adande017.github.io/acharya-dhunro-pasal/` to the allowed redirect URLs.
@@ -27,6 +27,17 @@ Email/password accounts use Supabase Auth. The app stores the name as Supabase u
 4. For GitHub Pages, add those same two values as repository **Actions variables** named `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` under **Settings → Secrets and variables → Actions → Variables**, then rerun the Pages workflow.
 
 Never put a service-role key, secret key, database password, or email credentials in the frontend or GitHub Actions variables. Without the two public project values, account actions show an explicit setup message while guest browsing remains available.
+
+## Member community
+
+After sign-in, members land on the community feed, which is connected to the shop in the same site. Members can manage a display name and profile photo, publish posts, comment, like posts, discover suggested members, send and accept friend requests, and message other members. Community profiles, posts, comments, friendships, and messages are readable only by signed-in members. Profile photos are stored in a private Supabase Storage bucket and served with short-lived signed URLs. Guests can still browse and order from the shop.
+
+Before using the community, apply these migrations in order from **Supabase → SQL Editor → New query**:
+
+1. [`supabase/migrations/20261111000000_community.sql`](supabase/migrations/20261111000000_community.sql)
+2. [`supabase/migrations/20261112000000_friendships.sql`](supabase/migrations/20261112000000_friendships.sql)
+
+The community migration creates the tables and row-level security policies, provisions profiles for existing accounts, and creates the private avatar bucket. Do not disable RLS or make the avatar bucket public.
 
 ## Blogspot / Blogger edition
 
