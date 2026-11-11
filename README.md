@@ -35,7 +35,7 @@ After sign-in, members land on the community feed, which is connected to the sho
 Before using the community, apply these migrations in order from **Supabase → SQL Editor → New query**:
 
 1. [`supabase/migrations/20261111000000_community.sql`](supabase/migrations/20261111000000_community.sql)
-2. [`supabase/migrations/20261112000000_friendships.sql`](supabase/migrations/20261112000000_friendships.sql)
+2. [`supabase/migrations/20261111181608_add_friendships.sql`](supabase/migrations/20261111181608_add_friendships.sql)
 
 The community migration creates the tables and row-level security policies, provisions profiles for existing accounts, and creates the private avatar bucket. Do not disable RLS or make the avatar bucket public.
 
