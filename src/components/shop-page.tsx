@@ -1,11 +1,14 @@
 import { useId, useState } from "react";
 import {
   ArrowUpRight,
+  Heart,
+  MessageCircle,
   Menu,
   Minus,
   Phone,
   Plus,
   QrCode,
+  Users,
   UserRound,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -107,10 +110,12 @@ function WhatsAppIcon({ className }: { className?: string }) {
 
 export function ShopPage({
   onAccount,
+  onCommunity,
   onSignOut,
   accountNotice = "",
 }: {
   onAccount?: () => void;
+  onCommunity?: () => void;
   onSignOut?: () => void;
   accountNotice?: string;
 }) {
@@ -165,9 +170,24 @@ export function ShopPage({
                 {item.label}
               </a>
             ))}
+            {onCommunity && (
+              <button
+                type="button"
+                onClick={onCommunity}
+                className="text-sm text-muted transition-[color] duration-150 ease-out hover:text-fg"
+              >
+                Community
+              </button>
+            )}
           </nav>
 
           <div className="flex items-center gap-2">
+            {onCommunity && (
+              <Button type="button" variant="ghost" size="sm" onClick={onCommunity}>
+                <Users />
+                Community
+              </Button>
+            )}
             {onSignOut ? (
               <Button type="button" variant="ghost" size="sm" onClick={onSignOut}>
                 <UserRound />
@@ -219,6 +239,17 @@ export function ShopPage({
                       </a>
                     </SheetClose>
                   ))}
+                  {onCommunity && (
+                    <SheetClose asChild>
+                      <button
+                        type="button"
+                        onClick={onCommunity}
+                        className="rounded-xl px-3 py-3 text-left text-base text-fg transition-[background-color] duration-150 ease-out hover:bg-surface-muted"
+                      >
+                        Community
+                      </button>
+                    </SheetClose>
+                  )}
                 </nav>
                 <div className="mt-auto flex flex-col gap-2">
                   <Button asChild>
@@ -313,6 +344,46 @@ export function ShopPage({
                 <p className="mt-2 text-sm leading-relaxed text-muted">{fact.body}</p>
               </article>
             ))}
+          </div>
+        </section>
+
+        <section id="community" className="scroll-mt-24 px-4 py-12 sm:px-6 sm:py-16">
+          <div className="mx-auto grid max-w-6xl gap-8 overflow-hidden rounded-3xl bg-accent p-6 text-accent-foreground shadow-[var(--shadow-border)] sm:p-9 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center lg:p-12">
+            <div className="max-w-2xl">
+              <p className="text-xs font-medium tracking-[0.18em] text-accent-foreground/65 uppercase">
+                Beyond the shelf
+              </p>
+              <h2 className="mt-2 font-display text-3xl font-medium tracking-tight sm:text-4xl">
+                Good snacks bring people together.
+              </h2>
+              <p className="mt-3 max-w-xl leading-relaxed text-accent-foreground/75">
+                Meet other pasal members, share a moment, and keep in touch. Your shop,
+                profile, community feed, and messages all live in one place.
+              </p>
+              <div className="mt-6 flex flex-wrap gap-4 text-sm text-accent-foreground/80">
+                <span className="inline-flex items-center gap-2">
+                  <Users className="size-4" /> Find your people
+                </span>
+                <span className="inline-flex items-center gap-2">
+                  <Heart className="size-4" /> Share and react
+                </span>
+                <span className="inline-flex items-center gap-2">
+                  <MessageCircle className="size-4" /> Stay in touch
+                </span>
+              </div>
+            </div>
+            {(onCommunity || onAccount) && (
+              <Button
+                type="button"
+                variant="outline"
+                size="lg"
+                className="w-full sm:w-fit"
+                onClick={onCommunity ?? onAccount}
+              >
+                {onCommunity ? "Visit the community" : "Join the community"}
+                <ArrowUpRight />
+              </Button>
+            )}
           </div>
         </section>
 
