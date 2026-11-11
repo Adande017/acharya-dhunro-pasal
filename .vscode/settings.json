@@ -1,0 +1,5 @@
+{
+    "azureResourceGroups.autoOpenActivityPanel": false,
+    "azureResourceGroups.enableOutputTimestamps": false,
+    "azureResourceGroups.suppressActivityNotifications": false
+}
