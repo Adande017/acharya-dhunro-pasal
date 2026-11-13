@@ -34,11 +34,17 @@ function readableAuthError(error: Error): string {
 
 export function AuthPage({
   onContinue,
+  onStaffLogin,
+  onCustomerLogin,
+  staffLogin = false,
   initialNotice = "",
   recoveringPassword = false,
   onPasswordChanged,
 }: {
   onContinue: () => void;
+  onStaffLogin: () => void;
+  onCustomerLogin: () => void;
+  staffLogin?: boolean;
   initialNotice?: string;
   recoveringPassword?: boolean;
   onPasswordChanged: () => void;
@@ -191,7 +197,9 @@ export function AuthPage({
 
       <section className="flex items-center justify-center px-5 py-8 sm:px-6 sm:py-10 lg:px-14">
         <div className="w-full max-w-md">
-          <p className="text-sm font-medium text-primary">Welcome to the pasal</p>
+          <p className="text-sm font-medium text-primary">
+            {staffLogin ? "Staff inventory sign-in" : "Welcome to the pasal"}
+          </p>
           <h2 className="mt-2 font-display text-3xl font-medium tracking-tight sm:text-4xl">
             {mode === "login"
               ? "Good to see you."
@@ -202,7 +210,9 @@ export function AuthPage({
                   : "Choose a new password."}
           </h2>
           <p className="mt-2 text-sm leading-relaxed text-muted">
-            {mode === "login"
+            {staffLogin
+              ? "Use your own account. Inventory access is limited to emails approved by the shop owner."
+              : mode === "login"
               ? "Sign in to your account, or browse our snacks as a guest."
               : mode === "signup"
                 ? "Create an account to make your next visit easier."
@@ -373,19 +383,41 @@ export function AuthPage({
             <span className="h-px flex-1 bg-border" />
           </div>
 
-          <Button
-            type="button"
-            variant="outline"
-            size="lg"
-            className="w-full"
-            onClick={onContinue}
-            disabled={pending}
-          >
-            Browse the shop as a guest
-          </Button>
-          <p className="mt-3 text-center text-xs leading-relaxed text-subtle">
-            Your password is handled securely by Supabase. Guest browsing is always available.
-          </p>
+          {!staffLogin && (
+            <>
+              <Button
+                type="button"
+                variant="outline"
+                size="lg"
+                className="w-full"
+                onClick={onContinue}
+                disabled={pending}
+              >
+                Browse the shop as a guest
+              </Button>
+              <button
+                type="button"
+                className="mt-4 w-full text-center text-sm font-medium text-primary underline-offset-4 hover:underline"
+                onClick={onStaffLogin}
+                disabled={pending}
+              >
+                Staff sign-in
+              </button>
+              <p className="mt-3 text-center text-xs leading-relaxed text-subtle">
+                Your password is handled securely by Supabase. Guest browsing is always available.
+              </p>
+            </>
+          )}
+          {staffLogin && (
+            <button
+              type="button"
+              className="mt-4 w-full text-center text-sm font-medium text-primary underline-offset-4 hover:underline"
+              onClick={onCustomerLogin}
+              disabled={pending}
+            >
+              Return to customer sign-in
+            </button>
+          )}
         </div>
       </section>
     </main>

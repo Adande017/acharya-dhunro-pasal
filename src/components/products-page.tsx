@@ -3,8 +3,10 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { AvailabilityBadge } from "@/components/availability-badge";
 import { asset, PACKS, SHOP, telHref, type PackId } from "@/lib/shop";
 import { resetTilt, updateTilt } from "@/lib/tilt";
+import { useInventoryAvailability } from "@/lib/use-inventory-availability";
 
 const PRODUCT_FILTERS: Array<{ id: "all" | PackId; label: string }> = [
   { id: "all", label: "All products" },
@@ -22,6 +24,7 @@ export function ProductsPage({
 }) {
   const [productFilter, setProductFilter] = useState<"all" | PackId>("all");
   const [productSearch, setProductSearch] = useState("");
+  const { availability, loading, error } = useInventoryAvailability();
   const search = productSearch.trim().toLocaleLowerCase();
   const visiblePacks = PACKS.filter((item) => {
     const matchesFilter = productFilter === "all" || item.id === productFilter;
@@ -147,6 +150,12 @@ export function ProductsPage({
               )}
             </div>
 
+            {error && (
+              <p className="mt-3 rounded-xl border border-border bg-surface/90 px-4 py-3 text-sm text-muted" role="status">
+                {error}
+              </p>
+            )}
+
             {visiblePacks.length > 0 ? (
               <div className="mt-4 grid gap-4 md:grid-cols-2">
                 {visiblePacks.map((item) => (
@@ -175,13 +184,23 @@ export function ProductsPage({
                       </h2>
                       <p className="mt-1 text-sm leading-relaxed text-muted">{item.description}</p>
                       <p className="mt-2 text-xs text-subtle">{item.suited}</p>
+                      <AvailabilityBadge
+                        status={availability[item.id]}
+                        loading={loading}
+                        error={error}
+                      />
+                      {availability[item.id] === "unavailable" && (
+                        <p className="mt-2 text-xs text-muted">
+                          You can still ask us when this pack will be available.
+                        </p>
+                      )}
                       <Button
                         type="button"
                         size="sm"
                         className="mt-4"
                         onClick={() => onOrder(item.id)}
                       >
-                        Choose this pack
+                        {availability[item.id] === "unavailable" ? "Ask about this pack" : "Choose this pack"}
                         <ArrowUpRight />
                       </Button>
                     </div>
