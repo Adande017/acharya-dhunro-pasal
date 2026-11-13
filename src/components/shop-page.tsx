@@ -1,4 +1,4 @@
-import { useId, useState } from "react";
+import { useId, useState, type PointerEvent as ReactPointerEvent } from "react";
 import {
   ArrowUpRight,
   Heart,
@@ -86,6 +86,32 @@ const GALLERY = [
     caption: "The sack",
   },
 ] as const;
+
+function updateTilt(event: ReactPointerEvent<HTMLElement>) {
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  const bounds = event.currentTarget.getBoundingClientRect();
+  const x = (event.clientX - bounds.left) / bounds.width;
+  const y = (event.clientY - bounds.top) / bounds.height;
+  const tilt = 8;
+
+  event.currentTarget.style.setProperty("--tilt-x", `${(0.5 - y) * tilt}deg`);
+  event.currentTarget.style.setProperty("--tilt-y", `${(x - 0.5) * tilt}deg`);
+  event.currentTarget.style.setProperty("--pointer-x", `${x * 100}%`);
+  event.currentTarget.style.setProperty("--pointer-y", `${y * 100}%`);
+}
+
+function resetTilt(event: ReactPointerEvent<HTMLElement>) {
+  event.currentTarget.style.setProperty("--tilt-x", "0deg");
+  event.currentTarget.style.setProperty("--tilt-y", "0deg");
+  event.currentTarget.style.setProperty("--pointer-x", "50%");
+  event.currentTarget.style.setProperty("--pointer-y", "50%");
+}
+
+function captureTouchTilt(event: ReactPointerEvent<HTMLElement>) {
+  if (event.pointerType === "touch") {
+    event.currentTarget.setPointerCapture(event.pointerId);
+  }
+}
 
 function BrandMark({ className }: { className?: string }) {
   return (
@@ -310,8 +336,16 @@ export function ShopPage({
               </p>
             </div>
 
-            <div className="rise-in-3 relative">
-              <div className="overflow-hidden rounded-3xl bg-surface p-2 shadow-[var(--shadow-border)]">
+            <div className="product-scene rise-in-3 relative">
+              <div
+                className="product-card-3d relative overflow-hidden rounded-3xl bg-surface p-2 shadow-[var(--shadow-border)]"
+                onPointerDown={captureTouchTilt}
+                onPointerMove={updateTilt}
+                onPointerUp={resetTilt}
+                onPointerCancel={resetTilt}
+                onPointerLeave={resetTilt}
+                aria-describedby="product-3d-hint"
+              >
                 <img
                   src={asset("product/closeup-bright.jpg")}
                   alt="Golden Corn Puff Pipes, close-up"
@@ -319,8 +353,11 @@ export function ShopPage({
                   height={900}
                   fetchPriority="high"
                   decoding="async"
-                  className="media aspect-[4/3] w-full rounded-2xl object-cover"
+                  className="product-card-visual media aspect-[4/3] w-full rounded-2xl object-cover"
                 />
+                <span className="product-card-label absolute right-5 bottom-5 rounded-full border border-border/70 bg-surface/95 px-3 py-1.5 text-xs font-medium text-fg shadow-sm backdrop-blur-sm">
+                  Fresh from the pasal
+                </span>
               </div>
               <div className="absolute -bottom-6 -left-2 hidden w-44 overflow-hidden rounded-2xl bg-surface p-1.5 shadow-[var(--shadow-border)] sm:block lg:-left-8">
                 <img
@@ -332,6 +369,9 @@ export function ShopPage({
                   className="media aspect-[4/3] w-full rounded-xl object-cover"
                 />
               </div>
+              <p id="product-3d-hint" className="mt-4 text-center text-xs text-subtle">
+                Move your pointer or drag across the product to explore
+              </p>
             </div>
           </div>
         </section>
@@ -404,7 +444,9 @@ export function ShopPage({
               {PACKS.map((item) => (
                 <article
                   key={item.id}
-                  className="flex flex-col overflow-hidden rounded-3xl bg-surface p-2 shadow-[var(--shadow-border)] transition-[box-shadow] duration-150 ease-out hover:shadow-[var(--shadow-border-hover)]"
+                  className="pack-card-3d flex flex-col overflow-hidden rounded-3xl bg-surface p-2 shadow-[var(--shadow-border)] transition-[box-shadow] duration-150 ease-out hover:shadow-[var(--shadow-border-hover)]"
+                  onPointerMove={updateTilt}
+                  onPointerLeave={resetTilt}
                 >
                   <img
                     src={asset(item.image)}
@@ -413,9 +455,9 @@ export function ShopPage({
                     height={600}
                     loading="lazy"
                     decoding="async"
-                    className="media aspect-[4/3] w-full rounded-2xl object-cover"
+                    className="pack-card-visual media aspect-[4/3] w-full rounded-2xl object-cover"
                   />
-                  <div className="flex flex-1 flex-col px-3 pt-4 pb-3">
+                  <div className="pack-card-content flex flex-1 flex-col px-3 pt-4 pb-3">
                     <Badge>{item.kicker}</Badge>
                     <h3 className="mt-3 font-display text-2xl font-medium tracking-tight">
                       {item.name}
