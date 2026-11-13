@@ -52,7 +52,7 @@ function DialogContent({
       >
         {children}
         <DialogPrimitive.Close
-          className="absolute top-3 right-3 inline-flex size-11 items-center justify-center rounded-full text-muted transition-[background-color] duration-150 ease-out hover:bg-surface-muted hover:text-fg focus-visible:ring-2 focus-visible:ring-ring"
+          className="absolute top-3 right-3 inline-flex size-11 items-center justify-center rounded-full text-muted transition-[background-color] duration-180 ease-out hover:bg-surface-muted hover:text-fg focus-visible:ring-2 focus-visible:ring-ring"
           aria-label="Close"
         >
           <X className="size-4" />

@@ -581,7 +581,7 @@ export function CommunityPage({
 
   if (!supabase) {
     return (
-      <main className="grid min-h-dvh place-items-center bg-bg px-6 text-center">
+      <main className="page-transition grid min-h-dvh place-items-center bg-bg px-6 text-center">
         <div className="max-w-md rounded-3xl bg-surface p-8 shadow-[var(--shadow-border)]">
           <h1 className="font-display text-2xl">Community is unavailable</h1>
           <p className="mt-3 text-sm text-muted">Account services need to be configured first.</p>
@@ -623,7 +623,7 @@ export function CommunityPage({
     .sort((a, b) => b.created_at.localeCompare(a.created_at));
 
   return (
-    <main className="min-h-dvh bg-bg text-fg">
+    <main className="page-transition min-h-dvh bg-bg text-fg">
       <header className="sticky top-0 z-30 border-b border-border/80 bg-bg/95 backdrop-blur-md">
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-3 px-4 sm:px-6">
           <div className="flex items-center gap-3">
@@ -657,7 +657,7 @@ export function CommunityPage({
               type="button"
               onClick={() => setTab(id)}
               aria-current={tab === id ? "page" : undefined}
-              className={`flex shrink-0 items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-colors ${
+              className={`flex shrink-0 items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-colors duration-180 ${
                 tab === id ? "bg-accent text-accent-foreground" : "text-muted hover:bg-surface-muted hover:text-fg"
               }`}
             >

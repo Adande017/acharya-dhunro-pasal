@@ -1,8 +1,11 @@
 import { useEffect, useState } from "react";
 import type { User } from "@supabase/supabase-js";
+import { AboutPage } from "./components/about-page";
 import { AuthPage } from "./components/auth-page";
 import { CommunityPage } from "./components/community-page";
+import { ProductsPage } from "./components/products-page";
 import { ShopPage } from "./components/shop-page";
+import type { PackId } from "./lib/shop";
 import { supabase } from "./lib/supabase";
 
 export default function App() {
@@ -11,8 +14,15 @@ export default function App() {
   const [authReady, setAuthReady] = useState(false);
   const [recoveringPassword, setRecoveringPassword] = useState(false);
   const [showCommunity, setShowCommunity] = useState(
-    () => window.location.hash !== "#top",
+    () => window.location.hash === "#community" || window.location.hash === "",
   );
+  const [showProducts, setShowProducts] = useState(
+    () => window.location.hash === "#products",
+  );
+  const [showAbout, setShowAbout] = useState(
+    () => window.location.hash === "#about",
+  );
+  const [selectedPack, setSelectedPack] = useState<PackId>("snack");
   const [notice, setNotice] = useState("");
 
   useEffect(() => {
@@ -35,6 +45,8 @@ export default function App() {
         if (session) {
           setGuest(false);
           setShowCommunity(true);
+          setShowProducts(false);
+          setShowAbout(false);
           if (window.location.hash !== "#community") {
             window.history.replaceState(null, "", "#community");
           }
@@ -72,6 +84,8 @@ export default function App() {
 
   useEffect(() => {
     function syncPageFromUrl() {
+      setShowProducts(window.location.hash === "#products");
+      setShowAbout(window.location.hash === "#about");
       setShowCommunity(
         window.location.hash === "#community" || window.location.hash === "",
       );
@@ -81,12 +95,34 @@ export default function App() {
     return () => window.removeEventListener("popstate", syncPageFromUrl);
   }, []);
 
-  function navigateTo(page: "shop" | "community") {
-    const hash = page === "community" ? "#community" : "#top";
+  useEffect(() => {
+    if (showCommunity || showProducts || showAbout || window.location.hash !== "#order") return;
+    const frame = window.requestAnimationFrame(() => {
+      document.getElementById("order")?.scrollIntoView({ behavior: "smooth" });
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [showAbout, showCommunity, showProducts]);
+
+  function navigateTo(
+    page: "shop" | "community" | "products" | "about",
+    destination = "top",
+  ) {
+    const hash =
+      page === "community"
+        ? "#community"
+        : page === "products"
+          ? "#products"
+          : page === "about"
+            ? "#about"
+            : destination === "order"
+              ? "#order"
+              : "#top";
     if (window.location.hash !== hash) {
       window.history.pushState(null, "", hash);
     }
     setShowCommunity(page === "community");
+    setShowProducts(page === "products");
+    setShowAbout(page === "about");
   }
 
   async function signOut() {
@@ -120,14 +156,43 @@ export default function App() {
   }
 
   if (user && !recoveringPassword) {
-    return showCommunity ? (
-      <CommunityPage
-        user={user}
-        onShop={() => navigateTo("shop")}
-        onSignOut={signOut}
-      />
-    ) : (
+    if (showCommunity) {
+      return (
+        <CommunityPage
+          user={user}
+          onShop={() => navigateTo("shop")}
+          onSignOut={signOut}
+        />
+      );
+    }
+
+    if (showProducts) {
+      return (
+        <ProductsPage
+          onHome={() => navigateTo("shop")}
+          onOrder={(pack) => {
+            setSelectedPack(pack);
+            navigateTo("shop", "order");
+          }}
+        />
+      );
+    }
+
+    if (showAbout) {
+      return (
+        <AboutPage
+          onHome={() => navigateTo("shop")}
+          onProducts={() => navigateTo("products")}
+          onCommunity={() => navigateTo("community")}
+        />
+      );
+    }
+
+    return (
       <ShopPage
+        initialPack={selectedPack}
+        onProducts={() => navigateTo("products")}
+        onAbout={() => navigateTo("about")}
         onCommunity={() => navigateTo("community")}
         onSignOut={signOut}
         accountNotice={notice}
@@ -135,8 +200,56 @@ export default function App() {
     );
   }
 
-  return guest ? (
+  if (!guest) {
+    return (
+      <AuthPage
+        onContinue={() => setGuest(true)}
+        initialNotice={notice}
+        recoveringPassword={recoveringPassword}
+        onPasswordChanged={() => {
+          setRecoveringPassword(false);
+          setNotice("");
+        }}
+      />
+    );
+  }
+
+  if (showProducts) {
+    return (
+      <ProductsPage
+        onHome={() => navigateTo("shop")}
+        onOrder={(pack) => {
+          setSelectedPack(pack);
+          navigateTo("shop", "order");
+        }}
+      />
+    );
+  }
+
+  if (showAbout) {
+    return (
+      <AboutPage
+        onHome={() => navigateTo("shop")}
+        onProducts={() => navigateTo("products")}
+        onCommunity={user ? () => navigateTo("community") : undefined}
+        onAccount={
+          user
+            ? undefined
+            : () => {
+                setGuest(false);
+                window.scrollTo(0, 0);
+              }
+        }
+      />
+    );
+  }
+
+  return (
     <ShopPage
+      initialPack={selectedPack}
+      onProducts={() => navigateTo("products")}
+      onAbout={() => navigateTo("about")}
+      onCommunity={user ? () => navigateTo("community") : undefined}
       onAccount={
         user
           ? undefined
@@ -147,16 +260,6 @@ export default function App() {
       }
       onSignOut={user ? signOut : undefined}
       accountNotice={notice}
-    />
-  ) : (
-    <AuthPage
-      onContinue={() => setGuest(true)}
-      initialNotice={notice}
-      recoveringPassword={recoveringPassword}
-      onPasswordChanged={() => {
-        setRecoveringPassword(false);
-        setNotice("");
-      }}
     />
   );
 }

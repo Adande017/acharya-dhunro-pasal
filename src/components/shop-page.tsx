@@ -1,17 +1,15 @@
 import { useId, useState } from "react";
 import {
   ArrowUpRight,
-  Heart,
-  MessageCircle,
-  Menu,
+  BookOpen,
   Minus,
+  Package,
   Phone,
   Plus,
   QrCode,
-  Users,
   UserRound,
+  Users,
 } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
 import {
   Dialog,
@@ -23,15 +21,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import {
-  Sheet,
-  SheetClose,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
 import {
   asset,
   buildMailtoUrl,
@@ -45,46 +34,11 @@ import {
   waHref,
   type PackId,
 } from "@/lib/shop";
+import { resetTilt, updateTilt } from "@/lib/tilt";
 import { cn } from "@/lib/utils";
 
 const NAV = [
-  { href: "#packs", label: "Packs" },
-  { href: "#craft", label: "Craft" },
-  { href: "#gallery", label: "Gallery" },
   { href: "#order", label: "Order" },
-] as const;
-
-const FACTS = [
-  {
-    title: "Traditional maize",
-    body: "Non-hybrid grain, puffed into light pipes — snack culture with a kitchen-table origin.",
-  },
-  {
-    title: "Small-batch",
-    body: "Handmade runs. You taste the batch, not a factory formula.",
-  },
-  {
-    title: "Pasal, Kathmandu",
-    body: "Call to book a bag, a party pack, or a sack for your shop.",
-  },
-] as const;
-
-const GALLERY = [
-  {
-    src: "product/closeup-bright.jpg",
-    alt: "Golden Corn Puff Pipes in close-up",
-    caption: "The pipe",
-  },
-  {
-    src: "product/basket-bright.jpg",
-    alt: "Basket of Corn Puff Pipes",
-    caption: "The share",
-  },
-  {
-    src: "product/bulk-bright.jpg",
-    alt: "Wholesale sack of Corn Puff Pipes",
-    caption: "The sack",
-  },
 ] as const;
 
 function BrandMark({ className }: { className?: string }) {
@@ -110,19 +64,23 @@ function WhatsAppIcon({ className }: { className?: string }) {
 
 export function ShopPage({
   onAccount,
+  onProducts,
+  onAbout,
   onCommunity,
   onSignOut,
   accountNotice = "",
+  initialPack = "snack",
 }: {
   onAccount?: () => void;
+  onProducts?: () => void;
+  onAbout?: () => void;
   onCommunity?: () => void;
   onSignOut?: () => void;
   accountNotice?: string;
+  initialPack?: PackId;
 }) {
   const [payOpen, setPayOpen] = useState(false);
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [lightbox, setLightbox] = useState<(typeof GALLERY)[number] | null>(null);
-  const [pack, setPack] = useState<PackId>("snack");
+  const [pack, setPack] = useState<PackId>(initialPack);
   const [qty, setQty] = useState(1);
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
@@ -136,14 +94,20 @@ export function ShopPage({
     qty,
     note,
   };
-
   return (
-    <div className="min-h-dvh bg-bg text-fg">
+    <div className="page-transition pasal-watermark relative min-h-dvh bg-bg text-fg">
+      <div
+        className="watermark-layer"
+        aria-hidden="true"
+        style={{
+          backgroundImage: `linear-gradient(rgba(243, 238, 228, 0.94), rgba(243, 238, 228, 0.94)), url("${asset("product/basket-bright.jpg")}")`,
+        }}
+      />
       <a
-        href="#packs"
+        href="#top"
         className="sr-only focus:not-sr-only focus:absolute focus:top-3 focus:left-3 focus:z-50 focus:rounded-full focus:bg-surface focus:px-4 focus:py-2 focus:text-sm"
       >
-        Skip to packs
+        Skip to content
       </a>
 
       <header className="sticky top-0 z-40 border-b border-border/80 bg-bg/90 backdrop-blur-md">
@@ -161,11 +125,29 @@ export function ShopPage({
           </a>
 
           <nav className="hidden items-center gap-6 lg:flex" aria-label="Primary">
+            {onProducts && (
+              <button
+                type="button"
+                onClick={onProducts}
+                className="text-sm text-muted transition-[color] duration-180 ease-out hover:text-fg"
+              >
+                Products
+              </button>
+            )}
+            {onAbout && (
+              <button
+                type="button"
+                onClick={onAbout}
+                className="text-sm text-muted transition-[color] duration-180 ease-out hover:text-fg"
+              >
+                About
+              </button>
+            )}
             {NAV.map((item) => (
               <a
                 key={item.href}
                 href={item.href}
-                className="text-sm text-muted transition-[color] duration-150 ease-out hover:text-fg"
+                className="text-sm text-muted transition-[color] duration-180 ease-out hover:text-fg"
               >
                 {item.label}
               </a>
@@ -174,7 +156,7 @@ export function ShopPage({
               <button
                 type="button"
                 onClick={onCommunity}
-                className="text-sm text-muted transition-[color] duration-150 ease-out hover:text-fg"
+                className="text-sm text-muted transition-[color] duration-180 ease-out hover:text-fg"
               >
                 Community
               </button>
@@ -215,74 +197,35 @@ export function ShopPage({
               <QrCode />
               Pay
             </Button>
-            <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
-              <SheetTrigger asChild>
-                <Button variant="outline" size="icon" className="lg:hidden" aria-label="Open menu">
-                  <Menu />
-                </Button>
-              </SheetTrigger>
-              <SheetContent>
-                <SheetHeader>
-                  <SheetTitle>{SHOP.name}</SheetTitle>
-                  <SheetDescription>
-                    {SHOP.product} from {SHOP.city}
-                  </SheetDescription>
-                </SheetHeader>
-                <nav className="flex flex-col gap-1" aria-label="Mobile">
-                  {NAV.map((item) => (
-                    <SheetClose asChild key={item.href}>
-                      <a
-                        href={item.href}
-                        className="rounded-xl px-3 py-3 text-base text-fg transition-[background-color] duration-150 ease-out hover:bg-surface-muted"
-                      >
-                        {item.label}
-                      </a>
-                    </SheetClose>
-                  ))}
-                  {onCommunity && (
-                    <SheetClose asChild>
-                      <button
-                        type="button"
-                        onClick={onCommunity}
-                        className="rounded-xl px-3 py-3 text-left text-base text-fg transition-[background-color] duration-150 ease-out hover:bg-surface-muted"
-                      >
-                        Community
-                      </button>
-                    </SheetClose>
-                  )}
-                </nav>
-                <div className="mt-auto flex flex-col gap-2">
-                  <Button asChild>
-                    <a href={telHref}>
-                      <Phone />
-                      Call {SHOP.phoneDisplay}
-                    </a>
-                  </Button>
-                  <Button asChild variant="outline">
-                    <a href={waHref} target="_blank" rel="noopener noreferrer">
-                      <WhatsAppIcon className="size-4" />
-                      WhatsApp
-                    </a>
-                  </Button>
-                  <Button type="button" variant="ghost" onClick={() => { setMenuOpen(false); setPayOpen(true); }}>
-                    <QrCode />
-                    Scan to pay
-                  </Button>
-                </div>
-              </SheetContent>
-            </Sheet>
           </div>
         </div>
+        <nav
+          className="glass-nav mx-4 mb-2 grid grid-cols-3 gap-1.5 p-1.5 lg:hidden"
+          aria-label="Primary"
+        >
+          <button type="button" onClick={onProducts} className="glass-nav-card">
+            <Package className="size-4" />
+            Products
+          </button>
+          <button type="button" onClick={onAbout} className="glass-nav-card">
+            <BookOpen className="size-4" />
+            About
+          </button>
+          <a href="#order" className="glass-nav-card">
+            <Phone className="size-4" />
+            Order
+          </a>
+        </nav>
       </header>
 
-      <main id="top">
+      <main id="top" className="relative z-10">
         {accountNotice && (
           <p className="mx-auto max-w-6xl px-4 pt-4 text-sm text-primary sm:px-6" role="status">
             {accountNotice}
           </p>
         )}
-        <section className="relative overflow-hidden bg-hero-wash">
-          <div className="mx-auto grid max-w-6xl items-center gap-10 px-4 py-12 sm:px-6 sm:py-16 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] lg:gap-14 lg:py-20">
+        <section className="relative overflow-hidden">
+          <div className="mx-auto max-w-3xl px-4 py-16 sm:px-6 sm:py-24">
             <div>
               <p className="rise-in text-xs font-medium tracking-[0.18em] text-muted uppercase">
                 Pasal · {SHOP.city}
@@ -290,10 +233,6 @@ export function ShopPage({
               <h1 className="rise-in-2 mt-3 font-display text-4xl leading-[1.1] font-medium tracking-tight sm:text-5xl lg:text-6xl">
                 Corn Puff Pipes from traditional maize.
               </h1>
-              <p className="rise-in-3 mt-5 max-w-md text-base leading-relaxed text-muted sm:text-lg">
-                Light, pipe-shaped puffs. Handmade in small batches at Acharya Dhunro Pasal.
-                Call to book, then scan to pay.
-              </p>
               <div className="rise-in-4 mt-8 flex flex-wrap items-center gap-3">
                 <Button asChild size="lg">
                   <a href={telHref}>
@@ -304,228 +243,24 @@ export function ShopPage({
                 <Button asChild variant="outline" size="lg">
                   <a href="#order">Place an order</a>
                 </Button>
-              </div>
-              <p className="mt-5 text-sm text-subtle">
-                {SHOP.phoneDisplay} · {SHOP.email}
-              </p>
-            </div>
-
-            <div className="rise-in-3 relative">
-              <div className="overflow-hidden rounded-3xl bg-surface p-2 shadow-[var(--shadow-border)]">
-                <img
-                  src={asset("product/closeup-bright.jpg")}
-                  alt="Golden Corn Puff Pipes, close-up"
-                  width={1200}
-                  height={900}
-                  fetchPriority="high"
-                  decoding="async"
-                  className="media aspect-[4/3] w-full rounded-2xl object-cover"
-                />
-              </div>
-              <div className="absolute -bottom-6 -left-2 hidden w-44 overflow-hidden rounded-2xl bg-surface p-1.5 shadow-[var(--shadow-border)] sm:block lg:-left-8">
-                <img
-                  src={asset("product/basket-bright.jpg")}
-                  alt=""
-                  width={400}
-                  height={300}
-                  decoding="async"
-                  className="media aspect-[4/3] w-full rounded-xl object-cover"
-                />
+                {onProducts && (
+                  <Button type="button" variant="ghost" size="lg" onClick={onProducts}>
+                    Browse all products
+                    <ArrowUpRight />
+                  </Button>
+                )}
+                {onAbout && (
+                  <Button type="button" variant="ghost" size="lg" onClick={onAbout}>
+                    About the pasal
+                    <ArrowUpRight />
+                  </Button>
+                )}
               </div>
             </div>
           </div>
         </section>
 
-        <section className="border-y border-border bg-surface">
-          <div className="mx-auto grid max-w-6xl gap-px bg-border sm:grid-cols-3">
-            {FACTS.map((fact) => (
-              <article key={fact.title} className="bg-surface px-6 py-8 sm:px-8">
-                <h2 className="font-display text-xl font-medium tracking-tight">{fact.title}</h2>
-                <p className="mt-2 text-sm leading-relaxed text-muted">{fact.body}</p>
-              </article>
-            ))}
-          </div>
-        </section>
-
-        <section id="community" className="scroll-mt-24 px-4 py-12 sm:px-6 sm:py-16">
-          <div className="mx-auto grid max-w-6xl gap-8 overflow-hidden rounded-3xl bg-accent p-6 text-accent-foreground shadow-[var(--shadow-border)] sm:p-9 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center lg:p-12">
-            <div className="max-w-2xl">
-              <p className="text-xs font-medium tracking-[0.18em] text-accent-foreground/65 uppercase">
-                Beyond the shelf
-              </p>
-              <h2 className="mt-2 font-display text-3xl font-medium tracking-tight sm:text-4xl">
-                Good snacks bring people together.
-              </h2>
-              <p className="mt-3 max-w-xl leading-relaxed text-accent-foreground/75">
-                Meet other pasal members, share a moment, and keep in touch. Your shop,
-                profile, community feed, and messages all live in one place.
-              </p>
-              <div className="mt-6 flex flex-wrap gap-4 text-sm text-accent-foreground/80">
-                <span className="inline-flex items-center gap-2">
-                  <Users className="size-4" /> Find your people
-                </span>
-                <span className="inline-flex items-center gap-2">
-                  <Heart className="size-4" /> Share and react
-                </span>
-                <span className="inline-flex items-center gap-2">
-                  <MessageCircle className="size-4" /> Stay in touch
-                </span>
-              </div>
-            </div>
-            {(onCommunity || onAccount) && (
-              <Button
-                type="button"
-                variant="outline"
-                size="lg"
-                className="w-full sm:w-fit"
-                onClick={onCommunity ?? onAccount}
-              >
-                {onCommunity ? "Visit the community" : "Join the community"}
-                <ArrowUpRight />
-              </Button>
-            )}
-          </div>
-        </section>
-
-        <section id="packs" className="scroll-mt-24 px-4 py-16 sm:px-6 sm:py-20">
-          <div className="mx-auto max-w-6xl">
-            <div className="max-w-xl">
-              <p className="text-xs font-medium tracking-[0.18em] text-muted uppercase">The shelf</p>
-              <h2 className="mt-2 font-display text-3xl font-medium tracking-tight sm:text-4xl">
-                Three ways to take them home.
-              </h2>
-              <p className="mt-3 text-muted">
-                Same maize, same pipes. Choose a bag for the table, a pack for the gathering,
-                or a sack for the shop.
-              </p>
-            </div>
-
-            <div className="mt-10 grid gap-5 md:grid-cols-3">
-              {PACKS.map((item) => (
-                <article
-                  key={item.id}
-                  className="flex flex-col overflow-hidden rounded-3xl bg-surface p-2 shadow-[var(--shadow-border)] transition-[box-shadow] duration-150 ease-out hover:shadow-[var(--shadow-border-hover)]"
-                >
-                  <img
-                    src={asset(item.image)}
-                    alt={item.imageAlt}
-                    width={800}
-                    height={600}
-                    loading="lazy"
-                    decoding="async"
-                    className="media aspect-[4/3] w-full rounded-2xl object-cover"
-                  />
-                  <div className="flex flex-1 flex-col px-3 pt-4 pb-3">
-                    <Badge>{item.kicker}</Badge>
-                    <h3 className="mt-3 font-display text-2xl font-medium tracking-tight">
-                      {item.name}
-                    </h3>
-                    <p className="mt-2 flex-1 text-sm leading-relaxed text-muted">
-                      {item.description}
-                    </p>
-                    <p className="mt-3 text-xs text-subtle">{item.suited}</p>
-                    <Button
-                      type="button"
-                      className="mt-5 w-full"
-                      onClick={() => {
-                        setPack(item.id);
-                        document.getElementById("order")?.scrollIntoView({ behavior: "smooth" });
-                      }}
-                    >
-                      Order {item.name.toLowerCase()}
-                    </Button>
-                  </div>
-                </article>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        <section id="craft" className="scroll-mt-24 bg-hero-wash px-4 py-16 sm:px-6 sm:py-20">
-          <div className="mx-auto grid max-w-6xl items-center gap-10 lg:grid-cols-2 lg:gap-16">
-            <div className="overflow-hidden rounded-3xl bg-surface p-2 shadow-[var(--shadow-border)]">
-              <img
-                src={asset("product/bulk-bright.jpg")}
-                alt="A sack of Corn Puff Pipes ready for wholesale"
-                width={1200}
-                height={900}
-                loading="lazy"
-                decoding="async"
-                className="media aspect-[4/3] w-full rounded-2xl object-cover"
-              />
-            </div>
-            <div>
-              <p className="text-xs font-medium tracking-[0.18em] text-muted uppercase">The craft</p>
-              <h2 className="mt-2 font-display text-3xl font-medium tracking-tight sm:text-4xl">
-                Maize, heat, and a pipe shape.
-              </h2>
-              <div className="mt-5 space-y-4 text-base leading-relaxed text-muted">
-                <p>
-                  Acharya Dhunro Pasal puffs traditional, non-hybrid maize into airy pipes —
-                  a familiar teatime snack with a clean crunch and a golden finish.
-                </p>
-                <p>
-                  Batches stay small so the crunch stays even. Ask for a bag for the house,
-                  a pack for the gathering, or a sack if you sell snacks of your own.
-                </p>
-              </div>
-              <ul className="mt-8 grid gap-3 sm:grid-cols-2">
-                {[
-                  "Non-hybrid maize",
-                  "Pipe-shaped puff",
-                  "Small handmade batches",
-                  "Call, WhatsApp, or scan",
-                ].map((line) => (
-                  <li
-                    key={line}
-                    className="rounded-xl bg-surface px-4 py-3 text-sm text-fg shadow-[var(--shadow-border)]"
-                  >
-                    {line}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        </section>
-
-        <section id="gallery" className="scroll-mt-24 px-4 py-16 sm:px-6 sm:py-20">
-          <div className="mx-auto max-w-6xl">
-            <div className="flex items-end justify-between gap-4">
-              <div>
-                <p className="text-xs font-medium tracking-[0.18em] text-muted uppercase">Look closer</p>
-                <h2 className="mt-2 font-display text-3xl font-medium tracking-tight sm:text-4xl">
-                  The pipes, as they are.
-                </h2>
-              </div>
-            </div>
-            <div className="mt-8 grid gap-4 sm:grid-cols-3">
-              {GALLERY.map((shot) => (
-                <button
-                  key={shot.src}
-                  type="button"
-                  onClick={() => setLightbox(shot)}
-                  className="group overflow-hidden rounded-3xl bg-surface p-2 text-left shadow-[var(--shadow-border)] transition-[box-shadow] duration-150 ease-out hover:shadow-[var(--shadow-border-hover)]"
-                >
-                  <img
-                    src={asset(shot.src)}
-                    alt={shot.alt}
-                    width={800}
-                    height={600}
-                    loading="lazy"
-                    decoding="async"
-                    className="media aspect-[4/5] w-full rounded-2xl object-cover"
-                  />
-                  <span className="mt-3 flex items-center justify-between px-2 pb-1 text-sm text-muted">
-                    {shot.caption}
-                    <ArrowUpRight className="size-4 opacity-0 transition-[opacity] duration-150 ease-out group-hover:opacity-100" />
-                  </span>
-                </button>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        <section id="order" className="scroll-mt-24 bg-surface px-4 py-16 sm:px-6 sm:py-20">
+        <section id="order" className="scroll-mt-24 bg-surface/80 px-4 py-16 backdrop-blur-sm sm:px-6 sm:py-20">
           <div className="mx-auto grid max-w-6xl gap-10 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
             <div>
               <p className="text-xs font-medium tracking-[0.18em] text-muted uppercase">Order</p>
@@ -539,7 +274,10 @@ export function ShopPage({
               <div className="mt-8 flex flex-col gap-3">
                 <a
                   href={telHref}
-                  className="flex items-center justify-between rounded-2xl bg-bg px-4 py-3 shadow-[var(--shadow-border)]"
+                  className="depth-card-3d flex items-center justify-between rounded-2xl bg-bg px-4 py-3 shadow-[var(--shadow-border)]"
+                  data-tilt-strength="3"
+                  onPointerMove={updateTilt}
+                  onPointerLeave={resetTilt}
                 >
                   <span>
                     <span className="block text-xs text-subtle">Call</span>
@@ -549,7 +287,10 @@ export function ShopPage({
                 </a>
                 <a
                   href={mailHref}
-                  className="flex items-center justify-between rounded-2xl bg-bg px-4 py-3 shadow-[var(--shadow-border)]"
+                  className="depth-card-3d flex items-center justify-between rounded-2xl bg-bg px-4 py-3 shadow-[var(--shadow-border)]"
+                  data-tilt-strength="3"
+                  onPointerMove={updateTilt}
+                  onPointerLeave={resetTilt}
                 >
                   <span>
                     <span className="block text-xs text-subtle">Email</span>
@@ -605,9 +346,12 @@ export function ShopPage({
                       <label
                         key={item.id}
                         className={cn(
-                          "cursor-pointer rounded-2xl bg-surface px-3 py-3 text-sm shadow-[var(--shadow-border)] transition-[box-shadow] duration-150 ease-out",
+                          "depth-card-3d cursor-pointer rounded-2xl bg-surface px-3 py-3 text-sm shadow-[var(--shadow-border)] transition-[box-shadow] duration-180 ease-out",
                           selected && "shadow-[var(--shadow-border-hover)] ring-2 ring-ring",
                         )}
+                        data-tilt-strength="3"
+                        onPointerMove={updateTilt}
+                        onPointerLeave={resetTilt}
                       >
                         <input
                           type="radio"
@@ -670,7 +414,7 @@ export function ShopPage({
                   value={note}
                   onChange={(e) => setNote(sanitizeLine(e.target.value, 200))}
                   placeholder="Delivery area, preferred time, or shop name"
-                  className="w-full resize-y rounded-xl bg-surface px-3.5 py-3 text-sm text-fg shadow-[var(--shadow-border)] outline-none transition-[box-shadow] duration-150 ease-out placeholder:text-subtle focus-visible:ring-2 focus-visible:ring-ring"
+                  className="w-full resize-y rounded-xl bg-surface px-3.5 py-3 text-sm text-fg shadow-[var(--shadow-border)] outline-none transition-[box-shadow] duration-180 ease-out placeholder:text-subtle focus-visible:ring-2 focus-visible:ring-ring"
                 />
               </div>
 
@@ -697,7 +441,7 @@ export function ShopPage({
         </section>
       </main>
 
-      <footer className="border-t border-border bg-accent text-accent-foreground">
+      <footer className="relative z-10 border-t border-border bg-accent text-accent-foreground">
         <div className="mx-auto flex max-w-6xl flex-col gap-8 px-4 py-12 sm:px-6 sm:py-14 md:flex-row md:items-start md:justify-between">
           <div className="flex items-start gap-3">
             <BrandMark className="size-11" />
@@ -779,25 +523,6 @@ export function ShopPage({
         </DialogContent>
       </Dialog>
 
-      <Dialog open={Boolean(lightbox)} onOpenChange={(open) => !open && setLightbox(null)}>
-        <DialogContent className="w-[min(40rem,calc(100vw-2rem))] p-3">
-          {lightbox ? (
-            <>
-              <DialogHeader className="px-3 pt-10">
-                <DialogTitle className="text-lg">{lightbox.caption}</DialogTitle>
-                <DialogDescription>{lightbox.alt}</DialogDescription>
-              </DialogHeader>
-              <img
-                src={asset(lightbox.src)}
-                alt={lightbox.alt}
-                width={1200}
-                height={900}
-                className="media w-full rounded-2xl object-cover"
-              />
-            </>
-          ) : null}
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }
