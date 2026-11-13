@@ -211,10 +211,15 @@ export function InventoryPage({
         p_low_stock_threshold: Number(productDraft.low_stock_threshold),
       });
       if (error) throw error;
-      await refreshInventory();
+      const successMessage = editingProductId ? "Product updated." : "Product added to the catalog.";
       setEditingProductId(null);
       setProductDraft(EMPTY_PRODUCT_DRAFT);
-      setProductNotice(editingProductId ? "Product updated." : "Product added to the catalog.");
+      setProductNotice(successMessage);
+      try {
+        await refreshInventory();
+      } catch (error: unknown) {
+        setProductNotice(`${successMessage} The product list could not refresh: ${messageOf(error)}`);
+      }
     } catch (error: unknown) {
       setProductNotice(`Product could not be saved: ${messageOf(error)}`);
     } finally {
@@ -240,8 +245,13 @@ export function InventoryPage({
         p_active: active,
       });
       if (error) throw error;
-      await refreshInventory();
-      setProductNotice(`${product.name} ${active ? "restored to" : "archived from"} the customer catalog.`);
+      const successMessage = `${product.name} ${active ? "restored to" : "archived from"} the customer catalog.`;
+      setProductNotice(successMessage);
+      try {
+        await refreshInventory();
+      } catch (error: unknown) {
+        setProductNotice(`${successMessage} The product list could not refresh: ${messageOf(error)}`);
+      }
     } catch (error: unknown) {
       setProductNotice(`Product could not be ${action}d: ${messageOf(error)}`);
     } finally {
