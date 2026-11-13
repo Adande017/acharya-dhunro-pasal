@@ -48,11 +48,18 @@ import {
 import { cn } from "@/lib/utils";
 
 const NAV = [
-  { href: "#packs", label: "Packs" },
+  { href: "#packs", label: "Products" },
   { href: "#craft", label: "Craft" },
   { href: "#gallery", label: "Gallery" },
   { href: "#order", label: "Order" },
 ] as const;
+
+const PRODUCT_FILTERS: Array<{ id: "all" | PackId; label: string }> = [
+  { id: "all", label: "All products" },
+  { id: "snack", label: "Everyday" },
+  { id: "party", label: "Gatherings" },
+  { id: "bulk", label: "Wholesale" },
+];
 
 const FACTS = [
   {
@@ -92,7 +99,7 @@ function updateTilt(event: ReactPointerEvent<HTMLElement>) {
   const bounds = event.currentTarget.getBoundingClientRect();
   const x = (event.clientX - bounds.left) / bounds.width;
   const y = (event.clientY - bounds.top) / bounds.height;
-  const tilt = 8;
+  const tilt = Number(event.currentTarget.dataset.tiltStrength) || 8;
 
   event.currentTarget.style.setProperty("--tilt-x", `${(0.5 - y) * tilt}deg`);
   event.currentTarget.style.setProperty("--tilt-y", `${(x - 0.5) * tilt}deg`);
@@ -149,6 +156,8 @@ export function ShopPage({
   const [menuOpen, setMenuOpen] = useState(false);
   const [lightbox, setLightbox] = useState<(typeof GALLERY)[number] | null>(null);
   const [pack, setPack] = useState<PackId>("snack");
+  const [productFilter, setProductFilter] = useState<"all" | PackId>("all");
+  const [productSearch, setProductSearch] = useState("");
   const [qty, setQty] = useState(1);
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
@@ -162,6 +171,16 @@ export function ShopPage({
     qty,
     note,
   };
+  const visiblePacks = PACKS.filter((item) => {
+    const matchesFilter = productFilter === "all" || item.id === productFilter;
+    const search = productSearch.trim().toLocaleLowerCase();
+    const matchesSearch =
+      !search ||
+      `${item.name} ${item.kicker} ${item.description} ${item.suited}`
+        .toLocaleLowerCase()
+        .includes(search);
+    return matchesFilter && matchesSearch;
+  });
 
   return (
     <div className="min-h-dvh bg-bg text-fg">
@@ -379,7 +398,13 @@ export function ShopPage({
         <section className="border-y border-border bg-surface">
           <div className="mx-auto grid max-w-6xl gap-px bg-border sm:grid-cols-3">
             {FACTS.map((fact) => (
-              <article key={fact.title} className="bg-surface px-6 py-8 sm:px-8">
+              <article
+                key={fact.title}
+                className="depth-card-3d bg-surface px-6 py-8 sm:px-8"
+                data-tilt-strength="3"
+                onPointerMove={updateTilt}
+                onPointerLeave={resetTilt}
+              >
                 <h2 className="font-display text-xl font-medium tracking-tight">{fact.title}</h2>
                 <p className="mt-2 text-sm leading-relaxed text-muted">{fact.body}</p>
               </article>
@@ -388,7 +413,12 @@ export function ShopPage({
         </section>
 
         <section id="community" className="scroll-mt-24 px-4 py-12 sm:px-6 sm:py-16">
-          <div className="mx-auto grid max-w-6xl gap-8 overflow-hidden rounded-3xl bg-accent p-6 text-accent-foreground shadow-[var(--shadow-border)] sm:p-9 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center lg:p-12">
+          <div
+            className="depth-card-3d mx-auto grid max-w-6xl gap-8 overflow-hidden rounded-3xl bg-accent p-6 text-accent-foreground shadow-[var(--shadow-border)] sm:p-9 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center lg:p-12"
+            data-tilt-strength="2"
+            onPointerMove={updateTilt}
+            onPointerLeave={resetTilt}
+          >
             <div className="max-w-2xl">
               <p className="text-xs font-medium tracking-[0.18em] text-accent-foreground/65 uppercase">
                 Beyond the shelf
@@ -429,63 +459,141 @@ export function ShopPage({
 
         <section id="packs" className="scroll-mt-24 px-4 py-16 sm:px-6 sm:py-20">
           <div className="mx-auto max-w-6xl">
-            <div className="max-w-xl">
-              <p className="text-xs font-medium tracking-[0.18em] text-muted uppercase">The shelf</p>
-              <h2 className="mt-2 font-display text-3xl font-medium tracking-tight sm:text-4xl">
-                Three ways to take them home.
-              </h2>
-              <p className="mt-3 text-muted">
-                Same maize, same pipes. Choose a bag for the table, a pack for the gathering,
-                or a sack for the shop.
-              </p>
+            <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+              <div className="max-w-xl">
+                <p className="text-xs font-medium tracking-[0.18em] text-muted uppercase">Product library</p>
+                <h2 className="mt-2 font-display text-3xl font-medium tracking-tight sm:text-4xl">
+                  Find your perfect pack.
+                </h2>
+                <p className="mt-3 text-muted">
+                  Browse every product photo, explore the pack that suits you, and send an order
+                  straight to the pasal.
+                </p>
+              </div>
+              <div className="w-full lg:max-w-xs">
+                <Label htmlFor="product-search" className="sr-only">Search products</Label>
+                <Input
+                  id="product-search"
+                  type="search"
+                  value={productSearch}
+                  onChange={(event) => setProductSearch(event.target.value)}
+                  placeholder="Search snack, party, wholesale…"
+                  autoComplete="off"
+                />
+              </div>
             </div>
 
-            <div className="mt-10 grid gap-5 md:grid-cols-3">
-              {PACKS.map((item) => (
-                <article
-                  key={item.id}
-                  className="pack-card-3d flex flex-col overflow-hidden rounded-3xl bg-surface p-2 shadow-[var(--shadow-border)] transition-[box-shadow] duration-150 ease-out hover:shadow-[var(--shadow-border-hover)]"
-                  onPointerMove={updateTilt}
-                  onPointerLeave={resetTilt}
+            <div className="mt-8 flex flex-wrap gap-2" role="group" aria-label="Filter products">
+              {PRODUCT_FILTERS.map((filter) => (
+                <button
+                  key={filter.id}
+                  type="button"
+                  aria-pressed={productFilter === filter.id}
+                  onClick={() => setProductFilter(filter.id)}
+                  className={`rounded-full border px-4 py-2 text-sm font-medium transition-[background-color,color,box-shadow,transform] duration-150 ${
+                    productFilter === filter.id
+                      ? "border-accent bg-accent text-accent-foreground shadow-[var(--shadow-border)]"
+                      : "border-border bg-surface text-muted hover:-translate-y-0.5 hover:bg-surface-muted hover:text-fg"
+                  }`}
                 >
-                  <img
-                    src={asset(item.image)}
-                    alt={item.imageAlt}
-                    width={800}
-                    height={600}
-                    loading="lazy"
-                    decoding="async"
-                    className="pack-card-visual media aspect-[4/3] w-full rounded-2xl object-cover"
-                  />
-                  <div className="pack-card-content flex flex-1 flex-col px-3 pt-4 pb-3">
-                    <Badge>{item.kicker}</Badge>
-                    <h3 className="mt-3 font-display text-2xl font-medium tracking-tight">
-                      {item.name}
-                    </h3>
-                    <p className="mt-2 flex-1 text-sm leading-relaxed text-muted">
-                      {item.description}
-                    </p>
-                    <p className="mt-3 text-xs text-subtle">{item.suited}</p>
-                    <Button
-                      type="button"
-                      className="mt-5 w-full"
-                      onClick={() => {
-                        setPack(item.id);
-                        document.getElementById("order")?.scrollIntoView({ behavior: "smooth" });
-                      }}
-                    >
-                      Order {item.name.toLowerCase()}
-                    </Button>
-                  </div>
-                </article>
+                  {filter.label}
+                </button>
               ))}
             </div>
+
+            <div className="mt-5 flex items-center justify-between gap-4">
+              <p className="text-sm text-muted" aria-live="polite">
+                {visiblePacks.length} {visiblePacks.length === 1 ? "product" : "products"}
+              </p>
+              {(productFilter !== "all" || productSearch) && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setProductFilter("all");
+                    setProductSearch("");
+                  }}
+                  className="text-sm font-medium text-primary underline-offset-4 hover:underline"
+                >
+                  Clear filters
+                </button>
+              )}
+            </div>
+
+            {visiblePacks.length > 0 ? (
+              <div className="mt-4 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+                {visiblePacks.map((item) => (
+                  <article
+                    key={item.id}
+                    className="pack-card-3d flex flex-col overflow-hidden rounded-3xl bg-surface p-2 shadow-[var(--shadow-border)] transition-[box-shadow] duration-150 ease-out hover:shadow-[var(--shadow-border-hover)]"
+                    data-tilt-strength="5"
+                    onPointerMove={updateTilt}
+                    onPointerLeave={resetTilt}
+                  >
+                    <img
+                      src={asset(item.image)}
+                      alt={item.imageAlt}
+                      width={800}
+                      height={600}
+                      loading="lazy"
+                      decoding="async"
+                      className="pack-card-visual media aspect-[4/3] w-full rounded-2xl object-cover"
+                    />
+                    <div className="pack-card-content flex flex-1 flex-col px-3 pt-4 pb-3">
+                      <Badge>{item.kicker}</Badge>
+                      <h3 className="mt-3 font-display text-2xl font-medium tracking-tight">
+                        {item.name}
+                      </h3>
+                      <p className="mt-2 flex-1 text-sm leading-relaxed text-muted">
+                        {item.description}
+                      </p>
+                      <p className="mt-3 text-xs text-subtle">{item.suited}</p>
+                      <Button
+                        type="button"
+                        className="mt-5 w-full"
+                        onClick={() => {
+                          setPack(item.id);
+                          document.getElementById("order")?.scrollIntoView({ behavior: "smooth" });
+                        }}
+                      >
+                        Order {item.name.toLowerCase()}
+                      </Button>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            ) : (
+              <div
+                className="depth-card-3d mt-4 rounded-3xl bg-surface p-8 text-center shadow-[var(--shadow-border)]"
+                data-tilt-strength="3"
+                onPointerMove={updateTilt}
+                onPointerLeave={resetTilt}
+              >
+                <p className="font-display text-xl font-medium">No products match that search.</p>
+                <p className="mt-2 text-sm text-muted">Try another name or clear the filters.</p>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="mt-5"
+                  onClick={() => {
+                    setProductFilter("all");
+                    setProductSearch("");
+                  }}
+                >
+                  Show all products
+                </Button>
+              </div>
+            )}
           </div>
         </section>
 
         <section id="craft" className="scroll-mt-24 bg-hero-wash px-4 py-16 sm:px-6 sm:py-20">
           <div className="mx-auto grid max-w-6xl items-center gap-10 lg:grid-cols-2 lg:gap-16">
-            <div className="overflow-hidden rounded-3xl bg-surface p-2 shadow-[var(--shadow-border)]">
+            <div
+              className="depth-card-3d overflow-hidden rounded-3xl bg-surface p-2 shadow-[var(--shadow-border)]"
+              data-tilt-strength="4"
+              onPointerMove={updateTilt}
+              onPointerLeave={resetTilt}
+            >
               <img
                 src={asset("product/bulk-bright.jpg")}
                 alt="A sack of Corn Puff Pipes ready for wholesale"
@@ -493,7 +601,7 @@ export function ShopPage({
                 height={900}
                 loading="lazy"
                 decoding="async"
-                className="media aspect-[4/3] w-full rounded-2xl object-cover"
+                className="depth-card-visual media aspect-[4/3] w-full rounded-2xl object-cover"
               />
             </div>
             <div>
@@ -546,7 +654,10 @@ export function ShopPage({
                   key={shot.src}
                   type="button"
                   onClick={() => setLightbox(shot)}
-                  className="group overflow-hidden rounded-3xl bg-surface p-2 text-left shadow-[var(--shadow-border)] transition-[box-shadow] duration-150 ease-out hover:shadow-[var(--shadow-border-hover)]"
+                  className="depth-card-3d group overflow-hidden rounded-3xl bg-surface p-2 text-left shadow-[var(--shadow-border)] transition-[box-shadow] duration-150 ease-out hover:shadow-[var(--shadow-border-hover)]"
+                  data-tilt-strength="5"
+                  onPointerMove={updateTilt}
+                  onPointerLeave={resetTilt}
                 >
                   <img
                     src={asset(shot.src)}
@@ -555,7 +666,7 @@ export function ShopPage({
                     height={600}
                     loading="lazy"
                     decoding="async"
-                    className="media aspect-[4/5] w-full rounded-2xl object-cover"
+                    className="depth-card-visual media aspect-[4/5] w-full rounded-2xl object-cover"
                   />
                   <span className="mt-3 flex items-center justify-between px-2 pb-1 text-sm text-muted">
                     {shot.caption}
@@ -581,7 +692,10 @@ export function ShopPage({
               <div className="mt-8 flex flex-col gap-3">
                 <a
                   href={telHref}
-                  className="flex items-center justify-between rounded-2xl bg-bg px-4 py-3 shadow-[var(--shadow-border)]"
+                  className="depth-card-3d flex items-center justify-between rounded-2xl bg-bg px-4 py-3 shadow-[var(--shadow-border)]"
+                  data-tilt-strength="3"
+                  onPointerMove={updateTilt}
+                  onPointerLeave={resetTilt}
                 >
                   <span>
                     <span className="block text-xs text-subtle">Call</span>
@@ -591,7 +705,10 @@ export function ShopPage({
                 </a>
                 <a
                   href={mailHref}
-                  className="flex items-center justify-between rounded-2xl bg-bg px-4 py-3 shadow-[var(--shadow-border)]"
+                  className="depth-card-3d flex items-center justify-between rounded-2xl bg-bg px-4 py-3 shadow-[var(--shadow-border)]"
+                  data-tilt-strength="3"
+                  onPointerMove={updateTilt}
+                  onPointerLeave={resetTilt}
                 >
                   <span>
                     <span className="block text-xs text-subtle">Email</span>
@@ -647,9 +764,12 @@ export function ShopPage({
                       <label
                         key={item.id}
                         className={cn(
-                          "cursor-pointer rounded-2xl bg-surface px-3 py-3 text-sm shadow-[var(--shadow-border)] transition-[box-shadow] duration-150 ease-out",
+                          "depth-card-3d cursor-pointer rounded-2xl bg-surface px-3 py-3 text-sm shadow-[var(--shadow-border)] transition-[box-shadow] duration-150 ease-out",
                           selected && "shadow-[var(--shadow-border-hover)] ring-2 ring-ring",
                         )}
+                        data-tilt-strength="3"
+                        onPointerMove={updateTilt}
+                        onPointerLeave={resetTilt}
                       >
                         <input
                           type="radio"
