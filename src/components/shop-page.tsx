@@ -21,6 +21,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
+import { AvailabilityBadge } from "@/components/availability-badge";
 import {
   asset,
   buildMailtoUrl,
@@ -35,6 +36,7 @@ import {
   type PackId,
 } from "@/lib/shop";
 import { resetTilt, updateTilt } from "@/lib/tilt";
+import { useInventoryAvailability } from "@/lib/use-inventory-availability";
 import { cn } from "@/lib/utils";
 
 function BrandMark({ className }: { className?: string }) {
@@ -64,6 +66,7 @@ export function ShopPage({
   onAbout,
   onCommunity,
   onSignOut,
+  onInventory,
   accountNotice = "",
   initialPack = "snack",
 }: {
@@ -72,6 +75,7 @@ export function ShopPage({
   onAbout?: () => void;
   onCommunity?: () => void;
   onSignOut?: () => void;
+  onInventory?: () => void;
   accountNotice?: string;
   initialPack?: PackId;
 }) {
@@ -82,6 +86,7 @@ export function ShopPage({
   const [phone, setPhone] = useState("");
   const [note, setNote] = useState("");
   const formId = useId();
+  const { availability, loading, error } = useInventoryAvailability();
 
   const order = {
     name,
@@ -121,6 +126,12 @@ export function ShopPage({
           </a>
 
           <div className="flex items-center gap-2">
+            {onInventory && (
+              <Button type="button" variant="outline" size="sm" onClick={onInventory}>
+                <Package />
+                <span className="hidden sm:inline">Inventory</span>
+              </Button>
+            )}
             {onCommunity && (
               <Button type="button" variant="ghost" size="sm" onClick={onCommunity}>
                 <Users />
@@ -320,10 +331,25 @@ export function ShopPage({
                         />
                         <span className="block font-medium">{item.name}</span>
                         <span className="text-xs text-muted">{item.kicker}</span>
+                        <AvailabilityBadge
+                          status={availability[item.id]}
+                          loading={loading}
+                          error={error}
+                        />
                       </label>
                     );
                   })}
                 </div>
+                <p className="mt-2 text-xs leading-relaxed text-muted">
+                  {availability[pack] === "unavailable"
+                    ? "This pack is currently unavailable, but you can still send an inquiry and we’ll confirm by phone."
+                    : "Availability can change; we’ll confirm your request before payment."}
+                </p>
+                {error && (
+                  <p className="mt-2 text-xs text-muted" role="status">
+                    {error}
+                  </p>
+                )}
               </fieldset>
 
               <div className="mt-5 grid gap-2">
