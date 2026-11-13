@@ -156,6 +156,20 @@ export type Database = {
         },
         never
       >;
+      customer_orders: Table<
+        {
+          id: string;
+          customer_name: string;
+          customer_phone: string;
+          note: string;
+          product_id: string;
+          quantity: number;
+          created_by: string | null;
+          created_at: string;
+        },
+        never,
+        never
+      >;
     };
     Views: {
       inventory_availability: {
@@ -194,6 +208,20 @@ export type Database = {
       is_inventory_owner: {
         Args: Record<string, never>;
         Returns: boolean;
+      };
+      place_customer_order: {
+        Args: {
+          p_customer_name: string;
+          p_customer_phone: string;
+          p_note: string;
+          p_items: Json;
+        };
+        Returns: {
+          order_id: string;
+          product_id: string;
+          quantity: number;
+          created_at: string;
+        };
       };
     };
     Enums: Record<string, never>;

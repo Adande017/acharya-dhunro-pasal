@@ -23,6 +23,7 @@ import type { Database, Json } from "@/lib/database.types";
 
 type InventoryItem = Database["public"]["Tables"]["inventory_items"]["Row"];
 type InventoryTransaction = Database["public"]["Tables"]["inventory_transactions"]["Row"];
+type CustomerOrder = Database["public"]["Tables"]["customer_orders"]["Row"];
 type Cart = Partial<Record<PackId, number>>;
 type InventoryMode = "receive" | "sale";
 
@@ -81,6 +82,7 @@ export function InventoryPage({
 }) {
   const [items, setItems] = useState<InventoryItem[]>([]);
   const [history, setHistory] = useState<InventoryTransaction[]>([]);
+  const [customerOrders, setCustomerOrders] = useState<CustomerOrder[]>([]);
   const [staffEmails, setStaffEmails] = useState<string[]>([]);
   const [staffEmailInput, setStaffEmailInput] = useState("");
   const [staffNotice, setStaffNotice] = useState("");
@@ -102,18 +104,25 @@ export function InventoryPage({
 
   async function refreshInventory(): Promise<void> {
     if (!supabase) throw new Error("Inventory service is unavailable.");
-    const [itemsResult, historyResult] = await Promise.all([
+    const [itemsResult, historyResult, ordersResult] = await Promise.all([
       supabase.from("inventory_items").select("*").order("product_id"),
       supabase
         .from("inventory_transactions")
         .select("*")
         .order("created_at", { ascending: false })
         .limit(25),
+      supabase
+        .from("customer_orders")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(25),
     ]);
     if (itemsResult.error) throw itemsResult.error;
     if (historyResult.error) throw historyResult.error;
+    if (ordersResult.error) throw ordersResult.error;
     setItems(itemsResult.data);
     setHistory(historyResult.data);
+    setCustomerOrders(ordersResult.data);
   }
 
   async function refreshStaffEmails(): Promise<void> {
@@ -669,6 +678,34 @@ export function InventoryPage({
                 )}
               </tbody>
             </table>
+          </div>
+        </section>
+
+        <section className="rounded-3xl border border-border/70 bg-surface p-5 shadow-[var(--shadow-border)] sm:p-6" data-print-hide>
+          <div>
+            <h2 className="font-display text-xl font-semibold">Customer orders</h2>
+            <p className="mt-1 text-sm text-muted">Confirmed online orders with stock reserved at checkout.</p>
+          </div>
+          <div className="mt-4 space-y-3">
+            {customerOrders.map((order) => (
+              <article key={order.id} className="rounded-2xl bg-bg p-4">
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                  <div className="min-w-0">
+                    <p className="font-semibold">{order.customer_name} · {order.customer_phone}</p>
+                    <p className="mt-1 text-sm">
+                      {PACKS.find((pack) => pack.id === order.product_id)?.name ?? order.product_id}
+                      {" · "}{order.quantity} {order.quantity === 1 ? "unit" : "units"} · Stock reserved
+                    </p>
+                    {order.note && <p className="mt-1 break-words text-sm text-muted">{order.note}</p>}
+                    <p className="mt-1 break-all font-mono text-xs text-muted">Ref: {order.id}</p>
+                  </div>
+                  <time className="shrink-0 text-xs text-muted">{formatTime(order.created_at)}</time>
+                </div>
+              </article>
+            ))}
+            {!customerOrders.length && !loading && (
+              <p className="rounded-2xl bg-bg p-4 text-sm text-muted">No customer orders yet.</p>
+            )}
           </div>
         </section>
 

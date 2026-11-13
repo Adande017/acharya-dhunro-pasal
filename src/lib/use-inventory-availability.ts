@@ -46,11 +46,17 @@ export function useInventoryAvailability() {
 
   useEffect(() => {
     void refresh(true);
+    const poll = window.setInterval(() => {
+      if (document.visibilityState === "visible") void refresh();
+    }, 15_000);
     const handleFocus = () => {
       if (document.visibilityState === "visible") void refresh();
     };
     window.addEventListener("focus", handleFocus);
-    return () => window.removeEventListener("focus", handleFocus);
+    return () => {
+      window.clearInterval(poll);
+      window.removeEventListener("focus", handleFocus);
+    };
   }, [refresh]);
 
   return { availability, loading, error, refresh };

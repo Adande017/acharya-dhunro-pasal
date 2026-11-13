@@ -19,7 +19,7 @@ Live: https://adande017.github.io/acharya-dhunro-pasal/
 
 ## Account sign-in setup
 
-Email/password accounts use Supabase Auth. The app stores the name as Supabase user metadata; passwords are sent directly to Supabase Auth and are never stored by this site. Auth does not use a service-role key or an auth-specific user table. Orders still go through WhatsApp/email; the site does not yet save order history to an account.
+Email/password accounts use Supabase Auth. The app stores the name as Supabase user metadata; passwords are sent directly to Supabase Auth and are never stored by this site. Auth does not use a service-role key or an auth-specific user table. Online guest orders reserve inventory and are visible to staff; they are not saved to a customer account. WhatsApp and email inquiries are also available.
 
 1. In Supabase, enable the Email provider and choose whether email confirmation is required.
 2. In **Authentication → URL Configuration**, add `http://localhost:5173/` and `https://adande017.github.io/acharya-dhunro-pasal/` to the allowed redirect URLs.
@@ -27,6 +27,18 @@ Email/password accounts use Supabase Auth. The app stores the name as Supabase u
 4. For GitHub Pages, add those same two values as repository **Actions variables** named `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` under **Settings → Secrets and variables → Actions → Variables**, then rerun the Pages workflow.
 
 Never put a service-role key, secret key, database password, or email credentials in the frontend or GitHub Actions variables. Without the two public project values, account actions show an explicit setup message while guest browsing remains available.
+
+## Inventory scanning and online orders
+
+Inventory staff can scan product labels with a camera or a Bluetooth barcode scanner that types into the focused barcode field. Customers can review an order, explicitly acknowledge that stock will be reserved, and place it online. The backend checks stock and records the order and stock deduction atomically; the customer receives an order reference, and staff can see customer contact details in the inventory page. Payment is not collected online.
+
+Apply these migrations in order from **Supabase → SQL Editor → New query** before using inventory scanning or online orders:
+
+1. [`supabase/migrations/20261113184731_barcode_inventory.sql`](supabase/migrations/20261113184731_barcode_inventory.sql)
+2. [`supabase/migrations/20261113185756_staff_inventory_access.sql`](supabase/migrations/20261113185756_staff_inventory_access.sql)
+3. [`supabase/migrations/20261114000000_customer_orders.sql`](supabase/migrations/20261114000000_customer_orders.sql)
+
+Camera access requires HTTPS (or localhost). Customers see availability status rather than exact stock counts.
 
 ## Member community
 
