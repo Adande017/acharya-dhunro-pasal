@@ -5,8 +5,11 @@ import {
   Archive,
   Camera,
   Check,
+  ClipboardList,
+  History,
   Minus,
   Package,
+  PackagePlus,
   Pencil,
   Plus,
   Printer,
@@ -463,6 +466,8 @@ export function InventoryPage({
   }
 
   const cartCount = Object.values(cart).reduce<number>((total, quantity) => total + (quantity ?? 0), 0);
+  const activeProductCount = products.filter((product) => product.active).length;
+  const lowStockCount = items.filter((item) => item.quantity_on_hand <= item.low_stock_threshold).length;
 
   return (
     <main className="inventory-screen page-transition min-h-dvh bg-bg text-fg">
@@ -503,13 +508,56 @@ export function InventoryPage({
           </Button>
         </div>
 
+        <nav className="rounded-3xl border border-border/70 bg-surface p-5 shadow-[var(--shadow-border)] sm:p-6" aria-label="Staff workspace" data-print-hide>
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <p className="text-xs font-medium tracking-[0.16em] text-muted uppercase">Staff workspace</p>
+              <h2 className="mt-1 font-display text-2xl font-semibold">Where would you like to go?</h2>
+              <p className="mt-1 text-sm text-muted">Open a task directly. Stock counts and product tools are staff-only.</p>
+            </div>
+            <p className="text-xs text-muted">
+              {activeProductCount} active products · {lowStockCount} low/out of stock · {customerOrders.length} recent orders
+            </p>
+          </div>
+          <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <a href="#staff-stock" className="group rounded-2xl border border-border bg-bg p-4 transition-colors hover:border-primary/40 hover:bg-surface-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">
+              <span className="grid size-10 place-items-center rounded-xl bg-accent text-accent-foreground">
+                <ScanLine className="size-5" />
+              </span>
+              <span className="mt-3 block font-semibold">Scan & manage stock</span>
+              <span className="mt-1 block text-xs leading-relaxed text-muted">Receive goods or record a sale with camera or barcode scanner.</span>
+            </a>
+            <a href="#staff-products" className="group rounded-2xl border border-border bg-bg p-4 transition-colors hover:border-primary/40 hover:bg-surface-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">
+              <span className="grid size-10 place-items-center rounded-xl bg-accent text-accent-foreground">
+                <PackagePlus className="size-5" />
+              </span>
+              <span className="mt-3 block font-semibold">Products</span>
+              <span className="mt-1 block text-xs leading-relaxed text-muted">Add or edit products, update barcode and stock alerts, archive or restore.</span>
+            </a>
+            <a href="#staff-orders" className="group rounded-2xl border border-border bg-bg p-4 transition-colors hover:border-primary/40 hover:bg-surface-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">
+              <span className="grid size-10 place-items-center rounded-xl bg-accent text-accent-foreground">
+                <ClipboardList className="size-5" />
+              </span>
+              <span className="mt-3 block font-semibold">Customer orders</span>
+              <span className="mt-1 block text-xs leading-relaxed text-muted">Review customer details and stock reservations from online orders.</span>
+            </a>
+            <a href="#staff-activity" className="group rounded-2xl border border-border bg-bg p-4 transition-colors hover:border-primary/40 hover:bg-surface-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">
+              <span className="grid size-10 place-items-center rounded-xl bg-accent text-accent-foreground">
+                <History className="size-5" />
+              </span>
+              <span className="mt-3 block font-semibold">Stock activity</span>
+              <span className="mt-1 block text-xs leading-relaxed text-muted">See recent receiving and sales transactions.</span>
+            </a>
+          </div>
+        </nav>
+
         {notice && (
           <p className="rounded-2xl border border-border bg-surface px-4 py-3 text-sm text-fg" role="status" aria-live="polite">
             {notice}
           </p>
         )}
 
-        <section className="grid gap-6 lg:grid-cols-[minmax(0,1.1fr)_minmax(320px,0.9fr)]" data-print-hide>
+        <section id="staff-stock" className="scroll-mt-24 grid gap-6 lg:grid-cols-[minmax(0,1.1fr)_minmax(320px,0.9fr)]" data-print-hide>
           <div className="space-y-5">
             <div className="rounded-3xl border border-border/70 bg-surface p-5 shadow-[var(--shadow-border)] sm:p-6">
               <div
@@ -726,7 +774,7 @@ export function InventoryPage({
           </aside>
         </section>
 
-        <section className="rounded-3xl border border-border/70 bg-surface p-5 shadow-[var(--shadow-border)] sm:p-6" data-print-hide>
+        <section id="staff-products" className="scroll-mt-24 rounded-3xl border border-border/70 bg-surface p-5 shadow-[var(--shadow-border)] sm:p-6" data-print-hide>
           <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <p className="text-xs font-medium tracking-[0.16em] text-muted uppercase">Staff tools</p>
@@ -891,7 +939,7 @@ export function InventoryPage({
         </section>
 
         {isOwner && (
-          <section className="rounded-3xl border border-border/70 bg-surface p-5 shadow-[var(--shadow-border)] sm:p-6" data-print-hide>
+          <section id="staff-access" className="scroll-mt-24 rounded-3xl border border-border/70 bg-surface p-5 shadow-[var(--shadow-border)] sm:p-6" data-print-hide>
             <div>
               <h2 className="font-display text-xl font-semibold">Staff access</h2>
               <p className="mt-1 text-sm leading-relaxed text-muted">
@@ -946,7 +994,7 @@ export function InventoryPage({
           </section>
         )}
 
-        <section className="rounded-3xl border border-border/70 bg-surface p-5 shadow-[var(--shadow-border)] sm:p-6" data-print-hide>
+        <section id="staff-activity" className="scroll-mt-24 rounded-3xl border border-border/70 bg-surface p-5 shadow-[var(--shadow-border)] sm:p-6" data-print-hide>
           <h2 className="font-display text-xl font-semibold">Recent stock activity</h2>
           <div className="mt-4 overflow-x-auto">
             <table className="w-full min-w-[36rem] border-collapse text-left text-sm">
@@ -981,7 +1029,7 @@ export function InventoryPage({
           </div>
         </section>
 
-        <section className="rounded-3xl border border-border/70 bg-surface p-5 shadow-[var(--shadow-border)] sm:p-6" data-print-hide>
+        <section id="staff-orders" className="scroll-mt-24 rounded-3xl border border-border/70 bg-surface p-5 shadow-[var(--shadow-border)] sm:p-6" data-print-hide>
           <div>
             <h2 className="font-display text-xl font-semibold">Customer orders</h2>
             <p className="mt-1 text-sm text-muted">Confirmed online orders with stock reserved at checkout.</p>
