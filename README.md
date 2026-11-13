@@ -41,6 +41,16 @@ Apply these migrations in order from **Supabase → SQL Editor → New query** b
 
 Camera access requires HTTPS (or localhost). Staff can add/edit catalog products, update barcodes and low-stock thresholds, and archive/restore products; archiving hides a product from customers while preserving its stock and history. Customers see availability status rather than exact stock counts.
 
+### Accessing staff shop edits
+
+1. Open the live shop and select **Staff sign-in** in the shop header.
+2. Sign in with the email/password for your Supabase account. The shop owner account (`roms7291@gmail.com`) has staff access automatically. Other accounts must first be approved by the owner.
+3. To approve a staff member, the owner signs in, opens **Staff access** on the staff page, enters the staff member's account email, and selects **Approve staff**. The staff member can then sign in with that same email.
+4. On the **Stock desk**, select **Manage products** in the Staff workspace to reach the product editor. Use **Add product** for a new listing or **Edit** beside a product to update its name, category/short label, customer description, image, image description, “Best for” text, barcode, or low-stock alert threshold. Select **Save product changes** to apply edits.
+5. To hide a listing from the customer shop, choose **Delete from shop**. This archives it rather than permanently deleting it, so stock and transaction history are retained; choose **Restore** to list it again.
+
+The product editor does not change product prices. Staff access and inventory editing require the Supabase setup above, including the inventory and product-catalog migrations.
+
 ## Member community
 
 After sign-in, members land on the community feed, which is connected to the shop in the same site. Members can manage a display name and profile photo, publish posts, comment, like posts, discover suggested members, send and accept friend requests, and message other members. Community profiles, posts, comments, friendships, and messages are readable only by signed-in members. Profile photos are stored in a private Supabase Storage bucket and served with short-lived signed URLs. Guests can still browse and order from the shop.

@@ -294,6 +294,7 @@ export default function App() {
         onAbout={() => navigateTo("about")}
         onCommunity={() => navigateTo("community")}
         onSignOut={signOut}
+        onStaffLogin={() => navigateTo("inventory")}
         onInventory={
           inventoryAccess ? () => navigateTo("inventory") : undefined
         }
@@ -364,6 +365,7 @@ export default function App() {
             }
       }
       onSignOut={user ? signOut : undefined}
+      onStaffLogin={!user ? () => navigateTo("inventory") : undefined}
       accountNotice={notice}
     />
   );
