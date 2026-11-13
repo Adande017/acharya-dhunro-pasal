@@ -7,6 +7,7 @@ import {
   LogOut,
   MessageCircle,
   MessagesSquare,
+  Search,
   Send,
   Store,
   Users,
@@ -122,16 +123,21 @@ function initials(name: string): string {
 }
 
 function Avatar({ profile, size = "md" }: { profile?: CommunityProfile; size?: "sm" | "md" | "lg" }) {
+  const [failedUrl, setFailedUrl] = useState<string | null>(null);
   const sizeClass = size === "lg" ? "size-20 text-xl" : size === "sm" ? "size-9 text-xs" : "size-11 text-sm";
-  return profile?.avatarUrl ? (
+  const avatarUrl = profile?.avatarUrl;
+  return avatarUrl && failedUrl !== avatarUrl ? (
     <img
-      src={profile.avatarUrl}
+      src={avatarUrl}
       alt={`${profile.display_name}'s profile`}
-      className={`${sizeClass} shrink-0 rounded-full bg-surface-muted object-cover`}
+      loading="lazy"
+      decoding="async"
+      onError={() => setFailedUrl(avatarUrl)}
+      className={`${sizeClass} shrink-0 rounded-full bg-surface-muted object-cover ring-2 ring-bg shadow-[var(--shadow-border)]`}
     />
   ) : (
     <span
-      className={`${sizeClass} grid shrink-0 place-items-center rounded-full bg-accent/10 font-semibold text-accent`}
+      className={`${sizeClass} grid shrink-0 place-items-center rounded-full bg-gradient-to-br from-primary/20 via-accent/10 to-surface-muted font-semibold text-accent ring-2 ring-bg shadow-[var(--shadow-border)]`}
       aria-label={profile?.display_name ?? "Member"}
     >
       {profile ? initials(profile.display_name) : "?"}
@@ -175,6 +181,7 @@ export function CommunityPage({
   const [postText, setPostText] = useState("");
   const [commentText, setCommentText] = useState<Record<string, string>>({});
   const [messageText, setMessageText] = useState("");
+  const [conversationSearch, setConversationSearch] = useState("");
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [previewAvatar, setPreviewAvatar] = useState<string | null>(null);
   const [notice, setNotice] = useState("");
@@ -621,6 +628,12 @@ export function CommunityPage({
       );
     })
     .sort((a, b) => b.created_at.localeCompare(a.created_at));
+  const visibleConversations = conversations.filter((conversation) =>
+    `${conversation.other.display_name} ${conversation.latestMessage}`
+      .toLowerCase()
+      .includes(conversationSearch.trim().toLowerCase()),
+  );
+  const activeChat = conversations.find((item) => item.id === activeConversation);
 
   return (
     <main className="page-transition min-h-dvh bg-bg text-fg">
@@ -947,45 +960,106 @@ export function CommunityPage({
 
               {tab === "messages" && (
                 <div>
-                  <p className="text-sm font-medium text-primary">Member-to-member chat</p>
+                  <p className="text-sm font-medium text-primary">A quieter place to catch up</p>
                   <h1 className="mt-1 font-display text-3xl font-semibold">Messages</h1>
-                  <div className="mt-5 grid min-h-[520px] overflow-hidden rounded-3xl bg-surface shadow-[var(--shadow-border)] md:grid-cols-[260px_minmax(0,1fr)]">
-                    <aside className="border-b border-border md:border-r md:border-b-0">
-                      <div className="flex items-center justify-between border-b border-border px-4 py-3">
-                        <p className="text-sm font-semibold">Conversations</p>
-                        <Button variant="ghost" size="icon" aria-label="Find members" onClick={() => setTab("members")}>
-                          <Users />
-                        </Button>
-                      </div>
-                      {conversations.map((conversation) => (
-                        <button
-                          key={conversation.id}
-                          type="button"
-                          onClick={() => setActiveConversation(conversation.id)}
-                          className={`flex w-full items-center gap-3 border-b border-border px-4 py-3 text-left hover:bg-surface-muted ${
-                            activeConversation === conversation.id ? "bg-surface-muted" : ""
-                          }`}
-                        >
-                          <Avatar profile={conversation.other} size="sm" />
-                          <span className="min-w-0 flex-1">
-                            <span className="block truncate text-sm font-medium">{conversation.other.display_name}</span>
-                            <span className="block truncate text-xs text-muted">{conversation.latestMessage}</span>
-                          </span>
-                        </button>
-                      ))}
-                      {conversations.length === 0 && (
-                        <div className="p-5 text-center">
-                          <p className="text-sm text-muted">No conversations yet.</p>
-                          <Button variant="link" className="mt-2" onClick={() => setTab("members")}>
-                            Find a member
+                  <div className="mt-5 grid min-h-[min(68dvh,720px)] overflow-hidden rounded-[28px] border border-border/70 bg-surface shadow-[0_20px_60px_rgba(47,34,20,0.09)] md:grid-cols-[320px_minmax(0,1fr)]">
+                    <aside className={`min-h-[min(68dvh,720px)] flex-col border-border bg-surface/90 md:flex md:border-r ${activeConversation ? "hidden" : "flex"}`}>
+                      <div className="border-b border-border/80 p-4 sm:p-5">
+                        <div className="flex items-center justify-between gap-3">
+                          <div>
+                            <h2 className="font-display text-xl font-semibold">Your inbox</h2>
+                            <p className="mt-0.5 text-xs text-muted">
+                              {conversations.length} {conversations.length === 1 ? "conversation" : "conversations"}
+                            </p>
+                          </div>
+                          <Button variant="outline" size="icon" aria-label="Find members" onClick={() => setTab("members")}>
+                            <Users />
                           </Button>
                         </div>
-                      )}
+                        <div className="relative mt-4">
+                          <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-subtle" />
+                          <Input
+                            value={conversationSearch}
+                            onChange={(event) => setConversationSearch(event.target.value)}
+                            placeholder="Search conversations"
+                            aria-label="Search conversations"
+                            className="h-10 rounded-xl border-transparent bg-bg pl-9 focus-visible:border-ring"
+                          />
+                        </div>
+                      </div>
+                      <div className="min-h-0 flex-1 space-y-1 overflow-y-auto p-2">
+                        {visibleConversations.map((conversation) => (
+                          <button
+                            key={conversation.id}
+                            type="button"
+                            onClick={() => setActiveConversation(conversation.id)}
+                            aria-pressed={activeConversation === conversation.id}
+                            className={`flex w-full items-center gap-3 rounded-2xl p-3 text-left ${
+                              activeConversation === conversation.id
+                                ? "bg-accent text-accent-foreground shadow-sm"
+                                : "hover:bg-surface-muted"
+                            }`}
+                          >
+                            <Avatar profile={conversation.other} />
+                            <span className="min-w-0 flex-1">
+                              <span className="flex items-center justify-between gap-2">
+                                <span className="truncate text-sm font-semibold">{conversation.other.display_name}</span>
+                                {conversation.latestAt && (
+                                  <time
+                                    className={`shrink-0 text-[0.6875rem] ${
+                                      activeConversation === conversation.id ? "text-accent-foreground/70" : "text-subtle"
+                                    }`}
+                                    dateTime={conversation.latestAt}
+                                  >
+                                    {new Intl.DateTimeFormat(undefined, { hour: "numeric", minute: "2-digit" }).format(
+                                      new Date(conversation.latestAt),
+                                    )}
+                                  </time>
+                                )}
+                              </span>
+                              <span
+                                className={`mt-0.5 block truncate text-xs ${
+                                  activeConversation === conversation.id ? "text-accent-foreground/75" : "text-muted"
+                                }`}
+                              >
+                                {conversation.latestMessage}
+                              </span>
+                            </span>
+                          </button>
+                        ))}
+                        {visibleConversations.length === 0 && (
+                          <div className="grid min-h-52 place-items-center px-5 text-center">
+                            <div>
+                              <span className="mx-auto grid size-12 place-items-center rounded-2xl bg-surface-muted text-muted">
+                                <MessageCircle className="size-5" />
+                              </span>
+                              <p className="mt-3 text-sm font-medium">
+                                {conversations.length ? "No matching conversations" : "No conversations yet"}
+                              </p>
+                              <p className="mt-1 text-xs leading-relaxed text-muted">
+                                {conversations.length
+                                  ? "Try another name or message."
+                                  : "Find a member and say hello to start a chat."}
+                              </p>
+                              {!conversations.length && (
+                                <Button variant="link" className="mt-2" onClick={() => setTab("members")}>
+                                  Find a member
+                                </Button>
+                              )}
+                            </div>
+                          </div>
+                        )}
+                      </div>
                     </aside>
-                    <div className="flex min-h-[420px] min-w-0 flex-col">
-                      {activeConversation ? (
+                    <section
+                      className={`min-h-[min(68dvh,720px)] min-w-0 flex-col bg-[linear-gradient(150deg,rgba(236,228,214,0.45),transparent_38%)] ${
+                        activeConversation ? "flex" : "hidden md:flex"
+                      }`}
+                      aria-label={activeChat ? `Chat with ${activeChat.other.display_name}` : "Conversation"}
+                    >
+                      {activeChat ? (
                         <>
-                          <div className="flex items-center gap-3 border-b border-border px-4 py-3">
+                          <header className="flex items-center gap-3 border-b border-border/70 bg-surface/75 px-4 py-3 backdrop-blur sm:px-6 sm:py-4">
                             <Button
                               className="md:hidden"
                               size="icon"
@@ -995,63 +1069,93 @@ export function CommunityPage({
                             >
                               <ArrowLeft />
                             </Button>
-                            <Avatar
-                              profile={conversations.find((item) => item.id === activeConversation)?.other}
-                              size="sm"
-                            />
-                            <p className="text-sm font-semibold">
-                              {conversations.find((item) => item.id === activeConversation)?.other.display_name ??
-                                "Conversation"}
-                            </p>
-                          </div>
-                          <div className="flex-1 space-y-3 overflow-y-auto p-4" aria-live="polite">
-                            {messages.map((message) => (
-                              <div
-                                key={message.id}
-                                className={`flex ${message.sender_id === user.id ? "justify-end" : "justify-start"}`}
-                              >
+                            <Avatar profile={activeChat.other} />
+                            <div className="min-w-0">
+                              <p className="truncate text-sm font-semibold">{activeChat.other.display_name}</p>
+                              <p className="text-xs text-muted">Private conversation</p>
+                            </div>
+                          </header>
+                          <div className="flex-1 space-y-4 overflow-y-auto px-4 py-5 sm:px-6" aria-live="polite">
+                            {messages.map((message) => {
+                              const isOwnMessage = message.sender_id === user.id;
+                              return (
                                 <div
-                                  className={`max-w-[85%] rounded-2xl px-4 py-2 ${
-                                    message.sender_id === user.id
-                                      ? "bg-accent text-accent-foreground"
-                                      : "bg-bg text-fg"
-                                  }`}
+                                  key={message.id}
+                                  className={`flex items-end gap-2 ${isOwnMessage ? "justify-end" : "justify-start"}`}
                                 >
-                                  <p className="whitespace-pre-wrap break-words text-sm">{message.content}</p>
-                                  <time className="mt-1 block text-right text-[0.6875rem] opacity-70" dateTime={message.created_at}>
-                                    {formatTime(message.created_at)}
-                                  </time>
+                                  {!isOwnMessage && <Avatar profile={activeChat.other} size="sm" />}
+                                  <div
+                                    className={`max-w-[min(84%,34rem)] rounded-3xl px-4 py-3 shadow-sm ${
+                                      isOwnMessage
+                                        ? "rounded-br-md bg-accent text-accent-foreground"
+                                        : "rounded-bl-md border border-border/60 bg-surface text-fg"
+                                    }`}
+                                  >
+                                    <p className="whitespace-pre-wrap break-words text-sm leading-relaxed">{message.content}</p>
+                                    <time
+                                      className={`mt-1.5 block text-right text-[0.6875rem] ${
+                                        isOwnMessage ? "text-accent-foreground/65" : "text-subtle"
+                                      }`}
+                                      dateTime={message.created_at}
+                                    >
+                                      {formatTime(message.created_at)}
+                                    </time>
+                                  </div>
+                                </div>
+                              );
+                            })}
+                            {messages.length === 0 && (
+                              <div className="grid min-h-64 place-items-center text-center">
+                                <div className="max-w-xs">
+                                  <Avatar profile={activeChat.other} size="lg" />
+                                  <p className="mt-4 font-display text-xl font-semibold">Say hello to {activeChat.other.display_name.split(" ")[0]}</p>
+                                  <p className="mt-1 text-sm leading-relaxed text-muted">A friendly message is a lovely way to start.</p>
                                 </div>
                               </div>
-                            ))}
-                            {messages.length === 0 && (
-                              <p className="py-12 text-center text-sm text-muted">Say hello to start the conversation.</p>
                             )}
                           </div>
-                          <form onSubmit={sendMessage} className="flex gap-2 border-t border-border p-3">
-                            <Input
-                              value={messageText}
-                              onChange={(event) => setMessageText(event.target.value)}
-                              placeholder="Write a message…"
-                              maxLength={4000}
-                              aria-label="Write a message"
-                              required
-                            />
-                            <Button type="submit" size="icon" aria-label="Send message" disabled={pending || !messageText.trim()}>
-                              <Send />
-                            </Button>
+                          <form onSubmit={sendMessage} className="border-t border-border/70 bg-surface/80 p-3 backdrop-blur sm:px-5 sm:py-4">
+                            <div className="flex items-end gap-2 rounded-2xl border border-border/70 bg-bg p-1.5 pl-3 shadow-inner focus-within:border-ring/60 focus-within:ring-2 focus-within:ring-ring/15">
+                              <textarea
+                                value={messageText}
+                                onChange={(event) => setMessageText(event.target.value)}
+                                placeholder="Write a message…"
+                                maxLength={4000}
+                                aria-label="Write a message"
+                                rows={1}
+                                className="max-h-32 min-h-10 flex-1 resize-y bg-transparent py-2 text-sm outline-none placeholder:text-subtle"
+                                required
+                              />
+                              <Button
+                                type="submit"
+                                size="icon"
+                                aria-label="Send message"
+                                className="mb-0.5 size-10 shrink-0 rounded-xl"
+                                disabled={pending || !messageText.trim()}
+                              >
+                                <Send />
+                              </Button>
+                            </div>
+                            <p className="mt-2 px-1 text-[0.6875rem] text-subtle">Keep it kind. Your message is shared only in this conversation.</p>
                           </form>
                         </>
                       ) : (
                         <div className="grid flex-1 place-items-center p-8 text-center">
-                          <div>
-                            <MessageCircle className="mx-auto size-9 text-muted" />
-                            <p className="mt-3 font-medium">Your conversations</p>
-                            <p className="mt-1 text-sm text-muted">Choose a chat or find a member to message.</p>
+                          <div className="max-w-sm">
+                            <span className="mx-auto grid size-16 place-items-center rounded-3xl bg-surface-muted text-primary shadow-inner">
+                              <MessagesSquare className="size-7" />
+                            </span>
+                            <h2 className="mt-5 font-display text-2xl font-semibold">A little catch-up?</h2>
+                            <p className="mt-2 text-sm leading-relaxed text-muted">
+                              Pick a conversation to continue, or find a member to start a new one.
+                            </p>
+                            <Button className="mt-5" variant="outline" onClick={() => setTab("members")}>
+                              <Users /> Find members
+                            </Button>
                           </div>
                         </div>
                       )}
-                    </div>
+                    </section>
                   </div>
                 </div>
               )}
