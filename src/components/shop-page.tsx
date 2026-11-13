@@ -1,15 +1,14 @@
 import { useId, useState } from "react";
 import {
   ArrowUpRight,
-  Heart,
-  MessageCircle,
-  Menu,
+  BookOpen,
   Minus,
+  Package,
   Phone,
   Plus,
   QrCode,
-  Users,
   UserRound,
+  Users,
 } from "lucide-react";
 import { Button, buttonVariants } from "@/components/ui/button";
 import {
@@ -22,15 +21,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import {
-  Sheet,
-  SheetClose,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
 import {
   asset,
   buildMailtoUrl,
@@ -48,23 +38,7 @@ import { resetTilt, updateTilt } from "@/lib/tilt";
 import { cn } from "@/lib/utils";
 
 const NAV = [
-  { href: "#craft", label: "Craft" },
   { href: "#order", label: "Order" },
-] as const;
-
-const FACTS = [
-  {
-    title: "Traditional maize",
-    body: "Non-hybrid grain, puffed into light pipes — snack culture with a kitchen-table origin.",
-  },
-  {
-    title: "Small-batch",
-    body: "Handmade runs. You taste the batch, not a factory formula.",
-  },
-  {
-    title: "Pasal, Kathmandu",
-    body: "Call to book a bag, a party pack, or a sack for your shop.",
-  },
 ] as const;
 
 function BrandMark({ className }: { className?: string }) {
@@ -91,6 +65,7 @@ function WhatsAppIcon({ className }: { className?: string }) {
 export function ShopPage({
   onAccount,
   onProducts,
+  onAbout,
   onCommunity,
   onSignOut,
   accountNotice = "",
@@ -98,13 +73,13 @@ export function ShopPage({
 }: {
   onAccount?: () => void;
   onProducts?: () => void;
+  onAbout?: () => void;
   onCommunity?: () => void;
   onSignOut?: () => void;
   accountNotice?: string;
   initialPack?: PackId;
 }) {
   const [payOpen, setPayOpen] = useState(false);
-  const [menuOpen, setMenuOpen] = useState(false);
   const [pack, setPack] = useState<PackId>(initialPack);
   const [qty, setQty] = useState(1);
   const [name, setName] = useState("");
@@ -157,6 +132,15 @@ export function ShopPage({
                 className="text-sm text-muted transition-[color] duration-150 ease-out hover:text-fg"
               >
                 Products
+              </button>
+            )}
+            {onAbout && (
+              <button
+                type="button"
+                onClick={onAbout}
+                className="text-sm text-muted transition-[color] duration-150 ease-out hover:text-fg"
+              >
+                About
               </button>
             )}
             {NAV.map((item) => (
@@ -213,75 +197,25 @@ export function ShopPage({
               <QrCode />
               Pay
             </Button>
-            <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
-              <SheetTrigger asChild>
-                <Button variant="outline" size="icon" className="lg:hidden" aria-label="Open menu">
-                  <Menu />
-                </Button>
-              </SheetTrigger>
-              <SheetContent>
-                <SheetHeader>
-                  <SheetTitle>{SHOP.name}</SheetTitle>
-                  <SheetDescription>
-                    {SHOP.product} from {SHOP.city}
-                  </SheetDescription>
-                </SheetHeader>
-                <nav className="flex flex-col gap-1" aria-label="Mobile">
-                  {onProducts && (
-                    <SheetClose asChild>
-                      <button
-                        type="button"
-                        onClick={onProducts}
-                        className="rounded-xl px-3 py-3 text-left text-base text-fg transition-[background-color] duration-150 ease-out hover:bg-surface-muted"
-                      >
-                        Products
-                      </button>
-                    </SheetClose>
-                  )}
-                  {NAV.map((item) => (
-                    <SheetClose asChild key={item.href}>
-                      <a
-                        href={item.href}
-                        className="rounded-xl px-3 py-3 text-base text-fg transition-[background-color] duration-150 ease-out hover:bg-surface-muted"
-                      >
-                        {item.label}
-                      </a>
-                    </SheetClose>
-                  ))}
-                  {onCommunity && (
-                    <SheetClose asChild>
-                      <button
-                        type="button"
-                        onClick={onCommunity}
-                        className="rounded-xl px-3 py-3 text-left text-base text-fg transition-[background-color] duration-150 ease-out hover:bg-surface-muted"
-                      >
-                        Community
-                      </button>
-                    </SheetClose>
-                  )}
-                </nav>
-                <div className="mt-auto flex flex-col gap-2">
-                  <Button asChild>
-                    <a href={telHref}>
-                      <Phone />
-                      Call {SHOP.phoneDisplay}
-                    </a>
-                  </Button>
-                  <Button asChild variant="outline">
-                    <a href={waHref} target="_blank" rel="noopener noreferrer">
-                      <WhatsAppIcon className="size-4" />
-                      WhatsApp
-                    </a>
-                  </Button>
-                  <Button type="button" variant="ghost" onClick={() => { setMenuOpen(false); setPayOpen(true); }}>
-                    <QrCode />
-                    Scan to pay
-                  </Button>
-                </div>
-              </SheetContent>
-            </Sheet>
           </div>
         </div>
+        <nav
+          className="glass-nav mx-4 mb-2 grid grid-cols-3 gap-1.5 p-1.5 lg:hidden"
+          aria-label="Primary"
+        >
+          <button type="button" onClick={onProducts} className="glass-nav-card">
+            <Package className="size-4" />
+            Products
+          </button>
+          <button type="button" onClick={onAbout} className="glass-nav-card">
+            <BookOpen className="size-4" />
+            About
+          </button>
+          <a href="#order" className="glass-nav-card">
+            <Phone className="size-4" />
+            Order
+          </a>
+        </nav>
       </header>
 
       <main id="top" className="relative z-10">
@@ -299,10 +233,6 @@ export function ShopPage({
               <h1 className="rise-in-2 mt-3 font-display text-4xl leading-[1.1] font-medium tracking-tight sm:text-5xl lg:text-6xl">
                 Corn Puff Pipes from traditional maize.
               </h1>
-              <p className="rise-in-3 mt-5 max-w-md text-base leading-relaxed text-muted sm:text-lg">
-                Light, pipe-shaped puffs. Handmade in small batches at Acharya Dhunro Pasal.
-                Call to book, then scan to pay.
-              </p>
               <div className="rise-in-4 mt-8 flex flex-wrap items-center gap-3">
                 <Button asChild size="lg">
                   <a href={telHref}>
@@ -319,107 +249,14 @@ export function ShopPage({
                     <ArrowUpRight />
                   </Button>
                 )}
-              </div>
-              <p className="mt-5 text-sm text-subtle">
-                {SHOP.phoneDisplay} · {SHOP.email}
-              </p>
-            </div>
-          </div>
-        </section>
-
-        <section className="border-y border-border bg-surface/75 backdrop-blur-sm">
-          <div className="mx-auto grid max-w-6xl gap-px bg-border sm:grid-cols-3">
-            {FACTS.map((fact) => (
-              <article
-                key={fact.title}
-                className="depth-card-3d bg-surface px-6 py-8 sm:px-8"
-                data-tilt-strength="3"
-                onPointerMove={updateTilt}
-                onPointerLeave={resetTilt}
-              >
-                <h2 className="font-display text-xl font-medium tracking-tight">{fact.title}</h2>
-                <p className="mt-2 text-sm leading-relaxed text-muted">{fact.body}</p>
-              </article>
-            ))}
-          </div>
-        </section>
-
-        <section id="community" className="scroll-mt-24 px-4 py-12 sm:px-6 sm:py-16">
-          <div
-            className="depth-card-3d mx-auto grid max-w-6xl gap-8 overflow-hidden rounded-3xl bg-accent p-6 text-accent-foreground shadow-[var(--shadow-border)] sm:p-9 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center lg:p-12"
-            data-tilt-strength="2"
-            onPointerMove={updateTilt}
-            onPointerLeave={resetTilt}
-          >
-            <div className="max-w-2xl">
-              <p className="text-xs font-medium tracking-[0.18em] text-accent-foreground/65 uppercase">
-                Beyond the shelf
-              </p>
-              <h2 className="mt-2 font-display text-3xl font-medium tracking-tight sm:text-4xl">
-                Good snacks bring people together.
-              </h2>
-              <p className="mt-3 max-w-xl leading-relaxed text-accent-foreground/75">
-                Meet other pasal members, share a moment, and keep in touch. Your shop,
-                profile, community feed, and messages all live in one place.
-              </p>
-              <div className="mt-6 flex flex-wrap gap-4 text-sm text-accent-foreground/80">
-                <span className="inline-flex items-center gap-2">
-                  <Users className="size-4" /> Find your people
-                </span>
-                <span className="inline-flex items-center gap-2">
-                  <Heart className="size-4" /> Share and react
-                </span>
-                <span className="inline-flex items-center gap-2">
-                  <MessageCircle className="size-4" /> Stay in touch
-                </span>
+                {onAbout && (
+                  <Button type="button" variant="ghost" size="lg" onClick={onAbout}>
+                    About the pasal
+                    <ArrowUpRight />
+                  </Button>
+                )}
               </div>
             </div>
-            {(onCommunity || onAccount) && (
-              <Button
-                type="button"
-                variant="outline"
-                size="lg"
-                className="w-full sm:w-fit"
-                onClick={onCommunity ?? onAccount}
-              >
-                {onCommunity ? "Visit the community" : "Join the community"}
-                <ArrowUpRight />
-              </Button>
-            )}
-          </div>
-        </section>
-
-        <section id="craft" className="scroll-mt-24 px-4 py-16 sm:px-6 sm:py-20">
-          <div className="mx-auto max-w-3xl">
-            <p className="text-xs font-medium tracking-[0.18em] text-muted uppercase">The craft</p>
-            <h2 className="mt-2 font-display text-3xl font-medium tracking-tight sm:text-4xl">
-              Maize, heat, and a pipe shape.
-            </h2>
-            <div className="mt-5 space-y-4 text-base leading-relaxed text-muted">
-              <p>
-                Acharya Dhunro Pasal puffs traditional, non-hybrid maize into airy pipes —
-                a familiar teatime snack with a clean crunch and a golden finish.
-              </p>
-              <p>
-                Batches stay small so the crunch stays even. Ask for a bag for the house,
-                a pack for the gathering, or a sack if you sell snacks of your own.
-              </p>
-            </div>
-            <ul className="mt-8 grid gap-3 sm:grid-cols-2">
-              {[
-                "Non-hybrid maize",
-                "Pipe-shaped puff",
-                "Small handmade batches",
-                "Call, WhatsApp, or scan",
-              ].map((line) => (
-                <li
-                  key={line}
-                  className="rounded-xl bg-surface/90 px-4 py-3 text-sm text-fg shadow-[var(--shadow-border)]"
-                >
-                  {line}
-                </li>
-              ))}
-            </ul>
           </div>
         </section>
 

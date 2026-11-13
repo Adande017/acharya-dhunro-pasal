@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import type { User } from "@supabase/supabase-js";
+import { AboutPage } from "./components/about-page";
 import { AuthPage } from "./components/auth-page";
 import { CommunityPage } from "./components/community-page";
 import { ProductsPage } from "./components/products-page";
@@ -17,6 +18,9 @@ export default function App() {
   );
   const [showProducts, setShowProducts] = useState(
     () => window.location.hash === "#products",
+  );
+  const [showAbout, setShowAbout] = useState(
+    () => window.location.hash === "#about",
   );
   const [selectedPack, setSelectedPack] = useState<PackId>("snack");
   const [notice, setNotice] = useState("");
@@ -42,6 +46,7 @@ export default function App() {
           setGuest(false);
           setShowCommunity(true);
           setShowProducts(false);
+          setShowAbout(false);
           if (window.location.hash !== "#community") {
             window.history.replaceState(null, "", "#community");
           }
@@ -80,6 +85,7 @@ export default function App() {
   useEffect(() => {
     function syncPageFromUrl() {
       setShowProducts(window.location.hash === "#products");
+      setShowAbout(window.location.hash === "#about");
       setShowCommunity(
         window.location.hash === "#community" || window.location.hash === "",
       );
@@ -90,27 +96,33 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    if (showCommunity || showProducts || window.location.hash !== "#order") return;
+    if (showCommunity || showProducts || showAbout || window.location.hash !== "#order") return;
     const frame = window.requestAnimationFrame(() => {
       document.getElementById("order")?.scrollIntoView({ behavior: "smooth" });
     });
     return () => window.cancelAnimationFrame(frame);
-  }, [showCommunity, showProducts]);
+  }, [showAbout, showCommunity, showProducts]);
 
-  function navigateTo(page: "shop" | "community" | "products", destination = "top") {
+  function navigateTo(
+    page: "shop" | "community" | "products" | "about",
+    destination = "top",
+  ) {
     const hash =
       page === "community"
         ? "#community"
         : page === "products"
           ? "#products"
-          : destination === "order"
-            ? "#order"
-            : "#top";
+          : page === "about"
+            ? "#about"
+            : destination === "order"
+              ? "#order"
+              : "#top";
     if (window.location.hash !== hash) {
       window.history.pushState(null, "", hash);
     }
     setShowCommunity(page === "community");
     setShowProducts(page === "products");
+    setShowAbout(page === "about");
   }
 
   async function signOut() {
@@ -166,10 +178,21 @@ export default function App() {
       );
     }
 
+    if (showAbout) {
+      return (
+        <AboutPage
+          onHome={() => navigateTo("shop")}
+          onProducts={() => navigateTo("products")}
+          onCommunity={() => navigateTo("community")}
+        />
+      );
+    }
+
     return (
       <ShopPage
         initialPack={selectedPack}
         onProducts={() => navigateTo("products")}
+        onAbout={() => navigateTo("about")}
         onCommunity={() => navigateTo("community")}
         onSignOut={signOut}
         accountNotice={notice}
@@ -203,10 +226,29 @@ export default function App() {
     );
   }
 
+  if (showAbout) {
+    return (
+      <AboutPage
+        onHome={() => navigateTo("shop")}
+        onProducts={() => navigateTo("products")}
+        onCommunity={user ? () => navigateTo("community") : undefined}
+        onAccount={
+          user
+            ? undefined
+            : () => {
+                setGuest(false);
+                window.scrollTo(0, 0);
+              }
+        }
+      />
+    );
+  }
+
   return (
     <ShopPage
       initialPack={selectedPack}
       onProducts={() => navigateTo("products")}
+      onAbout={() => navigateTo("about")}
       onCommunity={user ? () => navigateTo("community") : undefined}
       onAccount={
         user
