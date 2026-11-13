@@ -67,6 +67,7 @@ export function ShopPage({
   onCommunity,
   onSignOut,
   onInventory,
+  onStaffLogin,
   accountNotice = "",
   initialPack = "snack",
 }: {
@@ -76,6 +77,7 @@ export function ShopPage({
   onCommunity?: () => void;
   onSignOut?: () => void;
   onInventory?: () => void;
+  onStaffLogin?: () => void;
   accountNotice?: string;
   initialPack?: PackId;
 }) {
@@ -126,6 +128,12 @@ export function ShopPage({
           </a>
 
           <div className="flex items-center gap-2">
+            {onStaffLogin && (
+              <Button type="button" variant="outline" size="sm" onClick={onStaffLogin}>
+                <Package />
+                <span>Staff sign-in</span>
+              </Button>
+            )}
             {onInventory && (
               <Button type="button" variant="outline" size="sm" onClick={onInventory}>
                 <Package />

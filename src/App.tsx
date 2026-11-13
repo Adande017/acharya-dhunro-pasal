@@ -364,6 +364,7 @@ export default function App() {
             }
       }
       onSignOut={user ? signOut : undefined}
+      onStaffLogin={!user ? () => navigateTo("inventory") : undefined}
       accountNotice={notice}
     />
   );
