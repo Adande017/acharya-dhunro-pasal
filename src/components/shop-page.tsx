@@ -1,4 +1,4 @@
-import { useId, useState, type PointerEvent as ReactPointerEvent } from "react";
+import { useId, useState } from "react";
 import {
   ArrowUpRight,
   Heart,
@@ -11,7 +11,6 @@ import {
   Users,
   UserRound,
 } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
 import {
   Dialog,
@@ -45,21 +44,13 @@ import {
   waHref,
   type PackId,
 } from "@/lib/shop";
+import { resetTilt, updateTilt } from "@/lib/tilt";
 import { cn } from "@/lib/utils";
 
 const NAV = [
-  { href: "#packs", label: "Products" },
   { href: "#craft", label: "Craft" },
-  { href: "#gallery", label: "Gallery" },
   { href: "#order", label: "Order" },
 ] as const;
-
-const PRODUCT_FILTERS: Array<{ id: "all" | PackId; label: string }> = [
-  { id: "all", label: "All products" },
-  { id: "snack", label: "Everyday" },
-  { id: "party", label: "Gatherings" },
-  { id: "bulk", label: "Wholesale" },
-];
 
 const FACTS = [
   {
@@ -75,50 +66,6 @@ const FACTS = [
     body: "Call to book a bag, a party pack, or a sack for your shop.",
   },
 ] as const;
-
-const GALLERY = [
-  {
-    src: "product/closeup-bright.jpg",
-    alt: "Golden Corn Puff Pipes in close-up",
-    caption: "The pipe",
-  },
-  {
-    src: "product/basket-bright.jpg",
-    alt: "Basket of Corn Puff Pipes",
-    caption: "The share",
-  },
-  {
-    src: "product/bulk-bright.jpg",
-    alt: "Wholesale sack of Corn Puff Pipes",
-    caption: "The sack",
-  },
-] as const;
-
-function updateTilt(event: ReactPointerEvent<HTMLElement>) {
-  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-  const bounds = event.currentTarget.getBoundingClientRect();
-  const x = (event.clientX - bounds.left) / bounds.width;
-  const y = (event.clientY - bounds.top) / bounds.height;
-  const tilt = Number(event.currentTarget.dataset.tiltStrength) || 8;
-
-  event.currentTarget.style.setProperty("--tilt-x", `${(0.5 - y) * tilt}deg`);
-  event.currentTarget.style.setProperty("--tilt-y", `${(x - 0.5) * tilt}deg`);
-  event.currentTarget.style.setProperty("--pointer-x", `${x * 100}%`);
-  event.currentTarget.style.setProperty("--pointer-y", `${y * 100}%`);
-}
-
-function resetTilt(event: ReactPointerEvent<HTMLElement>) {
-  event.currentTarget.style.setProperty("--tilt-x", "0deg");
-  event.currentTarget.style.setProperty("--tilt-y", "0deg");
-  event.currentTarget.style.setProperty("--pointer-x", "50%");
-  event.currentTarget.style.setProperty("--pointer-y", "50%");
-}
-
-function captureTouchTilt(event: ReactPointerEvent<HTMLElement>) {
-  if (event.pointerType === "touch") {
-    event.currentTarget.setPointerCapture(event.pointerId);
-  }
-}
 
 function BrandMark({ className }: { className?: string }) {
   return (
@@ -143,21 +90,22 @@ function WhatsAppIcon({ className }: { className?: string }) {
 
 export function ShopPage({
   onAccount,
+  onProducts,
   onCommunity,
   onSignOut,
   accountNotice = "",
+  initialPack = "snack",
 }: {
   onAccount?: () => void;
+  onProducts?: () => void;
   onCommunity?: () => void;
   onSignOut?: () => void;
   accountNotice?: string;
+  initialPack?: PackId;
 }) {
   const [payOpen, setPayOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [lightbox, setLightbox] = useState<(typeof GALLERY)[number] | null>(null);
-  const [pack, setPack] = useState<PackId>("snack");
-  const [productFilter, setProductFilter] = useState<"all" | PackId>("all");
-  const [productSearch, setProductSearch] = useState("");
+  const [pack, setPack] = useState<PackId>(initialPack);
   const [qty, setQty] = useState(1);
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
@@ -171,24 +119,20 @@ export function ShopPage({
     qty,
     note,
   };
-  const visiblePacks = PACKS.filter((item) => {
-    const matchesFilter = productFilter === "all" || item.id === productFilter;
-    const search = productSearch.trim().toLocaleLowerCase();
-    const matchesSearch =
-      !search ||
-      `${item.name} ${item.kicker} ${item.description} ${item.suited}`
-        .toLocaleLowerCase()
-        .includes(search);
-    return matchesFilter && matchesSearch;
-  });
-
   return (
-    <div className="min-h-dvh bg-bg text-fg">
+    <div className="pasal-watermark relative min-h-dvh bg-bg text-fg">
+      <div
+        className="watermark-layer"
+        aria-hidden="true"
+        style={{
+          backgroundImage: `linear-gradient(rgba(243, 238, 228, 0.94), rgba(243, 238, 228, 0.94)), url("${asset("product/basket-bright.jpg")}")`,
+        }}
+      />
       <a
-        href="#packs"
+        href="#top"
         className="sr-only focus:not-sr-only focus:absolute focus:top-3 focus:left-3 focus:z-50 focus:rounded-full focus:bg-surface focus:px-4 focus:py-2 focus:text-sm"
       >
-        Skip to packs
+        Skip to content
       </a>
 
       <header className="sticky top-0 z-40 border-b border-border/80 bg-bg/90 backdrop-blur-md">
@@ -206,6 +150,15 @@ export function ShopPage({
           </a>
 
           <nav className="hidden items-center gap-6 lg:flex" aria-label="Primary">
+            {onProducts && (
+              <button
+                type="button"
+                onClick={onProducts}
+                className="text-sm text-muted transition-[color] duration-150 ease-out hover:text-fg"
+              >
+                Products
+              </button>
+            )}
             {NAV.map((item) => (
               <a
                 key={item.href}
@@ -274,6 +227,17 @@ export function ShopPage({
                   </SheetDescription>
                 </SheetHeader>
                 <nav className="flex flex-col gap-1" aria-label="Mobile">
+                  {onProducts && (
+                    <SheetClose asChild>
+                      <button
+                        type="button"
+                        onClick={onProducts}
+                        className="rounded-xl px-3 py-3 text-left text-base text-fg transition-[background-color] duration-150 ease-out hover:bg-surface-muted"
+                      >
+                        Products
+                      </button>
+                    </SheetClose>
+                  )}
                   {NAV.map((item) => (
                     <SheetClose asChild key={item.href}>
                       <a
@@ -320,14 +284,14 @@ export function ShopPage({
         </div>
       </header>
 
-      <main id="top">
+      <main id="top" className="relative z-10">
         {accountNotice && (
           <p className="mx-auto max-w-6xl px-4 pt-4 text-sm text-primary sm:px-6" role="status">
             {accountNotice}
           </p>
         )}
-        <section className="relative overflow-hidden bg-hero-wash">
-          <div className="mx-auto grid max-w-6xl items-center gap-10 px-4 py-12 sm:px-6 sm:py-16 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] lg:gap-14 lg:py-20">
+        <section className="relative overflow-hidden">
+          <div className="mx-auto max-w-3xl px-4 py-16 sm:px-6 sm:py-24">
             <div>
               <p className="rise-in text-xs font-medium tracking-[0.18em] text-muted uppercase">
                 Pasal · {SHOP.city}
@@ -349,53 +313,21 @@ export function ShopPage({
                 <Button asChild variant="outline" size="lg">
                   <a href="#order">Place an order</a>
                 </Button>
+                {onProducts && (
+                  <Button type="button" variant="ghost" size="lg" onClick={onProducts}>
+                    Browse all products
+                    <ArrowUpRight />
+                  </Button>
+                )}
               </div>
               <p className="mt-5 text-sm text-subtle">
                 {SHOP.phoneDisplay} · {SHOP.email}
               </p>
             </div>
-
-            <div className="product-scene rise-in-3 relative">
-              <div
-                className="product-card-3d relative overflow-hidden rounded-3xl bg-surface p-2 shadow-[var(--shadow-border)]"
-                onPointerDown={captureTouchTilt}
-                onPointerMove={updateTilt}
-                onPointerUp={resetTilt}
-                onPointerCancel={resetTilt}
-                onPointerLeave={resetTilt}
-                aria-describedby="product-3d-hint"
-              >
-                <img
-                  src={asset("product/closeup-bright.jpg")}
-                  alt="Golden Corn Puff Pipes, close-up"
-                  width={1200}
-                  height={900}
-                  fetchPriority="high"
-                  decoding="async"
-                  className="product-card-visual media aspect-[4/3] w-full rounded-2xl object-cover"
-                />
-                <span className="product-card-label absolute right-5 bottom-5 rounded-full border border-border/70 bg-surface/95 px-3 py-1.5 text-xs font-medium text-fg shadow-sm backdrop-blur-sm">
-                  Fresh from the pasal
-                </span>
-              </div>
-              <div className="absolute -bottom-6 -left-2 hidden w-44 overflow-hidden rounded-2xl bg-surface p-1.5 shadow-[var(--shadow-border)] sm:block lg:-left-8">
-                <img
-                  src={asset("product/basket-bright.jpg")}
-                  alt=""
-                  width={400}
-                  height={300}
-                  decoding="async"
-                  className="media aspect-[4/3] w-full rounded-xl object-cover"
-                />
-              </div>
-              <p id="product-3d-hint" className="mt-4 text-center text-xs text-subtle">
-                Move your pointer or drag across the product to explore
-              </p>
-            </div>
           </div>
         </section>
 
-        <section className="border-y border-border bg-surface">
+        <section className="border-y border-border bg-surface/75 backdrop-blur-sm">
           <div className="mx-auto grid max-w-6xl gap-px bg-border sm:grid-cols-3">
             {FACTS.map((fact) => (
               <article
@@ -457,228 +389,41 @@ export function ShopPage({
           </div>
         </section>
 
-        <section id="packs" className="scroll-mt-24 px-4 py-16 sm:px-6 sm:py-20">
-          <div className="mx-auto max-w-6xl">
-            <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-              <div className="max-w-xl">
-                <p className="text-xs font-medium tracking-[0.18em] text-muted uppercase">Product library</p>
-                <h2 className="mt-2 font-display text-3xl font-medium tracking-tight sm:text-4xl">
-                  Find your perfect pack.
-                </h2>
-                <p className="mt-3 text-muted">
-                  Browse every product photo, explore the pack that suits you, and send an order
-                  straight to the pasal.
-                </p>
-              </div>
-              <div className="w-full lg:max-w-xs">
-                <Label htmlFor="product-search" className="sr-only">Search products</Label>
-                <Input
-                  id="product-search"
-                  type="search"
-                  value={productSearch}
-                  onChange={(event) => setProductSearch(event.target.value)}
-                  placeholder="Search snack, party, wholesale…"
-                  autoComplete="off"
-                />
-              </div>
-            </div>
-
-            <div className="mt-8 flex flex-wrap gap-2" role="group" aria-label="Filter products">
-              {PRODUCT_FILTERS.map((filter) => (
-                <button
-                  key={filter.id}
-                  type="button"
-                  aria-pressed={productFilter === filter.id}
-                  onClick={() => setProductFilter(filter.id)}
-                  className={`rounded-full border px-4 py-2 text-sm font-medium transition-[background-color,color,box-shadow,transform] duration-150 ${
-                    productFilter === filter.id
-                      ? "border-accent bg-accent text-accent-foreground shadow-[var(--shadow-border)]"
-                      : "border-border bg-surface text-muted hover:-translate-y-0.5 hover:bg-surface-muted hover:text-fg"
-                  }`}
-                >
-                  {filter.label}
-                </button>
-              ))}
-            </div>
-
-            <div className="mt-5 flex items-center justify-between gap-4">
-              <p className="text-sm text-muted" aria-live="polite">
-                {visiblePacks.length} {visiblePacks.length === 1 ? "product" : "products"}
+        <section id="craft" className="scroll-mt-24 px-4 py-16 sm:px-6 sm:py-20">
+          <div className="mx-auto max-w-3xl">
+            <p className="text-xs font-medium tracking-[0.18em] text-muted uppercase">The craft</p>
+            <h2 className="mt-2 font-display text-3xl font-medium tracking-tight sm:text-4xl">
+              Maize, heat, and a pipe shape.
+            </h2>
+            <div className="mt-5 space-y-4 text-base leading-relaxed text-muted">
+              <p>
+                Acharya Dhunro Pasal puffs traditional, non-hybrid maize into airy pipes —
+                a familiar teatime snack with a clean crunch and a golden finish.
               </p>
-              {(productFilter !== "all" || productSearch) && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setProductFilter("all");
-                    setProductSearch("");
-                  }}
-                  className="text-sm font-medium text-primary underline-offset-4 hover:underline"
+              <p>
+                Batches stay small so the crunch stays even. Ask for a bag for the house,
+                a pack for the gathering, or a sack if you sell snacks of your own.
+              </p>
+            </div>
+            <ul className="mt-8 grid gap-3 sm:grid-cols-2">
+              {[
+                "Non-hybrid maize",
+                "Pipe-shaped puff",
+                "Small handmade batches",
+                "Call, WhatsApp, or scan",
+              ].map((line) => (
+                <li
+                  key={line}
+                  className="rounded-xl bg-surface/90 px-4 py-3 text-sm text-fg shadow-[var(--shadow-border)]"
                 >
-                  Clear filters
-                </button>
-              )}
-            </div>
-
-            {visiblePacks.length > 0 ? (
-              <div className="mt-4 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-                {visiblePacks.map((item) => (
-                  <article
-                    key={item.id}
-                    className="pack-card-3d flex flex-col overflow-hidden rounded-3xl bg-surface p-2 shadow-[var(--shadow-border)] transition-[box-shadow] duration-150 ease-out hover:shadow-[var(--shadow-border-hover)]"
-                    data-tilt-strength="5"
-                    onPointerMove={updateTilt}
-                    onPointerLeave={resetTilt}
-                  >
-                    <img
-                      src={asset(item.image)}
-                      alt={item.imageAlt}
-                      width={800}
-                      height={600}
-                      loading="lazy"
-                      decoding="async"
-                      className="pack-card-visual media aspect-[4/3] w-full rounded-2xl object-cover"
-                    />
-                    <div className="pack-card-content flex flex-1 flex-col px-3 pt-4 pb-3">
-                      <Badge>{item.kicker}</Badge>
-                      <h3 className="mt-3 font-display text-2xl font-medium tracking-tight">
-                        {item.name}
-                      </h3>
-                      <p className="mt-2 flex-1 text-sm leading-relaxed text-muted">
-                        {item.description}
-                      </p>
-                      <p className="mt-3 text-xs text-subtle">{item.suited}</p>
-                      <Button
-                        type="button"
-                        className="mt-5 w-full"
-                        onClick={() => {
-                          setPack(item.id);
-                          document.getElementById("order")?.scrollIntoView({ behavior: "smooth" });
-                        }}
-                      >
-                        Order {item.name.toLowerCase()}
-                      </Button>
-                    </div>
-                  </article>
-                ))}
-              </div>
-            ) : (
-              <div
-                className="depth-card-3d mt-4 rounded-3xl bg-surface p-8 text-center shadow-[var(--shadow-border)]"
-                data-tilt-strength="3"
-                onPointerMove={updateTilt}
-                onPointerLeave={resetTilt}
-              >
-                <p className="font-display text-xl font-medium">No products match that search.</p>
-                <p className="mt-2 text-sm text-muted">Try another name or clear the filters.</p>
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="mt-5"
-                  onClick={() => {
-                    setProductFilter("all");
-                    setProductSearch("");
-                  }}
-                >
-                  Show all products
-                </Button>
-              </div>
-            )}
-          </div>
-        </section>
-
-        <section id="craft" className="scroll-mt-24 bg-hero-wash px-4 py-16 sm:px-6 sm:py-20">
-          <div className="mx-auto grid max-w-6xl items-center gap-10 lg:grid-cols-2 lg:gap-16">
-            <div
-              className="depth-card-3d overflow-hidden rounded-3xl bg-surface p-2 shadow-[var(--shadow-border)]"
-              data-tilt-strength="4"
-              onPointerMove={updateTilt}
-              onPointerLeave={resetTilt}
-            >
-              <img
-                src={asset("product/bulk-bright.jpg")}
-                alt="A sack of Corn Puff Pipes ready for wholesale"
-                width={1200}
-                height={900}
-                loading="lazy"
-                decoding="async"
-                className="depth-card-visual media aspect-[4/3] w-full rounded-2xl object-cover"
-              />
-            </div>
-            <div>
-              <p className="text-xs font-medium tracking-[0.18em] text-muted uppercase">The craft</p>
-              <h2 className="mt-2 font-display text-3xl font-medium tracking-tight sm:text-4xl">
-                Maize, heat, and a pipe shape.
-              </h2>
-              <div className="mt-5 space-y-4 text-base leading-relaxed text-muted">
-                <p>
-                  Acharya Dhunro Pasal puffs traditional, non-hybrid maize into airy pipes —
-                  a familiar teatime snack with a clean crunch and a golden finish.
-                </p>
-                <p>
-                  Batches stay small so the crunch stays even. Ask for a bag for the house,
-                  a pack for the gathering, or a sack if you sell snacks of your own.
-                </p>
-              </div>
-              <ul className="mt-8 grid gap-3 sm:grid-cols-2">
-                {[
-                  "Non-hybrid maize",
-                  "Pipe-shaped puff",
-                  "Small handmade batches",
-                  "Call, WhatsApp, or scan",
-                ].map((line) => (
-                  <li
-                    key={line}
-                    className="rounded-xl bg-surface px-4 py-3 text-sm text-fg shadow-[var(--shadow-border)]"
-                  >
-                    {line}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        </section>
-
-        <section id="gallery" className="scroll-mt-24 px-4 py-16 sm:px-6 sm:py-20">
-          <div className="mx-auto max-w-6xl">
-            <div className="flex items-end justify-between gap-4">
-              <div>
-                <p className="text-xs font-medium tracking-[0.18em] text-muted uppercase">Look closer</p>
-                <h2 className="mt-2 font-display text-3xl font-medium tracking-tight sm:text-4xl">
-                  The pipes, as they are.
-                </h2>
-              </div>
-            </div>
-            <div className="mt-8 grid gap-4 sm:grid-cols-3">
-              {GALLERY.map((shot) => (
-                <button
-                  key={shot.src}
-                  type="button"
-                  onClick={() => setLightbox(shot)}
-                  className="depth-card-3d group overflow-hidden rounded-3xl bg-surface p-2 text-left shadow-[var(--shadow-border)] transition-[box-shadow] duration-150 ease-out hover:shadow-[var(--shadow-border-hover)]"
-                  data-tilt-strength="5"
-                  onPointerMove={updateTilt}
-                  onPointerLeave={resetTilt}
-                >
-                  <img
-                    src={asset(shot.src)}
-                    alt={shot.alt}
-                    width={800}
-                    height={600}
-                    loading="lazy"
-                    decoding="async"
-                    className="depth-card-visual media aspect-[4/5] w-full rounded-2xl object-cover"
-                  />
-                  <span className="mt-3 flex items-center justify-between px-2 pb-1 text-sm text-muted">
-                    {shot.caption}
-                    <ArrowUpRight className="size-4 opacity-0 transition-[opacity] duration-150 ease-out group-hover:opacity-100" />
-                  </span>
-                </button>
+                  {line}
+                </li>
               ))}
-            </div>
+            </ul>
           </div>
         </section>
 
-        <section id="order" className="scroll-mt-24 bg-surface px-4 py-16 sm:px-6 sm:py-20">
+        <section id="order" className="scroll-mt-24 bg-surface/80 px-4 py-16 backdrop-blur-sm sm:px-6 sm:py-20">
           <div className="mx-auto grid max-w-6xl gap-10 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
             <div>
               <p className="text-xs font-medium tracking-[0.18em] text-muted uppercase">Order</p>
@@ -859,7 +604,7 @@ export function ShopPage({
         </section>
       </main>
 
-      <footer className="border-t border-border bg-accent text-accent-foreground">
+      <footer className="relative z-10 border-t border-border bg-accent text-accent-foreground">
         <div className="mx-auto flex max-w-6xl flex-col gap-8 px-4 py-12 sm:px-6 sm:py-14 md:flex-row md:items-start md:justify-between">
           <div className="flex items-start gap-3">
             <BrandMark className="size-11" />
@@ -941,25 +686,6 @@ export function ShopPage({
         </DialogContent>
       </Dialog>
 
-      <Dialog open={Boolean(lightbox)} onOpenChange={(open) => !open && setLightbox(null)}>
-        <DialogContent className="w-[min(40rem,calc(100vw-2rem))] p-3">
-          {lightbox ? (
-            <>
-              <DialogHeader className="px-3 pt-10">
-                <DialogTitle className="text-lg">{lightbox.caption}</DialogTitle>
-                <DialogDescription>{lightbox.alt}</DialogDescription>
-              </DialogHeader>
-              <img
-                src={asset(lightbox.src)}
-                alt={lightbox.alt}
-                width={1200}
-                height={900}
-                className="media w-full rounded-2xl object-cover"
-              />
-            </>
-          ) : null}
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }

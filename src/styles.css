@@ -75,11 +75,20 @@
   }
 }
 
-.product-scene {
-  perspective: 1200px;
+.pasal-watermark {
+  isolation: isolate;
 }
 
-.product-card-3d,
+.watermark-layer {
+  position: fixed;
+  z-index: -1;
+  inset: 0;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  pointer-events: none;
+}
+
 .pack-card-3d,
 .depth-card-3d {
   --tilt-x: 0deg;
@@ -94,11 +103,6 @@
   will-change: transform;
 }
 
-.product-card-3d {
-  transform: rotateX(var(--tilt-x)) rotateY(var(--tilt-y));
-}
-
-.product-card-3d::after,
 .pack-card-3d::after,
 .depth-card-3d::after {
   position: absolute;
@@ -116,21 +120,14 @@
   transition: opacity 180ms ease;
 }
 
-.product-card-3d:hover::after,
 .pack-card-3d:hover::after,
 .depth-card-3d:hover::after {
   opacity: 1;
 }
 
-.product-card-visual,
-.pack-card-visual,
-.depth-card-visual {
+.pack-card-visual {
   transform: translateZ(22px);
   transition: transform 220ms ease;
-}
-
-.product-card-label {
-  transform: translateZ(38px);
 }
 
 .pack-card-3d {
@@ -139,11 +136,6 @@
 
 .depth-card-3d {
   position: relative;
-}
-
-.pack-card-content {
-  transform: translateZ(18px);
-  transform-style: preserve-3d;
 }
 
 .pack-card-3d:active {
@@ -155,28 +147,19 @@
 }
 
 @media (hover: hover) and (pointer: fine) {
-  .product-card-3d:hover .product-card-visual,
   .pack-card-3d:hover .pack-card-visual {
     transform: translateZ(34px) scale(1.015);
-  }
-
-  .depth-card-3d:hover .depth-card-visual {
-    transform: translateZ(24px) scale(1.01);
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .product-card-3d,
   .pack-card-3d,
   .depth-card-3d,
-  .product-card-visual,
-  .pack-card-visual,
-  .depth-card-visual {
+  .pack-card-visual {
     transform: none !important;
     transition: none !important;
   }
 
-  .product-card-3d::after,
   .pack-card-3d::after,
   .depth-card-3d::after {
     display: none;
