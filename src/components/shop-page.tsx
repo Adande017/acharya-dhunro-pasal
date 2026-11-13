@@ -37,10 +37,6 @@ import {
 import { resetTilt, updateTilt } from "@/lib/tilt";
 import { cn } from "@/lib/utils";
 
-const NAV = [
-  { href: "#order", label: "Order" },
-] as const;
-
 function BrandMark({ className }: { className?: string }) {
   return (
     <img
@@ -124,45 +120,6 @@ export function ShopPage({
             </span>
           </a>
 
-          <nav className="hidden items-center gap-6 lg:flex" aria-label="Primary">
-            {onProducts && (
-              <button
-                type="button"
-                onClick={onProducts}
-                className="text-sm text-muted transition-[color] duration-180 ease-out hover:text-fg"
-              >
-                Products
-              </button>
-            )}
-            {onAbout && (
-              <button
-                type="button"
-                onClick={onAbout}
-                className="text-sm text-muted transition-[color] duration-180 ease-out hover:text-fg"
-              >
-                About
-              </button>
-            )}
-            {NAV.map((item) => (
-              <a
-                key={item.href}
-                href={item.href}
-                className="text-sm text-muted transition-[color] duration-180 ease-out hover:text-fg"
-              >
-                {item.label}
-              </a>
-            ))}
-            {onCommunity && (
-              <button
-                type="button"
-                onClick={onCommunity}
-                className="text-sm text-muted transition-[color] duration-180 ease-out hover:text-fg"
-              >
-                Community
-              </button>
-            )}
-          </nav>
-
           <div className="flex items-center gap-2">
             {onCommunity && (
               <Button type="button" variant="ghost" size="sm" onClick={onCommunity}>
@@ -189,7 +146,7 @@ export function ShopPage({
             </Button>
             <Button
               type="button"
-              variant="outline"
+              variant="walnut"
               size="sm"
               className="hidden sm:inline-flex"
               onClick={() => setPayOpen(true)}
@@ -200,7 +157,7 @@ export function ShopPage({
           </div>
         </div>
         <nav
-          className="glass-nav mx-4 mb-2 grid grid-cols-3 gap-1.5 p-1.5 lg:hidden"
+          className="glass-nav mx-4 mb-2 grid max-w-sm grid-cols-3 gap-1.5 p-1.5 sm:mx-auto"
           aria-label="Primary"
         >
           <button type="button" onClick={onProducts} className="glass-nav-card">
