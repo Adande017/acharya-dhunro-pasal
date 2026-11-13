@@ -34,7 +34,7 @@ export function ProductsPage({
   });
 
   return (
-    <div className="pasal-watermark relative min-h-dvh bg-bg text-fg">
+    <div className="page-transition pasal-watermark relative min-h-dvh bg-bg text-fg">
       <div
         className="watermark-layer"
         aria-hidden="true"
@@ -118,7 +118,7 @@ export function ProductsPage({
                   type="button"
                   aria-pressed={productFilter === filter.id}
                   onClick={() => setProductFilter(filter.id)}
-                  className={`rounded-full border px-4 py-2 text-sm font-medium transition-[background-color,color,box-shadow,transform] duration-150 ${
+                  className={`rounded-full border px-4 py-2 text-sm font-medium transition-[background-color,color,box-shadow,transform] duration-180 ${
                     productFilter === filter.id
                       ? "border-accent bg-accent text-accent-foreground shadow-[var(--shadow-border)]"
                       : "border-border bg-surface/90 text-muted hover:-translate-y-0.5 hover:bg-surface hover:text-fg"
@@ -152,7 +152,7 @@ export function ProductsPage({
                 {visiblePacks.map((item) => (
                   <article
                     key={item.id}
-                    className="pack-card-3d flex items-center gap-4 rounded-3xl bg-surface/90 p-3 shadow-[var(--shadow-border)] transition-[box-shadow] duration-150 ease-out hover:shadow-[var(--shadow-border-hover)] sm:gap-5 sm:p-4"
+                    className="pack-card-3d flex items-center gap-4 rounded-3xl bg-surface/90 p-3 shadow-[var(--shadow-border)] transition-[box-shadow] duration-180 ease-out hover:shadow-[var(--shadow-border-hover)] sm:gap-5 sm:p-4"
                     data-tilt-strength="4"
                     onPointerMove={updateTilt}
                     onPointerLeave={resetTilt}

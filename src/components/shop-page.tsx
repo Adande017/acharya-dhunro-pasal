@@ -95,7 +95,7 @@ export function ShopPage({
     note,
   };
   return (
-    <div className="pasal-watermark relative min-h-dvh bg-bg text-fg">
+    <div className="page-transition pasal-watermark relative min-h-dvh bg-bg text-fg">
       <div
         className="watermark-layer"
         aria-hidden="true"
@@ -129,7 +129,7 @@ export function ShopPage({
               <button
                 type="button"
                 onClick={onProducts}
-                className="text-sm text-muted transition-[color] duration-150 ease-out hover:text-fg"
+                className="text-sm text-muted transition-[color] duration-180 ease-out hover:text-fg"
               >
                 Products
               </button>
@@ -138,7 +138,7 @@ export function ShopPage({
               <button
                 type="button"
                 onClick={onAbout}
-                className="text-sm text-muted transition-[color] duration-150 ease-out hover:text-fg"
+                className="text-sm text-muted transition-[color] duration-180 ease-out hover:text-fg"
               >
                 About
               </button>
@@ -147,7 +147,7 @@ export function ShopPage({
               <a
                 key={item.href}
                 href={item.href}
-                className="text-sm text-muted transition-[color] duration-150 ease-out hover:text-fg"
+                className="text-sm text-muted transition-[color] duration-180 ease-out hover:text-fg"
               >
                 {item.label}
               </a>
@@ -156,7 +156,7 @@ export function ShopPage({
               <button
                 type="button"
                 onClick={onCommunity}
-                className="text-sm text-muted transition-[color] duration-150 ease-out hover:text-fg"
+                className="text-sm text-muted transition-[color] duration-180 ease-out hover:text-fg"
               >
                 Community
               </button>
@@ -346,7 +346,7 @@ export function ShopPage({
                       <label
                         key={item.id}
                         className={cn(
-                          "depth-card-3d cursor-pointer rounded-2xl bg-surface px-3 py-3 text-sm shadow-[var(--shadow-border)] transition-[box-shadow] duration-150 ease-out",
+                          "depth-card-3d cursor-pointer rounded-2xl bg-surface px-3 py-3 text-sm shadow-[var(--shadow-border)] transition-[box-shadow] duration-180 ease-out",
                           selected && "shadow-[var(--shadow-border-hover)] ring-2 ring-ring",
                         )}
                         data-tilt-strength="3"
@@ -414,7 +414,7 @@ export function ShopPage({
                   value={note}
                   onChange={(e) => setNote(sanitizeLine(e.target.value, 200))}
                   placeholder="Delivery area, preferred time, or shop name"
-                  className="w-full resize-y rounded-xl bg-surface px-3.5 py-3 text-sm text-fg shadow-[var(--shadow-border)] outline-none transition-[box-shadow] duration-150 ease-out placeholder:text-subtle focus-visible:ring-2 focus-visible:ring-ring"
+                  className="w-full resize-y rounded-xl bg-surface px-3.5 py-3 text-sm text-fg shadow-[var(--shadow-border)] outline-none transition-[box-shadow] duration-180 ease-out placeholder:text-subtle focus-visible:ring-2 focus-visible:ring-ring"
                 />
               </div>
 

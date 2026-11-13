@@ -152,7 +152,7 @@ export function AuthPage({
   const showsConfirmPassword = mode === "signup" || isRecovery;
 
   return (
-    <main className="grid min-h-dvh bg-bg sm:grid-cols-[0.9fr_1.1fr]">
+    <main className="page-transition grid min-h-dvh bg-bg sm:grid-cols-[0.9fr_1.1fr]">
       <section className="relative flex min-h-[250px] flex-col justify-between overflow-hidden bg-accent px-6 py-6 text-accent-foreground sm:min-h-dvh sm:px-6 sm:py-9 lg:px-14 lg:py-12">
         <img
           src={asset("product/basket-bright.jpg")}
@@ -231,7 +231,7 @@ export function AuthPage({
                   aria-selected={mode === option}
                   onClick={() => changeMode(option)}
                   disabled={pending}
-                  className={`h-10 rounded-full text-sm font-medium transition-colors ${
+                  className={`h-10 rounded-full text-sm font-medium transition-colors duration-180 ${
                     mode === option
                       ? "bg-surface text-fg shadow-[var(--shadow-border)]"
                       : "text-muted hover:text-fg"
@@ -295,7 +295,7 @@ export function AuthPage({
                     type="button"
                     onClick={() => setShowPassword((visible) => !visible)}
                     aria-label={showPassword ? "Hide password" : "Show password"}
-                    className="absolute inset-y-0 right-0 flex w-11 items-center justify-center rounded-r-xl text-muted transition-colors hover:text-fg focus-visible:outline-2 focus-visible:outline-ring"
+                    className="absolute inset-y-0 right-0 flex w-11 items-center justify-center rounded-r-xl text-muted transition-colors duration-180 hover:text-fg focus-visible:outline-2 focus-visible:outline-ring"
                     disabled={pending}
                   >
                     {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}

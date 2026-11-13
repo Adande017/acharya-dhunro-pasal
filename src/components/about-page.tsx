@@ -52,7 +52,7 @@ export function AboutPage({
   onAccount?: () => void;
 }) {
   return (
-    <div className="pasal-watermark relative min-h-dvh bg-bg text-fg">
+    <div className="page-transition pasal-watermark relative min-h-dvh bg-bg text-fg">
       <div
         className="watermark-layer"
         aria-hidden="true"
