@@ -1,4 +1,4 @@
-import { useId, useState, type FormEvent } from "react";
+import { useEffect, useId, useState, type FormEvent } from "react";
 import {
   ArrowUpRight,
   BookOpen,
@@ -29,7 +29,6 @@ import {
   buildWhatsAppUrl,
   clampQty,
   mailHref,
-  PACKS,
   sanitizeLine,
   SHOP,
   telHref,
@@ -38,6 +37,7 @@ import {
 } from "@/lib/shop";
 import { resetTilt, updateTilt } from "@/lib/tilt";
 import { useInventoryAvailability } from "@/lib/use-inventory-availability";
+import { useProductCatalog } from "@/lib/use-product-catalog";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/lib/supabase";
 
@@ -114,6 +114,14 @@ export function ShopPage({
   const [orderReceipt, setOrderReceipt] = useState<CustomerOrderReceipt | null>(null);
   const formId = useId();
   const { availability, loading, error, refresh } = useInventoryAvailability();
+  const { products, error: catalogError } = useProductCatalog();
+
+  useEffect(() => {
+    if (!products.some((product) => product.product_id === pack) && products.length) {
+      setPack(products[0].product_id);
+    }
+  }, [pack, products]);
+  const selectedProduct = products.find((product) => product.product_id === pack);
 
   const order = {
     name,
@@ -121,6 +129,7 @@ export function ShopPage({
     pack,
     qty,
     note,
+    packName: selectedProduct?.name,
   };
 
   function reviewOrder(event: FormEvent<HTMLFormElement>): void {
@@ -370,11 +379,11 @@ export function ShopPage({
               <fieldset className="mt-5">
                 <legend className="text-sm font-medium">Pack</legend>
                 <div className="mt-2 grid gap-2 sm:grid-cols-3">
-                  {PACKS.map((item) => {
-                    const selected = pack === item.id;
+                  {products.map((item) => {
+                    const selected = pack === item.product_id;
                     return (
                       <label
-                        key={item.id}
+                        key={item.product_id}
                         className={cn(
                           "depth-card-3d cursor-pointer rounded-2xl bg-surface px-3 py-3 text-sm shadow-[var(--shadow-border)] transition-[box-shadow] duration-180 ease-out",
                           selected && "shadow-[var(--shadow-border-hover)] ring-2 ring-ring",
@@ -386,15 +395,15 @@ export function ShopPage({
                         <input
                           type="radio"
                           name="pack"
-                          value={item.id}
+                          value={item.product_id}
                           checked={selected}
-                          onChange={() => setPack(item.id)}
+                          onChange={() => setPack(item.product_id)}
                           className="sr-only"
                         />
                         <span className="block font-medium">{item.name}</span>
                         <span className="text-xs text-muted">{item.kicker}</span>
                         <AvailabilityBadge
-                          status={availability[item.id]}
+                          status={availability[item.product_id]}
                           loading={loading}
                           error={error}
                         />
@@ -409,7 +418,7 @@ export function ShopPage({
                 </p>
                 {error && (
                   <p className="mt-2 text-xs text-muted" role="status">
-                    {error}
+                    {error || catalogError}
                   </p>
                 )}
               </fieldset>
@@ -467,7 +476,7 @@ export function ShopPage({
                 <div className="mt-5 rounded-2xl border border-emerald-300 bg-emerald-50 p-4 text-emerald-950" role="status" aria-live="polite">
                   <p className="flex items-center gap-2 font-semibold">
                     <Check className="size-4" />
-                    Order confirmed — {PACKS.find((item) => item.id === orderReceipt.product_id)?.name ?? orderReceipt.product_id}, {orderReceipt.quantity} {orderReceipt.quantity === 1 ? "unit" : "units"} reserved.
+                    Order confirmed — {products.find((item) => item.product_id === orderReceipt.product_id)?.name ?? orderReceipt.product_id}, {orderReceipt.quantity} {orderReceipt.quantity === 1 ? "unit" : "units"} reserved.
                   </p>
                   <p className="mt-1 break-all text-xs">
                     Reference: <span className="font-mono">{orderReceipt.order_id}</span>
@@ -576,7 +585,7 @@ export function ShopPage({
           <div className="space-y-2 rounded-2xl bg-bg p-4 text-sm">
             <p><span className="text-muted">Customer:</span> {name}</p>
             <p><span className="text-muted">Phone:</span> {phone}</p>
-            <p><span className="text-muted">Product:</span> {PACKS.find((item) => item.id === pack)?.name}</p>
+            <p><span className="text-muted">Product:</span> {selectedProduct?.name ?? pack}</p>
             <p><span className="text-muted">Quantity:</span> {qty}</p>
             {note && <p className="break-words"><span className="text-muted">Note:</span> {note}</p>}
           </div>

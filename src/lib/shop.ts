@@ -13,6 +13,7 @@ export const SHOP = {
 } as const;
 
 export function asset(path: string): string {
+  if (/^https?:\/\//i.test(path)) return path;
   const base = import.meta.env.BASE_URL || "/";
   const prefix = base.endsWith("/") ? base : `${base}/`;
   return `${prefix}${path.replace(/^\//, "")}`;
@@ -51,7 +52,7 @@ export const PACKS = [
   },
 ] as const;
 
-export type PackId = (typeof PACKS)[number]["id"];
+export type PackId = string;
 
 const CONTROL_CHARS = /[\u0000-\u001F\u007F]/g;
 
@@ -68,10 +69,11 @@ export function buildWhatsAppUrl(input: {
   name: string;
   phone: string;
   pack: PackId;
+  packName?: string;
   qty: number;
   note: string;
 }): string {
-  const pack = PACKS.find((p) => p.id === input.pack)?.name ?? "Snack bag";
+  const pack = input.packName ?? PACKS.find((p) => p.id === input.pack)?.name ?? input.pack;
   const lines = [
     `Namaste, I would like to order ${SHOP.product} from ${SHOP.name}.`,
     `Name: ${sanitizeLine(input.name, 80) || "—"}`,
@@ -88,10 +90,11 @@ export function buildMailtoUrl(input: {
   name: string;
   phone: string;
   pack: PackId;
+  packName?: string;
   qty: number;
   note: string;
 }): string {
-  const pack = PACKS.find((p) => p.id === input.pack)?.name ?? "Snack bag";
+  const pack = input.packName ?? PACKS.find((p) => p.id === input.pack)?.name ?? input.pack;
   const subject = `${SHOP.product} order — ${pack}`;
   const body = [
     `Namaste,`,

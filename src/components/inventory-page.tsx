@@ -2,10 +2,12 @@ import { useEffect, useRef, useState, type FormEvent } from "react";
 import type { IScannerControls } from "@zxing/browser";
 import {
   ArrowLeft,
+  Archive,
   Camera,
   Check,
   Minus,
   Package,
+  Pencil,
   Plus,
   Printer,
   RefreshCw,
@@ -17,15 +19,37 @@ import JsBarcode from "jsbarcode";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { PACKS, SHOP, type PackId } from "@/lib/shop";
+import { SHOP, type PackId } from "@/lib/shop";
 import { supabase } from "@/lib/supabase";
 import type { Database, Json } from "@/lib/database.types";
 
 type InventoryItem = Database["public"]["Tables"]["inventory_items"]["Row"];
 type InventoryTransaction = Database["public"]["Tables"]["inventory_transactions"]["Row"];
 type CustomerOrder = Database["public"]["Tables"]["customer_orders"]["Row"];
+type InventoryProduct = Database["public"]["Tables"]["inventory_products"]["Row"];
 type Cart = Partial<Record<PackId, number>>;
 type InventoryMode = "receive" | "sale";
+type ProductDraft = {
+  name: string;
+  kicker: string;
+  description: string;
+  image: string;
+  image_alt: string;
+  suited: string;
+  barcode: string;
+  low_stock_threshold: string;
+};
+
+const EMPTY_PRODUCT_DRAFT: ProductDraft = {
+  name: "",
+  kicker: "",
+  description: "",
+  image: "product/closeup-bright.jpg",
+  image_alt: "",
+  suited: "",
+  barcode: "",
+  low_stock_threshold: "10",
+};
 
 function messageOf(error: unknown): string {
   if (error instanceof Error) return error.message;
@@ -47,9 +71,8 @@ function formatTime(value: string): string {
   }).format(new Date(value));
 }
 
-function BarcodeLabel({ item }: { item: InventoryItem }) {
+function BarcodeLabel({ item, productName }: { item: InventoryItem; productName: string }) {
   const barcodeRef = useRef<SVGSVGElement>(null);
-  const pack = PACKS.find((candidate) => candidate.id === item.product_id);
 
   useEffect(() => {
     if (!barcodeRef.current) return;
@@ -65,7 +88,7 @@ function BarcodeLabel({ item }: { item: InventoryItem }) {
 
   return (
     <article className="barcode-label rounded-2xl border border-border bg-white p-3 text-center text-fg">
-      <p className="text-sm font-semibold">{pack?.name ?? item.product_id}</p>
+      <p className="text-sm font-semibold">{productName}</p>
       <svg ref={barcodeRef} className="mx-auto mt-2 max-w-full" aria-label={`Barcode ${item.barcode}`} />
     </article>
   );
@@ -81,6 +104,7 @@ export function InventoryPage({
   isOwner: boolean;
 }) {
   const [items, setItems] = useState<InventoryItem[]>([]);
+  const [products, setProducts] = useState<InventoryProduct[]>([]);
   const [history, setHistory] = useState<InventoryTransaction[]>([]);
   const [customerOrders, setCustomerOrders] = useState<CustomerOrder[]>([]);
   const [staffEmails, setStaffEmails] = useState<string[]>([]);
@@ -95,6 +119,10 @@ export function InventoryPage({
   const [notice, setNotice] = useState("");
   const [loading, setLoading] = useState(true);
   const [pending, setPending] = useState(false);
+  const [productPending, setProductPending] = useState(false);
+  const [productNotice, setProductNotice] = useState("");
+  const [editingProductId, setEditingProductId] = useState<string | null>(null);
+  const [productDraft, setProductDraft] = useState<ProductDraft>(EMPTY_PRODUCT_DRAFT);
   const [scanning, setScanning] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const scannerControls = useRef<IScannerControls | null>(null);
@@ -104,7 +132,7 @@ export function InventoryPage({
 
   async function refreshInventory(): Promise<void> {
     if (!supabase) throw new Error("Inventory service is unavailable.");
-    const [itemsResult, historyResult, ordersResult] = await Promise.all([
+    const [itemsResult, historyResult, ordersResult, productsResult] = await Promise.all([
       supabase.from("inventory_items").select("*").order("product_id"),
       supabase
         .from("inventory_transactions")
@@ -116,13 +144,109 @@ export function InventoryPage({
         .select("*")
         .order("created_at", { ascending: false })
         .limit(25),
+      supabase.from("inventory_products").select("*").order("sort_order").order("name"),
     ]);
     if (itemsResult.error) throw itemsResult.error;
     if (historyResult.error) throw historyResult.error;
     if (ordersResult.error) throw ordersResult.error;
+    if (productsResult.error) throw productsResult.error;
     setItems(itemsResult.data);
     setHistory(historyResult.data);
     setCustomerOrders(ordersResult.data);
+    setProducts(productsResult.data);
+  }
+
+  function editProduct(product: InventoryProduct): void {
+    const item = items.find((candidate) => candidate.product_id === product.product_id);
+    setEditingProductId(product.product_id);
+    setProductDraft({
+      name: product.name,
+      kicker: product.kicker,
+      description: product.description,
+      image: product.image,
+      image_alt: product.image_alt,
+      suited: product.suited,
+      barcode: item?.barcode ?? "",
+      low_stock_threshold: String(item?.low_stock_threshold ?? 10),
+    });
+    setProductNotice("");
+  }
+
+  async function saveProduct(event: FormEvent<HTMLFormElement>): Promise<void> {
+    event.preventDefault();
+    if (!supabase) {
+      setProductNotice("Inventory service is unavailable.");
+      return;
+    }
+
+    const productId =
+      editingProductId ??
+      productDraft.name
+        .trim()
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-|-$/g, "")
+        .slice(0, 60);
+    if (!productId) {
+      setProductNotice("Enter a product name that includes letters or numbers.");
+      return;
+    }
+    if (!editingProductId && products.some((product) => product.product_id === productId)) {
+      setProductNotice(`The product ID “${productId}” already exists. Use a distinct product name.`);
+      return;
+    }
+
+    setProductPending(true);
+    setProductNotice("");
+    try {
+      const { error } = await supabase.rpc("save_inventory_product", {
+        p_product_id: productId,
+        p_name: productDraft.name.trim(),
+        p_kicker: productDraft.kicker.trim(),
+        p_description: productDraft.description.trim(),
+        p_image: productDraft.image.trim(),
+        p_image_alt: productDraft.image_alt.trim(),
+        p_suited: productDraft.suited.trim(),
+        p_barcode: productDraft.barcode.trim().toUpperCase(),
+        p_low_stock_threshold: Number(productDraft.low_stock_threshold),
+      });
+      if (error) throw error;
+      await refreshInventory();
+      setEditingProductId(null);
+      setProductDraft(EMPTY_PRODUCT_DRAFT);
+      setProductNotice(editingProductId ? "Product updated." : "Product added to the catalog.");
+    } catch (error: unknown) {
+      setProductNotice(`Product could not be saved: ${messageOf(error)}`);
+    } finally {
+      setProductPending(false);
+    }
+  }
+
+  async function setProductActive(product: InventoryProduct, active: boolean): Promise<void> {
+    const action = active ? "restore" : "archive";
+    if (!supabase) {
+      setProductNotice("Inventory service is unavailable.");
+      return;
+    }
+    if (!active && !window.confirm(`Archive ${product.name} from the customer catalog? Stock and history will be kept.`)) {
+      return;
+    }
+
+    setProductPending(true);
+    setProductNotice("");
+    try {
+      const { error } = await supabase.rpc("set_inventory_product_active", {
+        p_product_id: product.product_id,
+        p_active: active,
+      });
+      if (error) throw error;
+      await refreshInventory();
+      setProductNotice(`${product.name} ${active ? "restored to" : "archived from"} the customer catalog.`);
+    } catch (error: unknown) {
+      setProductNotice(`Product could not be ${action}d: ${messageOf(error)}`);
+    } finally {
+      setProductPending(false);
+    }
   }
 
   async function refreshStaffEmails(): Promise<void> {
@@ -256,7 +380,8 @@ export function InventoryPage({
     const barcode = value.trim().toUpperCase();
     if (!barcode) return;
     const item = items.find((candidate) => candidate.barcode.toUpperCase() === barcode);
-    if (!item) {
+    const product = item && products.find((candidate) => candidate.product_id === item.product_id);
+    if (!item || !product?.active) {
       setNotice(`Barcode “${barcode}” isn’t assigned to an inventory product.`);
       return;
     }
@@ -327,7 +452,7 @@ export function InventoryPage({
     }
   }
 
-  const cartCount = Object.values(cart).reduce((total, quantity) => total + (quantity ?? 0), 0);
+  const cartCount = Object.values(cart).reduce<number>((total, quantity) => total + (quantity ?? 0), 0);
 
   return (
     <main className="inventory-screen page-transition min-h-dvh bg-bg text-fg">
@@ -462,7 +587,7 @@ export function InventoryPage({
                   <p className="rounded-2xl bg-bg p-4 text-sm text-muted">Loading inventory…</p>
                 ) : (
                   items.map((item) => {
-                    const pack = PACKS.find((candidate) => candidate.id === item.product_id);
+                    const pack = products.find((candidate) => candidate.product_id === item.product_id);
                     return (
                       <article key={item.product_id} className="flex items-center gap-3 rounded-2xl bg-bg p-3 sm:p-4">
                         <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-surface text-primary">
@@ -471,6 +596,7 @@ export function InventoryPage({
                         <div className="min-w-0 flex-1">
                           <p className="truncate text-sm font-semibold">{pack?.name ?? item.product_id}</p>
                           <p className="truncate font-mono text-xs text-muted">{item.barcode}</p>
+                          <p className="text-[0.6875rem] text-muted">Alert at {item.low_stock_threshold} units or fewer</p>
                         </div>
                         <div className="text-right">
                           <p className="text-lg font-semibold tabular-nums">{item.quantity_on_hand}</p>
@@ -501,7 +627,7 @@ export function InventoryPage({
 
             <div className="mt-5 space-y-2">
               {Object.entries(cart).map(([productId, quantity]) => {
-                const pack = PACKS.find((candidate) => candidate.id === productId);
+                const pack = products.find((candidate) => candidate.product_id === productId);
                 const item = items.find((candidate) => candidate.product_id === productId);
                 if (!pack || !item || !quantity) return null;
                 return (
@@ -516,7 +642,7 @@ export function InventoryPage({
                         variant="ghost"
                         size="icon"
                         aria-label={`Remove ${pack.name} from cart`}
-                        onClick={() => changeQuantity(pack.id, -quantity)}
+                        onClick={() => changeQuantity(pack.product_id, -quantity)}
                       >
                         <Trash2 />
                       </Button>
@@ -529,7 +655,7 @@ export function InventoryPage({
                           variant="outline"
                           size="icon"
                           aria-label={`Remove one ${pack.name}`}
-                          onClick={() => changeQuantity(pack.id, -1)}
+                          onClick={() => changeQuantity(pack.product_id, -1)}
                         >
                           <Minus />
                         </Button>
@@ -539,7 +665,7 @@ export function InventoryPage({
                           variant="outline"
                           size="icon"
                           aria-label={`Add one ${pack.name}`}
-                          onClick={() => changeQuantity(pack.id, 1)}
+                          onClick={() => changeQuantity(pack.product_id, 1)}
                           disabled={mode === "sale" && quantity >= item.quantity_on_hand}
                         >
                           <Plus />
@@ -588,6 +714,170 @@ export function InventoryPage({
               </p>
             </div>
           </aside>
+        </section>
+
+        <section className="rounded-3xl border border-border/70 bg-surface p-5 shadow-[var(--shadow-border)] sm:p-6" data-print-hide>
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <p className="text-xs font-medium tracking-[0.16em] text-muted uppercase">Staff tools</p>
+              <h2 className="mt-1 font-display text-xl font-semibold">Manage products</h2>
+              <p className="mt-1 max-w-2xl text-sm leading-relaxed text-muted">
+                Add products, edit customer-facing details, barcode and low-stock threshold, or archive products from the storefront. Archived products keep stock and transaction history.
+              </p>
+            </div>
+            {editingProductId && (
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  setEditingProductId(null);
+                  setProductDraft(EMPTY_PRODUCT_DRAFT);
+                  setProductNotice("");
+                }}
+              >
+                Cancel edit
+              </Button>
+            )}
+          </div>
+
+          <form className="mt-5 grid gap-4 rounded-2xl bg-bg p-4 sm:grid-cols-2 sm:p-5" onSubmit={(event) => void saveProduct(event)}>
+            <div className="space-y-2">
+              <Label htmlFor="product-name">Product name</Label>
+              <Input
+                id="product-name"
+                value={productDraft.name}
+                onChange={(event) => setProductDraft((draft) => ({ ...draft, name: event.target.value }))}
+                maxLength={80}
+                required
+                disabled={productPending}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="product-kicker">Category / short label</Label>
+              <Input
+                id="product-kicker"
+                value={productDraft.kicker}
+                onChange={(event) => setProductDraft((draft) => ({ ...draft, kicker: event.target.value }))}
+                maxLength={40}
+                placeholder="Everyday, Gatherings…"
+                disabled={productPending}
+              />
+            </div>
+            <div className="space-y-2 sm:col-span-2">
+              <Label htmlFor="product-description">Customer description</Label>
+              <textarea
+                id="product-description"
+                value={productDraft.description}
+                onChange={(event) => setProductDraft((draft) => ({ ...draft, description: event.target.value }))}
+                maxLength={300}
+                rows={3}
+                className="w-full resize-y rounded-xl bg-surface px-3.5 py-3 text-sm text-fg shadow-[var(--shadow-border)] outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                disabled={productPending}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="product-image">Image path or HTTPS URL</Label>
+              <Input
+                id="product-image"
+                value={productDraft.image}
+                onChange={(event) => setProductDraft((draft) => ({ ...draft, image: event.target.value }))}
+                maxLength={500}
+                required
+                disabled={productPending}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="product-image-alt">Image description</Label>
+              <Input
+                id="product-image-alt"
+                value={productDraft.image_alt}
+                onChange={(event) => setProductDraft((draft) => ({ ...draft, image_alt: event.target.value }))}
+                maxLength={200}
+                disabled={productPending}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="product-suited">Best for</Label>
+              <Input
+                id="product-suited"
+                value={productDraft.suited}
+                onChange={(event) => setProductDraft((draft) => ({ ...draft, suited: event.target.value }))}
+                maxLength={120}
+                disabled={productPending}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="product-barcode">Barcode</Label>
+              <Input
+                id="product-barcode"
+                value={productDraft.barcode}
+                onChange={(event) => setProductDraft((draft) => ({ ...draft, barcode: event.target.value.toUpperCase() }))}
+                pattern="[A-Z0-9][A-Z0-9-]{2,63}"
+                maxLength={64}
+                required
+                className="font-mono"
+                disabled={productPending}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="product-threshold">Low-stock alert threshold</Label>
+              <Input
+                id="product-threshold"
+                type="number"
+                min={0}
+                max={1000000}
+                value={productDraft.low_stock_threshold}
+                onChange={(event) => setProductDraft((draft) => ({ ...draft, low_stock_threshold: event.target.value }))}
+                required
+                disabled={productPending}
+              />
+            </div>
+            <div className="flex items-end sm:col-span-2">
+              <Button type="submit" disabled={productPending}>
+                {editingProductId ? <Pencil /> : <Plus />}
+                {productPending ? "Saving…" : editingProductId ? "Save product changes" : "Add product"}
+              </Button>
+            </div>
+          </form>
+
+          {productNotice && (
+            <p className="mt-3 rounded-xl border border-border bg-bg px-4 py-3 text-sm" role="status" aria-live="polite">
+              {productNotice}
+            </p>
+          )}
+
+          <div className="mt-5 grid gap-3 md:grid-cols-2">
+            {products.map((product) => {
+              const stockItem = items.find((item) => item.product_id === product.product_id);
+              return (
+                <article key={product.product_id} className="rounded-2xl border border-border/70 bg-bg p-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="font-semibold">{product.name}</p>
+                      <p className="mt-1 font-mono text-xs text-muted">{stockItem?.barcode ?? "No barcode"} · {stockItem?.quantity_on_hand ?? 0} units</p>
+                      <p className="mt-1 text-xs text-muted">{product.active ? "Visible in storefront" : "Archived"}</p>
+                    </div>
+                    <div className="flex shrink-0 gap-2">
+                      <Button type="button" variant="outline" size="sm" disabled={productPending} onClick={() => editProduct(product)}>
+                        <Pencil />
+                        Edit
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        disabled={productPending}
+                        onClick={() => void setProductActive(product, !product.active)}
+                      >
+                        {product.active ? <Archive /> : <RefreshCw />}
+                        {product.active ? "Delete from shop" : "Restore"}
+                      </Button>
+                    </div>
+                  </div>
+                </article>
+              );
+            })}
+          </div>
         </section>
 
         {isOwner && (
@@ -663,7 +953,7 @@ export function InventoryPage({
                 {history.map((entry) => (
                   <tr key={entry.id} className="border-b border-border/60 last:border-0">
                     <td className="py-3 pr-4">{entry.transaction_type === "received" ? "Received" : "Sale"}</td>
-                    <td className="py-3 pr-4">{PACKS.find((pack) => pack.id === entry.product_id)?.name ?? entry.product_id}</td>
+                    <td className="py-3 pr-4">{products.find((pack) => pack.product_id === entry.product_id)?.name ?? entry.product_id}</td>
                     <td className="py-3 pr-4 text-right tabular-nums">{entry.quantity}</td>
                     <td className="py-3 pr-4 text-right tabular-nums">{entry.stock_after}</td>
                     <td className="py-3 text-right text-xs text-muted">{formatTime(entry.created_at)}</td>
@@ -693,7 +983,7 @@ export function InventoryPage({
                   <div className="min-w-0">
                     <p className="font-semibold">{order.customer_name} · {order.customer_phone}</p>
                     <p className="mt-1 text-sm">
-                      {PACKS.find((pack) => pack.id === order.product_id)?.name ?? order.product_id}
+                      {products.find((pack) => pack.product_id === order.product_id)?.name ?? order.product_id}
                       {" · "}{order.quantity} {order.quantity === 1 ? "unit" : "units"} · Stock reserved
                     </p>
                     {order.note && <p className="mt-1 break-words text-sm text-muted">{order.note}</p>}
@@ -712,7 +1002,13 @@ export function InventoryPage({
         <section className="barcode-print-sheet" aria-label="Printable product barcodes">
           <h1 className="mb-5 text-xl font-semibold">{SHOP.name} · Product barcodes</h1>
           <div className="grid grid-cols-2 gap-4">
-            {items.map((item) => <BarcodeLabel key={item.product_id} item={item} />)}
+            {items.map((item) => (
+              <BarcodeLabel
+                key={item.product_id}
+                item={item}
+                productName={products.find((product) => product.product_id === item.product_id)?.name ?? item.product_id}
+              />
+            ))}
           </div>
         </section>
       </div>

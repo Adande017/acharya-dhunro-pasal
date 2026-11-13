@@ -170,6 +170,23 @@ export type Database = {
         never,
         never
       >;
+      inventory_products: Table<
+        {
+          product_id: string;
+          name: string;
+          kicker: string;
+          description: string;
+          image: string;
+          image_alt: string;
+          suited: string;
+          active: boolean;
+          sort_order: number;
+          created_at: string;
+          updated_at: string;
+        },
+        never,
+        never
+      >;
     };
     Views: {
       inventory_availability: {
@@ -222,6 +239,24 @@ export type Database = {
           quantity: number;
           created_at: string;
         };
+      };
+      save_inventory_product: {
+        Args: {
+          p_product_id: string;
+          p_name: string;
+          p_kicker: string;
+          p_description: string;
+          p_image: string;
+          p_image_alt: string;
+          p_suited: string;
+          p_barcode: string;
+          p_low_stock_threshold: number;
+        };
+        Returns: undefined;
+      };
+      set_inventory_product_active: {
+        Args: { p_product_id: string; p_active: boolean };
+        Returns: undefined;
       };
     };
     Enums: Record<string, never>;

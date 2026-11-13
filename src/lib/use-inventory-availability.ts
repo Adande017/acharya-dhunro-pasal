@@ -5,7 +5,6 @@ import { supabase } from "./supabase";
 export type InventoryStatus = "unavailable" | "low_stock" | "in_stock";
 export type AvailabilityByProduct = Partial<Record<PackId, InventoryStatus>>;
 
-const PACK_IDS = new Set<string>(["snack", "party", "bulk"]);
 const AVAILABILITY_ERROR =
   "Live availability could not be loaded. Please contact us to confirm stock.";
 
@@ -30,9 +29,7 @@ export function useInventoryAvailability() {
 
       const next: AvailabilityByProduct = {};
       for (const item of data) {
-        if (PACK_IDS.has(item.product_id)) {
-          next[item.product_id as PackId] = item.status;
-        }
+        next[item.product_id as PackId] = item.status;
       }
       setAvailability(next);
       setError("");

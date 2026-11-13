@@ -37,8 +37,9 @@ Apply these migrations in order from **Supabase → SQL Editor → New query** b
 1. [`supabase/migrations/20261113184731_barcode_inventory.sql`](supabase/migrations/20261113184731_barcode_inventory.sql)
 2. [`supabase/migrations/20261113185756_staff_inventory_access.sql`](supabase/migrations/20261113185756_staff_inventory_access.sql)
 3. [`supabase/migrations/20261114000000_customer_orders.sql`](supabase/migrations/20261114000000_customer_orders.sql)
+4. [`supabase/migrations/20261114010000_inventory_product_catalog.sql`](supabase/migrations/20261114010000_inventory_product_catalog.sql)
 
-Camera access requires HTTPS (or localhost). Customers see availability status rather than exact stock counts.
+Camera access requires HTTPS (or localhost). Staff can add/edit catalog products, update barcodes and low-stock thresholds, and archive/restore products; archiving hides a product from customers while preserving its stock and history. Customers see availability status rather than exact stock counts.
 
 ## Member community
 

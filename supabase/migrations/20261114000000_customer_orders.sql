@@ -68,7 +68,10 @@ begin
     raise exception 'Choose a valid product';
   end if;
   v_product_id := order_line ->> 'product_id';
-  if v_product_id not in ('snack', 'party', 'bulk') then
+  if not exists (
+    select 1 from public.inventory_products
+    where product_id = v_product_id and active
+  ) then
     raise exception 'Choose a valid product';
   end if;
   if jsonb_typeof(order_line -> 'quantity') is distinct from 'number'
