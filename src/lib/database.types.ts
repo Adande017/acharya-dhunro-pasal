@@ -156,6 +156,20 @@ export type Database = {
         },
         never
       >;
+      inventory_audit_log: Table<
+        {
+          id: number;
+          entity_type: "inventory_items" | "inventory_products" | "inventory_staff_emails";
+          entity_id: string;
+          operation: "INSERT" | "UPDATE" | "DELETE";
+          actor_id: string | null;
+          actor_email: string | null;
+          details: Json;
+          created_at: string;
+        },
+        never,
+        never
+      >;
       customer_orders: Table<
         {
           id: string;

@@ -30,8 +30,11 @@ type InventoryItem = Database["public"]["Tables"]["inventory_items"]["Row"];
 type InventoryTransaction = Database["public"]["Tables"]["inventory_transactions"]["Row"];
 type CustomerOrder = Database["public"]["Tables"]["customer_orders"]["Row"];
 type InventoryProduct = Database["public"]["Tables"]["inventory_products"]["Row"];
+type InventoryAuditEvent = Database["public"]["Tables"]["inventory_audit_log"]["Row"];
 type Cart = Partial<Record<PackId, number>>;
 type InventoryMode = "receive" | "sale";
+const AUDIT_PAGE_SIZE = 50;
+
 type ProductDraft = {
   name: string;
   kicker: string;
@@ -110,6 +113,10 @@ export function InventoryPage({
   const [products, setProducts] = useState<InventoryProduct[]>([]);
   const [history, setHistory] = useState<InventoryTransaction[]>([]);
   const [customerOrders, setCustomerOrders] = useState<CustomerOrder[]>([]);
+  const [auditEvents, setAuditEvents] = useState<InventoryAuditEvent[]>([]);
+  const [auditHasMore, setAuditHasMore] = useState(true);
+  const [auditLoading, setAuditLoading] = useState(false);
+  const [auditNotice, setAuditNotice] = useState("");
   const [staffEmails, setStaffEmails] = useState<string[]>([]);
   const [staffEmailInput, setStaffEmailInput] = useState("");
   const [staffNotice, setStaffNotice] = useState("");
@@ -218,6 +225,7 @@ export function InventoryPage({
       setEditingProductId(null);
       setProductDraft(EMPTY_PRODUCT_DRAFT);
       setProductNotice(successMessage);
+      if (isOwner) void refreshAuditEvents(true);
       try {
         await refreshInventory();
       } catch (error: unknown) {
@@ -250,6 +258,7 @@ export function InventoryPage({
       if (error) throw error;
       const successMessage = `${product.name} ${active ? "restored to" : "archived from"} the customer catalog.`;
       setProductNotice(successMessage);
+      if (isOwner) void refreshAuditEvents(true);
       try {
         await refreshInventory();
       } catch (error: unknown) {
@@ -270,6 +279,38 @@ export function InventoryPage({
       .order("email");
     if (error) throw error;
     setStaffEmails(data.map((staff) => staff.email));
+  }
+
+  async function refreshAuditEvents(reset = false): Promise<void> {
+    if (!supabase) {
+      setAuditNotice("Inventory service is unavailable.");
+      return;
+    }
+
+    const cursor = auditEvents[auditEvents.length - 1]?.id;
+    if (!reset && cursor === undefined) {
+      setAuditHasMore(false);
+      return;
+    }
+
+    setAuditLoading(true);
+    setAuditNotice("");
+    try {
+      let query = supabase
+        .from("inventory_audit_log")
+        .select("*")
+        .order("id", { ascending: false })
+        .limit(AUDIT_PAGE_SIZE);
+      if (!reset && cursor !== undefined) query = query.lt("id", cursor);
+      const { data, error } = await query;
+      if (error) throw error;
+      setAuditEvents((current) => reset ? data : [...current, ...data]);
+      setAuditHasMore(data.length === AUDIT_PAGE_SIZE);
+    } catch (error: unknown) {
+      setAuditNotice(`Owner activity could not be loaded: ${messageOf(error)}`);
+    } finally {
+      setAuditLoading(false);
+    }
   }
 
   useEffect(() => {
@@ -293,6 +334,7 @@ export function InventoryPage({
     if (!isOwner) return;
     let active = true;
     setStaffLoading(true);
+    void refreshAuditEvents(true);
     void refreshStaffEmails()
       .catch((error: unknown) => {
         if (active) setStaffNotice(`Staff access could not be loaded: ${messageOf(error)}`);
@@ -321,6 +363,7 @@ export function InventoryPage({
       setStaffEmailInput("");
       await refreshStaffEmails();
       setStaffNotice(`${email} is approved for inventory. They can sign in with their own account.`);
+      void refreshAuditEvents(true);
     } catch (error: unknown) {
       setStaffNotice(`Staff access could not be added: ${messageOf(error)}`);
     } finally {
@@ -337,6 +380,7 @@ export function InventoryPage({
       if (error) throw error;
       await refreshStaffEmails();
       setStaffNotice(`Inventory access was removed for ${email}.`);
+      void refreshAuditEvents(true);
     } catch (error: unknown) {
       setStaffNotice(`Staff access could not be removed: ${messageOf(error)}`);
     } finally {
@@ -453,6 +497,7 @@ export function InventoryPage({
       if (result.error) throw result.error;
       setCart({});
       setNotice(successMessage);
+      if (isOwner) void refreshAuditEvents(true);
       try {
         await refreshInventory();
       } catch {
@@ -548,6 +593,15 @@ export function InventoryPage({
               <span className="mt-3 block font-semibold">Stock activity</span>
               <span className="mt-1 block text-xs leading-relaxed text-muted">See recent receiving and sales transactions.</span>
             </a>
+            {isOwner && (
+              <a href="#owner-activity" className="group rounded-2xl border border-border bg-bg p-4 transition-colors hover:border-primary/40 hover:bg-surface-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">
+                <span className="grid size-10 place-items-center rounded-xl bg-accent text-accent-foreground">
+                  <History className="size-5" />
+                </span>
+                <span className="mt-3 block font-semibold">Owner activity log</span>
+                <span className="mt-1 block text-xs leading-relaxed text-muted">Review the permanent record of inventory, product, and staff-access changes.</span>
+              </a>
+            )}
           </div>
         </nav>
 
@@ -555,6 +609,68 @@ export function InventoryPage({
           <p className="rounded-2xl border border-border bg-surface px-4 py-3 text-sm text-fg" role="status" aria-live="polite">
             {notice}
           </p>
+        )}
+
+        {isOwner && (
+          <section id="owner-activity" className="scroll-mt-24 rounded-3xl border border-border/70 bg-surface p-5 shadow-[var(--shadow-border)] sm:p-6" data-print-hide>
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <p className="text-xs font-medium tracking-[0.16em] text-muted uppercase">Owner only</p>
+                <h2 className="mt-1 font-display text-xl font-semibold">Inventory change log</h2>
+                <p className="mt-1 max-w-2xl text-sm leading-relaxed text-muted">
+                  A permanent record of stock, product, and staff-access changes, including who made each change and the before-and-after values.
+                </p>
+              </div>
+              <Button type="button" variant="outline" onClick={() => void refreshAuditEvents(true)} disabled={auditLoading}>
+                <RefreshCw />
+                {auditLoading ? "Refreshing…" : "Refresh log"}
+              </Button>
+            </div>
+            {auditNotice && (
+              <p className="mt-4 rounded-xl border border-border bg-bg px-4 py-3 text-sm" role="status" aria-live="polite">
+                {auditNotice}
+              </p>
+            )}
+            <div className="mt-4 space-y-3">
+              {auditEvents.map((entry) => (
+                <article key={entry.id} className="rounded-2xl border border-border/70 bg-bg p-4">
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                    <div className="min-w-0">
+                      <p className="font-semibold">
+                        {entry.operation === "INSERT" ? "Added" : entry.operation === "DELETE" ? "Removed" : "Updated"}{" "}
+                        {entry.entity_type === "inventory_items"
+                          ? "inventory"
+                          : entry.entity_type === "inventory_products"
+                            ? "product"
+                            : "staff access"}
+                        : {entry.entity_id}
+                      </p>
+                      <p className="mt-1 break-all text-xs text-muted">
+                        By {entry.actor_email ?? "Unknown account"}
+                      </p>
+                    </div>
+                    <time className="shrink-0 text-xs text-muted">{formatTime(entry.created_at)}</time>
+                  </div>
+                  <details className="mt-3 border-t border-border/70 pt-3">
+                    <summary className="cursor-pointer text-xs font-medium text-primary">View before-and-after details</summary>
+                    <pre className="mt-2 overflow-x-auto rounded-xl bg-surface p-3 text-xs leading-relaxed text-fg">
+                      {JSON.stringify(entry.details, null, 2)}
+                    </pre>
+                  </details>
+                </article>
+              ))}
+              {!auditEvents.length && !auditLoading && !auditNotice && (
+                <p className="rounded-2xl bg-bg p-4 text-sm text-muted">No inventory changes recorded yet.</p>
+              )}
+            </div>
+            {auditHasMore && (
+              <div className="mt-4 text-center">
+                <Button type="button" variant="outline" onClick={() => void refreshAuditEvents()} disabled={auditLoading}>
+                  {auditLoading ? "Loading…" : "Load older activity"}
+                </Button>
+              </div>
+            )}
+          </section>
         )}
 
         <section id="staff-stock" className="scroll-mt-24 grid gap-6 lg:grid-cols-[minmax(0,1.1fr)_minmax(320px,0.9fr)]" data-print-hide>

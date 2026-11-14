@@ -38,6 +38,7 @@ Apply these migrations in order from **Supabase → SQL Editor → New query** b
 2. [`supabase/migrations/20261113185756_staff_inventory_access.sql`](supabase/migrations/20261113185756_staff_inventory_access.sql)
 3. [`supabase/migrations/20261114000000_customer_orders.sql`](supabase/migrations/20261114000000_customer_orders.sql)
 4. [`supabase/migrations/20261114010000_inventory_product_catalog.sql`](supabase/migrations/20261114010000_inventory_product_catalog.sql)
+5. [`supabase/migrations/20261114190000_inventory_audit_log.sql`](supabase/migrations/20261114190000_inventory_audit_log.sql)
 
 Camera access requires HTTPS (or localhost). Staff can add/edit catalog products, update barcodes and low-stock thresholds, and archive/restore products; archiving hides a product from customers while preserving its stock and history. Customers see availability status rather than exact stock counts.
 
@@ -50,6 +51,8 @@ Camera access requires HTTPS (or localhost). Staff can add/edit catalog products
 5. To hide a listing from the customer shop, choose **Delete from shop**. This archives it rather than permanently deleting it, so stock and transaction history are retained; choose **Restore** to list it again.
 
 The product editor does not change product prices. Staff access and inventory editing require the Supabase setup above, including the inventory and product-catalog migrations.
+
+The owner (`roms7291@gmail.com`) can review the **Owner activity log** on the same inventory page. The log records stock, product, and staff-access changes with the acting account and before/after values. Records remain in Supabase; the page loads them in batches, with older activity available on demand. Only the owner account can read this log.
 
 ## Member community
 
