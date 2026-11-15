@@ -25,9 +25,9 @@ Email/password and social accounts use Supabase Auth. The app stores the name as
 2. To enable Google and Facebook, configure their OAuth client credentials under **Authentication → Providers** and add the Supabase callback URL shown there to each provider's app settings.
 3. In **Authentication → URL Configuration**, add `http://localhost:5173/` and `https://adande017.github.io/acharya-dhunro-pasal/` to the allowed redirect URLs.
 4. Copy `.env.example` to `.env.local` and set `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` using the project URL and browser-safe publishable/anon key from **Project Settings → API**.
-5. For GitHub Pages, add those same two values as repository **Actions variables** named `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` under **Settings → Secrets and variables → Actions → Variables**, then rerun the Pages workflow.
+5. To publish on the free GitHub Pages plan, run `npm run deploy:pages` from a checkout with the two Supabase values configured. This builds the site and pushes the generated files to the `gh-pages` branch; GitHub Pages serves that branch without using GitHub Actions.
 
-Never put a service-role key, secret key, database password, or email credentials in the frontend or GitHub Actions variables. Without the two public project values, account actions show an explicit setup message while guest browsing remains available.
+Never put a service-role key, secret key, database password, or email credentials in the frontend or source control. Without the two public project values, account actions show an explicit setup message while guest browsing remains available.
 
 ## Inventory scanning and online orders
 
