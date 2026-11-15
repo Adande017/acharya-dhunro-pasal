@@ -221,7 +221,7 @@ export function AuthPage({
     <main className="page-transition grid min-h-dvh bg-bg sm:grid-cols-[0.9fr_1.1fr]">
       <section className="relative flex min-h-[112px] flex-col justify-between overflow-hidden bg-accent px-6 py-4 text-accent-foreground sm:min-h-dvh sm:px-6 sm:py-9 lg:px-14 lg:py-12">
         <img
-          src={asset("product/basket-bright.jpg")}
+          src={asset("product/basket-bright.webp")}
           alt=""
           fetchPriority="high"
           className="absolute inset-0 size-full object-cover"
@@ -230,7 +230,7 @@ export function AuthPage({
 
         <a href="#welcome" className="relative z-10 flex w-fit items-center gap-3">
           <img
-            src={asset("brand/acharya-dhunro-pasal-logo.png")}
+            src={asset("brand/acharya-dhunro-pasal-logo.webp")}
             alt=""
             width={44}
             height={44}

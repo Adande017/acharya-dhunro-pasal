@@ -1,18 +1,48 @@
-import { lazy, Suspense, useEffect, useState } from "react";
+import { lazy, Suspense, useEffect, useState, type ReactNode } from "react";
 import type { User } from "@supabase/supabase-js";
-import { AboutPage } from "./components/about-page";
 import { AuthPage } from "./components/auth-page";
-import { CommunityPage } from "./components/community-page";
-import { ProductsPage } from "./components/products-page";
-import { ShopPage } from "./components/shop-page";
 import { SHOP, type PackId } from "./lib/shop";
 import { supabase } from "./lib/supabase";
 
+const AboutPage = lazy(() =>
+  import("./components/about-page").then((module) => ({
+    default: module.AboutPage,
+  })),
+);
+const CommunityPage = lazy(() =>
+  import("./components/community-page").then((module) => ({
+    default: module.CommunityPage,
+  })),
+);
 const InventoryPage = lazy(() =>
   import("./components/inventory-page").then((module) => ({
     default: module.InventoryPage,
   })),
 );
+const ProductsPage = lazy(() =>
+  import("./components/products-page").then((module) => ({
+    default: module.ProductsPage,
+  })),
+);
+const ShopPage = lazy(() =>
+  import("./components/shop-page").then((module) => ({
+    default: module.ShopPage,
+  })),
+);
+
+function PageSuspense({ children }: { children: ReactNode }) {
+  return (
+    <Suspense
+      fallback={
+        <main className="grid min-h-dvh place-items-center bg-bg px-6 text-sm text-muted">
+          Opening page…
+        </main>
+      }
+    >
+      {children}
+    </Suspense>
+  );
+}
 
 export default function App() {
   const [user, setUser] = useState<User | null>(null);
@@ -257,49 +287,57 @@ export default function App() {
 
     if (showCommunity) {
       return (
-        <CommunityPage
-          user={user}
-          onShop={() => navigateTo("shop")}
-          onSignOut={signOut}
-        />
+        <PageSuspense>
+          <CommunityPage
+            user={user}
+            onShop={() => navigateTo("shop")}
+            onSignOut={signOut}
+          />
+        </PageSuspense>
       );
     }
 
     if (showProducts) {
       return (
-        <ProductsPage
-          onHome={() => navigateTo("shop")}
-          onOrder={(pack) => {
-            setSelectedPack(pack);
-            navigateTo("shop", "order");
-          }}
-        />
+        <PageSuspense>
+          <ProductsPage
+            onHome={() => navigateTo("shop")}
+            onOrder={(pack) => {
+              setSelectedPack(pack);
+              navigateTo("shop", "order");
+            }}
+          />
+        </PageSuspense>
       );
     }
 
     if (showAbout) {
       return (
-        <AboutPage
-          onHome={() => navigateTo("shop")}
-          onProducts={() => navigateTo("products")}
-          onCommunity={() => navigateTo("community")}
-        />
+        <PageSuspense>
+          <AboutPage
+            onHome={() => navigateTo("shop")}
+            onProducts={() => navigateTo("products")}
+            onCommunity={() => navigateTo("community")}
+          />
+        </PageSuspense>
       );
     }
 
     return (
-      <ShopPage
-        initialPack={selectedPack}
-        onProducts={() => navigateTo("products")}
-        onAbout={() => navigateTo("about")}
-        onCommunity={() => navigateTo("community")}
-        onSignOut={signOut}
-        onStaffLogin={() => navigateTo("inventory")}
-        onInventory={
-          inventoryAccess ? () => navigateTo("inventory") : undefined
-        }
-        accountNotice={notice}
-      />
+      <PageSuspense>
+        <ShopPage
+          initialPack={selectedPack}
+          onProducts={() => navigateTo("products")}
+          onAbout={() => navigateTo("about")}
+          onCommunity={() => navigateTo("community")}
+          onSignOut={signOut}
+          onStaffLogin={() => navigateTo("inventory")}
+          onInventory={
+            inventoryAccess ? () => navigateTo("inventory") : undefined
+          }
+          accountNotice={notice}
+        />
+      </PageSuspense>
     );
   }
 
@@ -322,21 +360,44 @@ export default function App() {
 
   if (showProducts) {
     return (
-      <ProductsPage
-        onHome={() => navigateTo("shop")}
-        onOrder={(pack) => {
-          setSelectedPack(pack);
-          navigateTo("shop", "order");
-        }}
-      />
+      <PageSuspense>
+        <ProductsPage
+          onHome={() => navigateTo("shop")}
+          onOrder={(pack) => {
+            setSelectedPack(pack);
+            navigateTo("shop", "order");
+          }}
+        />
+      </PageSuspense>
     );
   }
 
   if (showAbout) {
     return (
-      <AboutPage
-        onHome={() => navigateTo("shop")}
+      <PageSuspense>
+        <AboutPage
+          onHome={() => navigateTo("shop")}
+          onProducts={() => navigateTo("products")}
+          onCommunity={user ? () => navigateTo("community") : undefined}
+          onAccount={
+            user
+              ? undefined
+              : () => {
+                  setGuest(false);
+                  window.scrollTo(0, 0);
+                }
+          }
+        />
+      </PageSuspense>
+    );
+  }
+
+  return (
+    <PageSuspense>
+      <ShopPage
+        initialPack={selectedPack}
         onProducts={() => navigateTo("products")}
+        onAbout={() => navigateTo("about")}
         onCommunity={user ? () => navigateTo("community") : undefined}
         onAccount={
           user
@@ -346,27 +407,10 @@ export default function App() {
                 window.scrollTo(0, 0);
               }
         }
+        onSignOut={user ? signOut : undefined}
+        onStaffLogin={!user ? () => navigateTo("inventory") : undefined}
+        accountNotice={notice}
       />
-    );
-  }
-
-  return (
-    <ShopPage
-      initialPack={selectedPack}
-      onProducts={() => navigateTo("products")}
-      onAbout={() => navigateTo("about")}
-      onCommunity={user ? () => navigateTo("community") : undefined}
-      onAccount={
-        user
-          ? undefined
-          : () => {
-              setGuest(false);
-              window.scrollTo(0, 0);
-            }
-      }
-      onSignOut={user ? signOut : undefined}
-      onStaffLogin={!user ? () => navigateTo("inventory") : undefined}
-      accountNotice={notice}
-    />
+    </PageSuspense>
   );
 }

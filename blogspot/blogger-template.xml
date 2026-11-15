@@ -181,7 +181,7 @@ footer.site{background:var(--accent);color:var(--accent-fg);margin-top:0}
 <header class="bar">
   <div class="wrap bar-inner">
     <a class="brand" href="#top">
-      <img src="https://adande017.github.io/acharya-dhunro-pasal/brand/acharya-dhunro-pasal-logo.png" width="40" height="40" alt=""/>
+      <img src="https://adande017.github.io/acharya-dhunro-pasal/brand/acharya-dhunro-pasal-logo.webp" width="40" height="40" alt=""/>
       <span>
         <strong>Acharya Dhunro Pasal</strong>
         <small>Corn Puff Pipes · Kathmandu</small>
@@ -214,8 +214,8 @@ footer.site{background:var(--accent);color:var(--accent-fg);margin-top:0}
         <p class="fine">+977 984-5044572 · roms7291@gmail.com</p>
       </div>
       <div class="hero-art rise">
-        <div class="frame"><img class="media" src="https://adande017.github.io/acharya-dhunro-pasal/product/closeup-bright.jpg" width="1200" height="900" alt="Golden Corn Puff Pipes, close-up" fetchpriority="high"/></div>
-        <div class="hero-float"><img class="media" src="https://adande017.github.io/acharya-dhunro-pasal/product/basket-bright.jpg" width="400" height="300" alt=""/></div>
+        <div class="frame"><img class="media" src="https://adande017.github.io/acharya-dhunro-pasal/product/closeup-bright.webp" width="1200" height="900" alt="Golden Corn Puff Pipes, close-up" fetchpriority="high"/></div>
+        <div class="hero-float"><img class="media" src="https://adande017.github.io/acharya-dhunro-pasal/product/basket-bright.webp" width="400" height="300" alt=""/></div>
       </div>
     </div>
   </section>
@@ -235,7 +235,7 @@ footer.site{background:var(--accent);color:var(--accent-fg);margin-top:0}
       </div>
       <div class="cards">
         <article class="card">
-    <img class="media" src="https://adande017.github.io/acharya-dhunro-pasal/product/closeup-bright.jpg" width="800" height="600" alt="Close-up of golden Corn Puff Pipes spilling from a bowl" loading="lazy"/>
+    <img class="media" src="https://adande017.github.io/acharya-dhunro-pasal/product/closeup-bright.webp" width="800" height="600" alt="Close-up of golden Corn Puff Pipes spilling from a bowl" loading="lazy"/>
     <div class="card-body">
       <span class="badge">Everyday</span>
       <h3>Snack bag</h3>
@@ -245,7 +245,7 @@ footer.site{background:var(--accent);color:var(--accent-fg);margin-top:0}
     </div>
   </article>
         <article class="card">
-    <img class="media" src="https://adande017.github.io/acharya-dhunro-pasal/product/basket-bright.jpg" width="800" height="600" alt="Woven basket filled with Corn Puff Pipes on a wooden table" loading="lazy"/>
+    <img class="media" src="https://adande017.github.io/acharya-dhunro-pasal/product/basket-bright.webp" width="800" height="600" alt="Woven basket filled with Corn Puff Pipes on a wooden table" loading="lazy"/>
     <div class="card-body">
       <span class="badge">Gatherings</span>
       <h3>Party pack</h3>
@@ -255,7 +255,7 @@ footer.site{background:var(--accent);color:var(--accent-fg);margin-top:0}
     </div>
   </article>
         <article class="card">
-    <img class="media" src="https://adande017.github.io/acharya-dhunro-pasal/product/bulk-bright.jpg" width="800" height="600" alt="Large sack of Corn Puff Pipes, bulk wholesale pack" loading="lazy"/>
+    <img class="media" src="https://adande017.github.io/acharya-dhunro-pasal/product/bulk-bright.webp" width="800" height="600" alt="Large sack of Corn Puff Pipes, bulk wholesale pack" loading="lazy"/>
     <div class="card-body">
       <span class="badge">Wholesale</span>
       <h3>Bulk order</h3>
@@ -269,7 +269,7 @@ footer.site{background:var(--accent);color:var(--accent-fg);margin-top:0}
   </section>
   <section class="block alt" id="craft">
     <div class="wrap craft-grid">
-      <div class="frame"><img class="media" src="https://adande017.github.io/acharya-dhunro-pasal/product/bulk-bright.jpg" width="1200" height="900" alt="A sack of Corn Puff Pipes ready for wholesale" loading="lazy"/></div>
+      <div class="frame"><img class="media" src="https://adande017.github.io/acharya-dhunro-pasal/product/bulk-bright.webp" width="1200" height="900" alt="A sack of Corn Puff Pipes ready for wholesale" loading="lazy"/></div>
       <div>
         <p class="kicker">The craft</p>
         <h2>Maize, heat, and a pipe shape.</h2>
@@ -291,16 +291,16 @@ footer.site{background:var(--accent);color:var(--accent-fg);margin-top:0}
         <h2>The pipes, as they are.</h2>
       </div>
       <div class="gallery">
-        <button class="shot" type="button" data-shot="1" data-src="https://adande017.github.io/acharya-dhunro-pasal/product/closeup-bright.jpg" data-alt="Golden Corn Puff Pipes in close-up" data-caption="The pipe">
-    <img class="media" src="https://adande017.github.io/acharya-dhunro-pasal/product/closeup-bright.jpg" width="800" height="600" alt="Golden Corn Puff Pipes in close-up" loading="lazy"/>
+        <button class="shot" type="button" data-shot="1" data-src="https://adande017.github.io/acharya-dhunro-pasal/product/closeup-bright.webp" data-alt="Golden Corn Puff Pipes in close-up" data-caption="The pipe">
+    <img class="media" src="https://adande017.github.io/acharya-dhunro-pasal/product/closeup-bright.webp" width="800" height="600" alt="Golden Corn Puff Pipes in close-up" loading="lazy"/>
     <span>The pipe <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" width="16" height="16"><path d="M7 17 17 7M8 7h9v9"/></svg></span>
   </button>
-        <button class="shot" type="button" data-shot="1" data-src="https://adande017.github.io/acharya-dhunro-pasal/product/basket-bright.jpg" data-alt="Basket of Corn Puff Pipes" data-caption="The share">
-    <img class="media" src="https://adande017.github.io/acharya-dhunro-pasal/product/basket-bright.jpg" width="800" height="600" alt="Basket of Corn Puff Pipes" loading="lazy"/>
+        <button class="shot" type="button" data-shot="1" data-src="https://adande017.github.io/acharya-dhunro-pasal/product/basket-bright.webp" data-alt="Basket of Corn Puff Pipes" data-caption="The share">
+    <img class="media" src="https://adande017.github.io/acharya-dhunro-pasal/product/basket-bright.webp" width="800" height="600" alt="Basket of Corn Puff Pipes" loading="lazy"/>
     <span>The share <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" width="16" height="16"><path d="M7 17 17 7M8 7h9v9"/></svg></span>
   </button>
-        <button class="shot" type="button" data-shot="1" data-src="https://adande017.github.io/acharya-dhunro-pasal/product/bulk-bright.jpg" data-alt="Wholesale sack of Corn Puff Pipes" data-caption="The sack">
-    <img class="media" src="https://adande017.github.io/acharya-dhunro-pasal/product/bulk-bright.jpg" width="800" height="600" alt="Wholesale sack of Corn Puff Pipes" loading="lazy"/>
+        <button class="shot" type="button" data-shot="1" data-src="https://adande017.github.io/acharya-dhunro-pasal/product/bulk-bright.webp" data-alt="Wholesale sack of Corn Puff Pipes" data-caption="The sack">
+    <img class="media" src="https://adande017.github.io/acharya-dhunro-pasal/product/bulk-bright.webp" width="800" height="600" alt="Wholesale sack of Corn Puff Pipes" loading="lazy"/>
     <span>The sack <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" width="16" height="16"><path d="M7 17 17 7M8 7h9v9"/></svg></span>
   </button>
       </div>
@@ -358,7 +358,7 @@ footer.site{background:var(--accent);color:var(--accent-fg);margin-top:0}
 <footer class="site">
   <div class="wrap foot-inner">
     <div class="foot-brand">
-      <img src="https://adande017.github.io/acharya-dhunro-pasal/brand/acharya-dhunro-pasal-logo.png" width="44" height="44" alt=""/>
+      <img src="https://adande017.github.io/acharya-dhunro-pasal/brand/acharya-dhunro-pasal-logo.webp" width="44" height="44" alt=""/>
       <div>
         <strong style="font-family:var(--display);font-size:1.2rem;font-weight:500">Acharya Dhunro Pasal</strong>
         <p>Corn Puff Pipes · traditional maize · Kathmandu</p>

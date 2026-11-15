@@ -26,7 +26,7 @@ export const PACKS = [
     kicker: "Everyday",
     description:
       "A light bag for home and teatime. Crisp maize pipes, ready to share.",
-    image: "product/closeup-bright.jpg",
+    image: "product/closeup-bright.webp",
     imageAlt: "Close-up of golden Corn Puff Pipes spilling from a bowl",
     suited: "Home, office, after-school",
   },
@@ -36,7 +36,7 @@ export const PACKS = [
     kicker: "Gatherings",
     description:
       "A larger share for birthdays, puja, and gifting. Same handmade batch.",
-    image: "product/basket-bright.jpg",
+    image: "product/basket-bright.webp",
     imageAlt: "Woven basket filled with Corn Puff Pipes on a wooden table",
     suited: "Celebrations and gifting",
   },
@@ -46,7 +46,7 @@ export const PACKS = [
     kicker: "Wholesale",
     description:
       "Sacks for shops and events. Call to arrange pickup or delivery.",
-    image: "product/bulk-bright.jpg",
+    image: "product/bulk-bright.webp",
     imageAlt: "Large sack of Corn Puff Pipes, bulk wholesale pack",
     suited: "Kirana, events, resale",
   },

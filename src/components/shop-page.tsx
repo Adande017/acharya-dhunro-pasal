@@ -64,7 +64,7 @@ function messageOf(error: unknown): string {
 function BrandMark({ className }: { className?: string }) {
   return (
     <img
-      src={asset("brand/acharya-dhunro-pasal-logo.png")}
+      src={asset("brand/acharya-dhunro-pasal-logo.webp")}
       alt=""
       width={40}
       height={40}
@@ -175,7 +175,7 @@ export function ShopPage({
         className="watermark-layer"
         aria-hidden="true"
         style={{
-          backgroundImage: `linear-gradient(rgba(243, 238, 228, 0.94), rgba(243, 238, 228, 0.94)), url("${asset("product/basket-bright.jpg")}")`,
+          backgroundImage: `linear-gradient(rgba(243, 238, 228, 0.94), rgba(243, 238, 228, 0.94)), url("${asset("product/basket-bright.webp")}")`,
         }}
       />
       <a

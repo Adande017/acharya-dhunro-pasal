@@ -50,7 +50,7 @@ const EMPTY_PRODUCT_DRAFT: ProductDraft = {
   name: "",
   kicker: "",
   description: "",
-  image: "product/closeup-bright.jpg",
+  image: "product/closeup-bright.webp",
   image_alt: "",
   suited: "",
   barcode: "",

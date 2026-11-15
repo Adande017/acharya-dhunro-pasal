@@ -57,7 +57,7 @@ export function AboutPage({
         className="watermark-layer"
         aria-hidden="true"
         style={{
-          backgroundImage: `linear-gradient(rgba(243, 238, 228, 0.94), rgba(243, 238, 228, 0.94)), url("${asset("product/basket-bright.jpg")}")`,
+          backgroundImage: `linear-gradient(rgba(243, 238, 228, 0.94), rgba(243, 238, 228, 0.94)), url("${asset("product/basket-bright.webp")}")`,
         }}
       />
       <header className="sticky top-0 z-40 border-b border-border/80 bg-bg/90 backdrop-blur-md">
@@ -68,7 +68,7 @@ export function AboutPage({
             className="flex min-w-0 items-center gap-3 text-left"
           >
             <img
-              src={asset("brand/acharya-dhunro-pasal-logo.png")}
+              src={asset("brand/acharya-dhunro-pasal-logo.webp")}
               alt=""
               width={40}
               height={40}
