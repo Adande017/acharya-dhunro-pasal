@@ -309,8 +309,8 @@ export function ShopPage({
         </section>
 
         <section id="order" className="scroll-mt-24 bg-surface/80 px-4 py-16 backdrop-blur-sm sm:px-6 sm:py-20">
-          <div className="mx-auto grid max-w-6xl gap-10 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
-            <div>
+          <div className="mx-auto grid max-w-6xl grid-cols-1 gap-10 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
+            <div className="min-w-0">
               <p className="text-xs font-medium tracking-[0.18em] text-muted uppercase">Order</p>
               <h2 className="mt-2 font-display text-3xl font-medium tracking-tight sm:text-4xl">
                 Tell us the pack. We’ll confirm on the call.
@@ -350,7 +350,7 @@ export function ShopPage({
             </div>
 
             <form
-              className="rounded-3xl bg-bg p-5 shadow-[var(--shadow-border)] sm:p-7"
+              className="min-w-0 rounded-3xl bg-bg p-5 shadow-[var(--shadow-border)] sm:p-7"
               onSubmit={reviewOrder}
             >
               <div className="grid gap-5 sm:grid-cols-2">
@@ -499,24 +499,24 @@ export function ShopPage({
                   {orderError}
                 </p>
               )}
-              <div className="mt-6 flex flex-col gap-2 sm:flex-row">
-                <Button type="submit" className="flex-1">
+              <div className="mt-6 grid gap-2 sm:grid-cols-2">
+                <Button type="submit">
                   Review and place order
                 </Button>
-                <Button asChild variant="outline" className="flex-1">
+                <Button asChild variant="outline">
                   <a href={buildWhatsAppUrl(order)} target="_blank" rel="noopener noreferrer">
                     <WhatsAppIcon className="size-4" />
                     WhatsApp inquiry
                   </a>
                 </Button>
-                <Button asChild variant="outline" className="flex-1">
+                <Button asChild variant="outline">
                   <a href={buildMailtoUrl(order)}>Email the order</a>
                 </Button>
               </div>
               <Button
                 type="button"
                 variant="ghost"
-                className="mt-2 w-full"
+                className="mt-2 h-auto min-h-11 w-full min-w-0 whitespace-normal text-center"
                 onClick={() => setPayOpen(true)}
               >
                 <QrCode />

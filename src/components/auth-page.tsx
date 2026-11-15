@@ -273,8 +273,8 @@ export function AuthPage({
   const showsName = mode === "signup" || (mode === "phone" && phoneIntent === "signup");
 
   return (
-    <main className="page-transition grid min-h-dvh bg-bg sm:grid-cols-[0.9fr_1.1fr]">
-      <section className="relative flex min-h-[112px] flex-col justify-between overflow-hidden bg-accent px-6 py-4 text-accent-foreground sm:min-h-dvh sm:px-6 sm:py-9 lg:px-14 lg:py-12">
+    <main className="page-transition grid min-h-dvh grid-cols-1 bg-bg sm:grid-cols-[0.9fr_1.1fr]">
+      <section className="relative flex min-w-0 min-h-[112px] flex-col justify-between overflow-hidden bg-accent px-6 py-4 text-accent-foreground sm:min-h-dvh sm:px-6 sm:py-9 lg:px-14 lg:py-12">
         <img
           src={asset("product/basket-bright.webp")}
           alt=""
@@ -310,7 +310,7 @@ export function AuthPage({
         </div>
       </section>
 
-      <section className="flex items-center justify-center px-5 py-8 sm:px-6 sm:py-10 lg:px-14">
+      <section className="flex min-w-0 items-center justify-center px-5 py-8 sm:px-6 sm:py-10 lg:px-14">
         <div className="w-full max-w-md">
           <p className="text-sm font-medium text-primary">
             {staffLogin
@@ -578,7 +578,7 @@ export function AuthPage({
                 <Button
                   type="button"
                   variant="outline"
-                  className="w-full justify-start"
+                  className="w-full justify-start px-2"
                   onClick={() => void handleSocialSignIn("google")}
                   disabled={pending}
                 >
@@ -588,7 +588,7 @@ export function AuthPage({
                 <Button
                   type="button"
                   variant="outline"
-                  className="w-full justify-start"
+                  className="w-full justify-start px-2"
                   onClick={() => void handleSocialSignIn("facebook")}
                   disabled={pending}
                 >
@@ -598,7 +598,7 @@ export function AuthPage({
                 <Button
                   type="button"
                   variant="outline"
-                  className="w-full justify-start"
+                  className="w-full justify-start px-2"
                   onClick={() => void handleSocialSignIn("custom:tiktok")}
                   disabled={pending}
                 >
@@ -609,7 +609,7 @@ export function AuthPage({
                   <Button
                     type="button"
                     variant="outline"
-                    className="w-full justify-start"
+                    className="col-span-2 w-full justify-start px-2 sm:col-span-1"
                     onClick={() => {
                       setPhoneIntent(mode);
                       setPhoneNumber("");
