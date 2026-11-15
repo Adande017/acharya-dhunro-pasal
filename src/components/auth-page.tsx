@@ -159,7 +159,7 @@ export function AuthPage({
 
   return (
     <main className="page-transition grid min-h-dvh bg-bg sm:grid-cols-[0.9fr_1.1fr]">
-      <section className="relative flex min-h-[250px] flex-col justify-between overflow-hidden bg-accent px-6 py-6 text-accent-foreground sm:min-h-dvh sm:px-6 sm:py-9 lg:px-14 lg:py-12">
+      <section className="relative flex min-h-[112px] flex-col justify-between overflow-hidden bg-accent px-6 py-4 text-accent-foreground sm:min-h-dvh sm:px-6 sm:py-9 lg:px-14 lg:py-12">
         <img
           src={asset("product/basket-bright.jpg")}
           alt=""
@@ -179,7 +179,7 @@ export function AuthPage({
           <span className="font-display text-lg font-medium tracking-tight">{SHOP.name}</span>
         </a>
 
-        <div id="welcome" className="relative z-10 mt-10 max-w-lg sm:mt-12 lg:mb-8">
+        <div id="welcome" className="relative z-10 mt-10 hidden max-w-lg sm:mt-12 sm:block lg:mb-8">
           <p className="text-xs font-medium tracking-[0.18em] text-white/75 uppercase">
             Small-batch · Kathmandu, Nepal
           </p>
@@ -295,8 +295,8 @@ export function AuthPage({
                     autoComplete={
                       mode === "login" ? "current-password" : "new-password"
                     }
-                    minLength={8}
-                    placeholder="At least 8 characters"
+                    minLength={mode === "login" ? undefined : 8}
+                    placeholder={mode === "login" ? "Enter your password" : "At least 8 characters"}
                     className="pr-12"
                     required
                     disabled={pending}
