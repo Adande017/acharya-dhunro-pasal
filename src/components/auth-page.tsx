@@ -4,7 +4,7 @@ import type { Provider } from "@supabase/supabase-js";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { getAuthRedirectUrl, isSupabaseConfigured, supabase } from "@/lib/supabase";
+import { getAuthRedirectUrl, isSupabaseConfigured } from "@/lib/supabase-config";
 import { asset, SHOP } from "@/lib/shop";
 
 type AuthMode = "login" | "signup" | "forgot" | "reset" | "phone" | "phone-verify";
@@ -84,13 +84,15 @@ export function AuthPage({
 
   async function handleSocialSignIn(provider: Provider | "custom:tiktok") {
     setNotice("");
-    if (!supabase) {
+    if (!isSupabaseConfigured) {
       showMessage("Sign-in setup is incomplete. Please try again later.", "error");
       return;
     }
 
     setPending(true);
     try {
+      const { supabase } = await import("@/lib/supabase");
+      if (!supabase) throw new Error("Sign-in setup is incomplete.");
       const { error } = await supabase.auth.signInWithOAuth({
         // Supabase supports custom OAuth identifiers, but this SDK's Provider type omits them.
         provider: provider as Provider,
@@ -111,7 +113,7 @@ export function AuthPage({
     event.preventDefault();
     setNotice("");
 
-    if (!supabase) {
+    if (!isSupabaseConfigured) {
       showMessage(
         "Sign-in setup is incomplete. You can still browse as a guest; the shop owner needs to add the Supabase project settings.",
         "error",
@@ -137,6 +139,8 @@ export function AuthPage({
 
     setPending(true);
     try {
+      const { supabase } = await import("@/lib/supabase");
+      if (!supabase) throw new Error("Sign-in setup is incomplete.");
       if (mode === "phone") {
         const { error } = await supabase.auth.signInWithOtp({
           phone,

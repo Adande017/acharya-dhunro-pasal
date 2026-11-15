@@ -2,7 +2,7 @@ import { lazy, Suspense, useEffect, useState, type ReactNode } from "react";
 import type { User } from "@supabase/supabase-js";
 import { AuthPage } from "./components/auth-page";
 import { SHOP, type PackId } from "./lib/shop";
-import { supabase } from "./lib/supabase";
+import { isSupabaseConfigured } from "./lib/supabase-config";
 
 const AboutPage = lazy(() =>
   import("./components/about-page").then((module) => ({
@@ -47,7 +47,6 @@ function PageSuspense({ children }: { children: ReactNode }) {
 export default function App() {
   const [user, setUser] = useState<User | null>(null);
   const [guest, setGuest] = useState(false);
-  const [authReady, setAuthReady] = useState(false);
   const [inventoryAccess, setInventoryAccess] = useState<boolean | null>(null);
   const [recoveringPassword, setRecoveringPassword] = useState(false);
   const [showCommunity, setShowCommunity] = useState(
@@ -66,54 +65,55 @@ export default function App() {
   const [notice, setNotice] = useState("");
 
   useEffect(() => {
-    if (!supabase) {
-      setAuthReady(true);
-      return;
-    }
+    if (!isSupabaseConfigured) return;
 
     let active = true;
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((event, session) => {
-      if (!active) return;
-      setUser(session?.user ?? null);
-      if (event === "PASSWORD_RECOVERY") {
-        setRecoveringPassword(true);
-        setGuest(false);
-      } else if (event === "SIGNED_IN" || event === "SIGNED_OUT") {
-        setInventoryAccess(session ? null : false);
-        setRecoveringPassword(false);
-        if (session) {
-          setGuest(false);
-          if (window.location.hash === "#inventory") {
-            setShowCommunity(false);
-            setShowInventory(true);
-            setShowProducts(false);
-            setShowAbout(false);
-          } else {
-            setShowCommunity(true);
-            setShowInventory(false);
-            setShowProducts(false);
-            setShowAbout(false);
-            if (window.location.hash !== "#community") {
-              window.history.replaceState(null, "", "#community");
+    let unsubscribe: (() => void) | undefined;
+    void import("./lib/supabase")
+      .then(({ supabase }) => {
+        if (!active) return null;
+        if (!supabase) throw new Error("Sign-in setup is incomplete.");
+        const {
+          data: { subscription },
+        } = supabase.auth.onAuthStateChange((event, session) => {
+          if (!active) return;
+          setUser(session?.user ?? null);
+          if (event === "PASSWORD_RECOVERY") {
+            setRecoveringPassword(true);
+            setGuest(false);
+          } else if (event === "SIGNED_IN" || event === "SIGNED_OUT") {
+            setInventoryAccess(session ? null : false);
+            setRecoveringPassword(false);
+            if (session) {
+              setGuest(false);
+              if (window.location.hash === "#inventory") {
+                setShowCommunity(false);
+                setShowInventory(true);
+                setShowProducts(false);
+                setShowAbout(false);
+              } else {
+                setShowCommunity(true);
+                setShowInventory(false);
+                setShowProducts(false);
+                setShowAbout(false);
+                if (window.location.hash !== "#community") {
+                  window.history.replaceState(null, "", "#community");
+                }
+              }
             }
           }
-        }
-      }
-      setAuthReady(true);
-    });
-
-    void supabase.auth
-      .getSession()
-      .then(({ data, error }) => {
-        if (!active) return;
+        });
+        unsubscribe = () => subscription.unsubscribe();
+        return supabase.auth.getSession();
+      })
+      .then((result) => {
+        if (!active || !result) return;
+        const { data, error } = result;
         if (error) {
           setNotice("We couldn’t restore your sign-in. Please log in again.");
         } else {
           setUser(data.session?.user ?? null);
         }
-        setAuthReady(true);
       })
       .catch((error: unknown) => {
         if (!active) return;
@@ -122,17 +122,16 @@ export default function App() {
             ? `We couldn’t restore your sign-in: ${error.message}`
             : "We couldn’t restore your sign-in. Please try again.",
         );
-        setAuthReady(true);
       });
 
     return () => {
       active = false;
-      subscription.unsubscribe();
+      unsubscribe?.();
     };
   }, []);
 
   useEffect(() => {
-    if (!user || !supabase) {
+    if (!user || !isSupabaseConfigured) {
       setInventoryAccess(false);
       return;
     }
@@ -141,6 +140,8 @@ export default function App() {
     setInventoryAccess(null);
     void (async () => {
       try {
+        const { supabase } = await import("./lib/supabase");
+        if (!supabase) throw new Error("Staff access could not be verified.");
         const { data, error } = await supabase.rpc("is_inventory_staff");
         if (!active) return;
         if (error) {
@@ -209,12 +210,14 @@ export default function App() {
   }
 
   async function signOut() {
-    if (!supabase) {
+    if (!isSupabaseConfigured) {
       setNotice("Sign-in is not configured yet. You can continue browsing as a guest.");
       return;
     }
 
     try {
+      const { supabase } = await import("./lib/supabase");
+      if (!supabase) throw new Error("Sign-in is not configured.");
       const { error } = await supabase.auth.signOut();
       if (error) {
         setNotice("We couldn’t sign you out. Please try again.");
@@ -228,14 +231,6 @@ export default function App() {
           : "We couldn’t sign you out. Please try again.",
       );
     }
-  }
-
-  if (!authReady) {
-    return (
-      <main className="grid min-h-dvh place-items-center bg-bg px-6 text-sm text-muted">
-        Restoring your sign-in…
-      </main>
-    );
   }
 
   if (user && !recoveringPassword) {
