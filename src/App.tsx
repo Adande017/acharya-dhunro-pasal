@@ -9,6 +9,11 @@ const AboutPage = lazy(() =>
     default: module.AboutPage,
   })),
 );
+const GoogleAccountSetupPage = lazy(() =>
+  import("./components/google-account-setup-page").then((module) => ({
+    default: module.GoogleAccountSetupPage,
+  })),
+);
 const CommunityPage = lazy(() =>
   import("./components/community-page").then((module) => ({
     default: module.CommunityPage,
@@ -295,6 +300,17 @@ export default function App() {
   }
 
   if (user && !recoveringPassword) {
+    if (
+      user.app_metadata.provider === "google" &&
+      user.user_metadata.pasal_account_setup_completed !== true
+    ) {
+      return (
+        <PageSuspense>
+          <GoogleAccountSetupPage user={user} />
+        </PageSuspense>
+      );
+    }
+
     if (showOwner && ownerAccess === null) {
       return (
         <main className="grid min-h-dvh place-items-center bg-bg px-6 text-sm text-muted">
