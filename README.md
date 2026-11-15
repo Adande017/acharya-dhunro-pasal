@@ -57,6 +57,8 @@ The product editor does not change product prices. Staff access and inventory ed
 
 The owner (`roms7291@gmail.com`) can review the **Owner activity log** on the same inventory page. The log records stock, product, and staff-access changes with the acting account and before/after values. Records remain in Supabase; the page loads them in batches, with older activity available on demand. Only the owner account can read this log.
 
+The **Owner dashboard** button on the inventory page shows all member-account, customer-order, inventory, product, staff, and activity records in the database, loading records in pages. Member email addresses and customer order contact details are visible only to the owner. Private one-to-one messages and authentication credentials are not included.
+
 ## Member community
 
 After sign-in, members land on the community feed, which is connected to the shop in the same site. Members can manage a display name and profile photo, publish posts, comment, like posts, discover suggested members, send and accept friend requests, and message other members. Community profiles, posts, comments, friendships, and messages are readable only by signed-in members. Profile photos are stored in a private Supabase Storage bucket and served with short-lived signed URLs. Guests can still browse and order from the shop.
@@ -67,6 +69,8 @@ Before using the community, apply these migrations in order from **Supabase → 
 2. [`supabase/migrations/20261111181608_add_friendships.sql`](supabase/migrations/20261111181608_add_friendships.sql)
 
 The community migration creates the tables and row-level security policies, provisions profiles for existing accounts, and creates the private avatar bucket. Do not disable RLS or make the avatar bucket public.
+
+After applying both community migrations and all inventory/order migrations above, apply [`supabase/migrations/20261116000000_unique_usernames_and_owner_accounts.sql`](supabase/migrations/20261116000000_unique_usernames_and_owner_accounts.sql). It assigns each existing and new member a unique username, allows members to change their username when it is available, and adds the owner-only account listing used by the dashboard. New Google sign-ins go straight to the community; usernames are created automatically without an extra setup step.
 
 ## Blogspot / Blogger edition
 

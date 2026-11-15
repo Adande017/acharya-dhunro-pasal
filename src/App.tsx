@@ -19,6 +19,11 @@ const InventoryPage = lazy(() =>
     default: module.InventoryPage,
   })),
 );
+const OwnerDashboardPage = lazy(() =>
+  import("./components/owner-dashboard-page").then((module) => ({
+    default: module.OwnerDashboardPage,
+  })),
+);
 const ProductsPage = lazy(() =>
   import("./components/products-page").then((module) => ({
     default: module.ProductsPage,
@@ -48,12 +53,16 @@ export default function App() {
   const [user, setUser] = useState<User | null>(null);
   const [guest, setGuest] = useState(false);
   const [inventoryAccess, setInventoryAccess] = useState<boolean | null>(null);
+  const [ownerAccess, setOwnerAccess] = useState<boolean | null>(null);
   const [recoveringPassword, setRecoveringPassword] = useState(false);
   const [showCommunity, setShowCommunity] = useState(
     () => window.location.hash === "#community" || window.location.hash === "",
   );
   const [showInventory, setShowInventory] = useState(
     () => window.location.hash === "#inventory",
+  );
+  const [showOwner, setShowOwner] = useState(
+    () => window.location.hash === "#owner",
   );
   const [showProducts, setShowProducts] = useState(
     () => window.location.hash === "#products",
@@ -81,29 +90,62 @@ export default function App() {
           if (event === "PASSWORD_RECOVERY") {
             setRecoveringPassword(true);
             setGuest(false);
-          } else if (event === "SIGNED_IN" || event === "SIGNED_OUT") {
+          } else if (
+            event === "INITIAL_SESSION" ||
+            event === "SIGNED_IN" ||
+            event === "SIGNED_OUT"
+          ) {
             setInventoryAccess(session ? null : false);
+            setOwnerAccess(session ? null : false);
             setRecoveringPassword(false);
-            if (session) {
-              setGuest(false);
-              const returnToStaff =
-                window.location.hash === "#inventory" ||
-                window.sessionStorage.getItem("auth-return-to-staff") === "true";
-              if (returnToStaff) {
-                window.sessionStorage.removeItem("auth-return-to-staff");
-                window.history.replaceState(null, "", "#inventory");
-                setShowCommunity(false);
-                setShowInventory(true);
-                setShowProducts(false);
-                setShowAbout(false);
-              } else {
-                setShowCommunity(true);
-                setShowInventory(false);
-                setShowProducts(false);
-                setShowAbout(false);
-                if (window.location.hash !== "#community") {
-                  window.history.replaceState(null, "", "#community");
-                }
+          }
+
+          const currentHash = window.location.hash;
+          const explicitRoute = [
+            "#about",
+            "#community",
+            "#inventory",
+            "#order",
+            "#owner",
+            "#products",
+            "#top",
+          ].includes(currentHash);
+          const shouldRouteToAuthenticatedPage =
+            event === "SIGNED_IN" ||
+            (event === "INITIAL_SESSION" && Boolean(session) && !explicitRoute);
+
+          if (shouldRouteToAuthenticatedPage && session) {
+            setInventoryAccess(null);
+            setRecoveringPassword(false);
+            setGuest(false);
+            const returnToOwner = currentHash === "#owner";
+            const returnToStaff =
+              !returnToOwner &&
+              (currentHash === "#inventory" ||
+                window.sessionStorage.getItem("auth-return-to-staff") === "true");
+            window.sessionStorage.removeItem("auth-return-to-staff");
+            if (returnToOwner) {
+              window.history.replaceState(null, "", "#owner");
+              setShowOwner(true);
+              setShowCommunity(false);
+              setShowInventory(false);
+              setShowProducts(false);
+              setShowAbout(false);
+            } else if (returnToStaff) {
+              window.history.replaceState(null, "", "#inventory");
+              setShowOwner(false);
+              setShowCommunity(false);
+              setShowInventory(true);
+              setShowProducts(false);
+              setShowAbout(false);
+            } else {
+              setShowCommunity(true);
+              setShowOwner(false);
+              setShowInventory(false);
+              setShowProducts(false);
+              setShowAbout(false);
+              if (window.location.hash !== "#community") {
+                window.history.replaceState(null, "", "#community");
               }
             }
           }
@@ -138,6 +180,7 @@ export default function App() {
   useEffect(() => {
     if (!user || !isSupabaseConfigured) {
       setInventoryAccess(false);
+      setOwnerAccess(false);
       return;
     }
 
@@ -147,18 +190,24 @@ export default function App() {
       try {
         const { supabase } = await import("./lib/supabase");
         if (!supabase) throw new Error("Staff access could not be verified.");
-        const { data, error } = await supabase.rpc("is_inventory_staff");
+        const [staffResult, ownerResult] = await Promise.all([
+          supabase.rpc("is_inventory_staff"),
+          supabase.rpc("is_inventory_owner"),
+        ]);
         if (!active) return;
-        if (error) {
+        if (staffResult.error || ownerResult.error) {
           setInventoryAccess(false);
-          setNotice("Staff access could not be verified. Please try again later.");
+          setOwnerAccess(false);
+          setNotice("Account access could not be verified. Please try again later.");
           return;
         }
-        setInventoryAccess(data);
+        setInventoryAccess(staffResult.data);
+        setOwnerAccess(ownerResult.data);
       } catch {
         if (!active) return;
         setInventoryAccess(false);
-        setNotice("Staff access could not be verified. Please try again later.");
+        setOwnerAccess(false);
+        setNotice("Account access could not be verified. Please try again later.");
       }
     })();
 
@@ -172,6 +221,7 @@ export default function App() {
       setShowProducts(window.location.hash === "#products");
       setShowAbout(window.location.hash === "#about");
       setShowInventory(window.location.hash === "#inventory");
+      setShowOwner(window.location.hash === "#owner");
       setShowCommunity(
         window.location.hash === "#community" || window.location.hash === "",
       );
@@ -190,7 +240,7 @@ export default function App() {
   }, [showAbout, showCommunity, showProducts]);
 
   function navigateTo(
-    page: "shop" | "community" | "products" | "about" | "inventory",
+    page: "shop" | "community" | "products" | "about" | "inventory" | "owner",
     destination = "top",
   ) {
     const hash =
@@ -198,18 +248,21 @@ export default function App() {
         ? "#community"
         : page === "inventory"
           ? "#inventory"
-          : page === "products"
-            ? "#products"
-            : page === "about"
-              ? "#about"
-              : destination === "order"
-                ? "#order"
-                : "#top";
+          : page === "owner"
+            ? "#owner"
+            : page === "products"
+              ? "#products"
+              : page === "about"
+                ? "#about"
+                : destination === "order"
+                  ? "#order"
+                  : "#top";
     if (window.location.hash !== hash) {
       window.history.pushState(null, "", hash);
     }
     setShowCommunity(page === "community");
     setShowInventory(page === "inventory");
+    setShowOwner(page === "owner");
     setShowProducts(page === "products");
     setShowAbout(page === "about");
   }
@@ -239,6 +292,45 @@ export default function App() {
   }
 
   if (user && !recoveringPassword) {
+    if (showOwner && ownerAccess === null) {
+      return (
+        <main className="grid min-h-dvh place-items-center bg-bg px-6 text-sm text-muted">
+          Checking owner access…
+        </main>
+      );
+    }
+
+    if (showOwner && !ownerAccess) {
+      return (
+        <main className="grid min-h-dvh place-items-center bg-bg px-6 text-center text-fg">
+          <div className="max-w-md">
+            <h1 className="font-display text-3xl font-semibold">Owner access required</h1>
+            <p className="mt-3 text-sm leading-relaxed text-muted">
+              This dashboard is available only to the verified shop owner account.
+            </p>
+            <button
+              type="button"
+              onClick={() => navigateTo("shop")}
+              className="mt-6 rounded-xl bg-accent px-5 py-3 text-sm font-medium text-accent-foreground"
+            >
+              Back to shop
+            </button>
+          </div>
+        </main>
+      );
+    }
+
+    if (showOwner && ownerAccess) {
+      return (
+        <PageSuspense>
+          <OwnerDashboardPage
+            onInventory={() => navigateTo("inventory")}
+            onSignOut={signOut}
+          />
+        </PageSuspense>
+      );
+    }
+
     if (showInventory && inventoryAccess === null) {
       return (
         <main className="grid min-h-dvh place-items-center bg-bg px-6 text-sm text-muted">
@@ -278,6 +370,7 @@ export default function App() {
         >
           <InventoryPage
             onShop={() => navigateTo("shop")}
+            onOwnerDashboard={() => navigateTo("owner")}
             onSignOut={signOut}
             isOwner={user.email?.toLowerCase() === SHOP.email.toLowerCase()}
           />
@@ -347,7 +440,7 @@ export default function App() {
         onContinue={() => setGuest(true)}
         onStaffLogin={() => navigateTo("inventory")}
         onCustomerLogin={() => navigateTo("shop")}
-        staffLogin={showInventory}
+        staffLogin={showInventory || showOwner}
         initialNotice={notice}
         recoveringPassword={recoveringPassword}
         onPasswordChanged={() => {

@@ -20,6 +20,7 @@ export type Database = {
         {
           id: string;
           display_name: string;
+          username: string;
           avatar_path: string | null;
           created_at: string;
           updated_at: string;
@@ -27,10 +28,12 @@ export type Database = {
         {
           id: string;
           display_name: string;
+          username: string;
           avatar_path?: string | null;
         },
         {
           display_name?: string;
+          username?: string;
           avatar_path?: string | null;
           updated_at?: string;
         }
@@ -271,6 +274,17 @@ export type Database = {
       set_inventory_product_active: {
         Args: { p_product_id: string; p_active: boolean };
         Returns: undefined;
+      };
+      owner_list_accounts: {
+        Args: Record<string, never>;
+        Returns: Array<{
+          user_id: string;
+          email: string | null;
+          username: string | null;
+          display_name: string | null;
+          created_at: string;
+          last_sign_in_at: string | null;
+        }>;
       };
     };
     Enums: Record<string, never>;

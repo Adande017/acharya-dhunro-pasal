@@ -102,10 +102,12 @@ function BarcodeLabel({ item, productName }: { item: InventoryItem; productName:
 
 export function InventoryPage({
   onShop,
+  onOwnerDashboard,
   onSignOut,
   isOwner,
 }: {
   onShop: () => void;
+  onOwnerDashboard: () => void;
   onSignOut: () => void;
   isOwner: boolean;
 }) {
@@ -528,6 +530,13 @@ export function InventoryPage({
             </div>
           </div>
           <div className="flex items-center gap-2">
+            {isOwner && (
+              <Button type="button" variant="outline" size="sm" onClick={onOwnerDashboard}>
+                <ClipboardList />
+                <span className="hidden sm:inline">Owner dashboard</span>
+                <span className="sm:hidden">Owner</span>
+              </Button>
+            )}
             <Button type="button" variant="outline" size="sm" onClick={onShop}>
               <ArrowLeft />
               <span className="hidden sm:inline">Back to shop</span>

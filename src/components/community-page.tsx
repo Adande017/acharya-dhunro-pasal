@@ -24,6 +24,7 @@ type CommunityTab = "feed" | "members" | "messages" | "profile";
 type ProfileRow = {
   id: string;
   display_name: string;
+  username: string;
   avatar_path: string | null;
   created_at: string;
 };
@@ -178,6 +179,7 @@ export function CommunityPage({
   const [messages, setMessages] = useState<MessageRow[]>([]);
   const [friendships, setFriendships] = useState<FriendshipRow[]>([]);
   const [displayName, setDisplayName] = useState("");
+  const [username, setUsername] = useState("");
   const [postText, setPostText] = useState("");
   const [commentText, setCommentText] = useState<Record<string, string>>({});
   const [messageText, setMessageText] = useState("");
@@ -213,6 +215,7 @@ export function CommunityPage({
     if (!result) throw new Error("Your member profile could not be loaded.");
     setProfile(result);
     setDisplayName(result.display_name);
+    setUsername(result.username);
     return result;
   }
 
@@ -278,6 +281,7 @@ export function CommunityPage({
         author: allProfiles.find((member) => member.id === post.author_id) ?? {
           id: post.author_id,
           display_name: "Member",
+          username: "member",
           avatar_path: null,
           created_at: post.created_at,
           avatarUrl: null,
@@ -289,6 +293,7 @@ export function CommunityPage({
             author: allProfiles.find((member) => member.id === comment.author_id) ?? {
               id: comment.author_id,
               display_name: "Member",
+              username: "member",
               avatar_path: null,
               created_at: comment.created_at,
               avatarUrl: null,
@@ -498,8 +503,13 @@ export function CommunityPage({
     const client = supabase;
     if (!client || !profile) return;
     const nextName = displayName.trim();
+    const nextUsername = username.trim().toLowerCase();
     if (!nextName || nextName.length > 60) {
       setNotice("Enter a name between 1 and 60 characters.");
+      return;
+    }
+    if (!/^[a-z0-9_]{3,50}$/.test(nextUsername)) {
+      setNotice("Choose a username with 3–50 lowercase letters, numbers, or underscores.");
       return;
     }
     await withPending(async () => {
@@ -517,10 +527,20 @@ export function CommunityPage({
       }
       const { data, error } = await client
         .from("profiles")
-        .update({ display_name: nextName, avatar_path: avatarPath })
+        .update({
+          display_name: nextName,
+          username: nextUsername,
+          avatar_path: avatarPath,
+        })
         .eq("id", user.id)
         .select("*")
         .single();
+      if (error?.code === "23505") {
+        throw new Error("That username is already taken. Please choose another.");
+      }
+      if (error?.code === "23514") {
+        throw new Error("Choose a username with 3–50 lowercase letters, numbers, or underscores.");
+      }
       if (error) throw error;
       const [updatedProfile] = await signedProfiles([data]);
       if (!updatedProfile) throw new Error("Your profile could not be refreshed.");
@@ -688,6 +708,7 @@ export function CommunityPage({
               <Avatar profile={profile ?? undefined} size="sm" />
               <div className="min-w-0">
                 <p className="truncate text-sm font-medium">{profile?.display_name ?? "Your profile"}</p>
+                <p className="truncate text-xs text-muted">@{profile?.username ?? "member"}</p>
                 <p className="truncate text-xs text-muted">{user.email}</p>
               </div>
             </div>
@@ -763,6 +784,7 @@ export function CommunityPage({
                           <Avatar profile={item.author} />
                           <div className="min-w-0">
                             <p className="truncate text-sm font-semibold">{item.author.display_name}</p>
+                            <p className="truncate text-xs text-muted">@{item.author.username}</p>
                             <time className="text-xs text-muted" dateTime={item.post.created_at}>
                               {formatTime(item.post.created_at)}
                             </time>
@@ -847,7 +869,10 @@ export function CommunityPage({
                         {incomingRequests.map(({ friendship, member }) => (
                           <article key={`${friendship.user_low}-${friendship.user_high}`} className="flex min-w-0 items-center gap-3 rounded-2xl bg-surface p-4 shadow-[var(--shadow-border)]">
                             <Avatar profile={member} />
-                            <p className="min-w-0 flex-1 truncate text-sm font-semibold">{member.display_name}</p>
+                            <div className="min-w-0 flex-1">
+                              <p className="truncate text-sm font-semibold">{member.display_name}</p>
+                              <p className="truncate text-xs text-muted">@{member.username}</p>
+                            </div>
                             <Button size="sm" onClick={() => void respondToFriendRequest(member.id, true)} disabled={pending}>
                               <Check /> Accept
                             </Button>
@@ -876,7 +901,7 @@ export function CommunityPage({
                         <Avatar profile={member} />
                         <div className="min-w-0 flex-1">
                           <p className="truncate text-sm font-semibold">{member.display_name}</p>
-                          <p className="text-xs text-muted">Pasal community member</p>
+                          <p className="truncate text-xs text-muted">@{member.username}</p>
                         </div>
                         <Button size="sm" variant="outline" onClick={() => void requestFriend(member.id)} disabled={pending || requestSent}>
                           <UserPlus /> {requestSent ? "Request sent" : "Add friend"}
@@ -899,7 +924,10 @@ export function CommunityPage({
                       {friends.map((member) => (
                         <article key={member.id} className="flex min-w-0 items-center gap-3 rounded-2xl bg-surface p-4 shadow-[var(--shadow-border)]">
                           <Avatar profile={member} />
-                          <p className="min-w-0 flex-1 truncate text-sm font-semibold">{member.display_name}</p>
+                          <div className="min-w-0 flex-1">
+                            <p className="truncate text-sm font-semibold">{member.display_name}</p>
+                            <p className="truncate text-xs text-muted">@{member.username}</p>
+                          </div>
                           <Button size="sm" variant="outline" onClick={() => void startConversation(member)} disabled={pending}>
                             <MessageCircle /> Message
                           </Button>
@@ -945,6 +973,24 @@ export function CommunityPage({
                         maxLength={60}
                         required
                       />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="profile-username">Username</Label>
+                      <Input
+                        id="profile-username"
+                        value={username}
+                        onChange={(event) =>
+                          setUsername(event.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ""))
+                        }
+                        maxLength={50}
+                        minLength={3}
+                        pattern="[a-z0-9_]{3,50}"
+                        autoComplete="username"
+                        required
+                      />
+                      <p className="text-xs text-muted">
+                        Your unique username is generated automatically. You can change it if the new one is available. Use 3–50 lowercase letters, numbers, or underscores.
+                      </p>
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="profile-email">Email address</Label>
