@@ -1,5 +1,5 @@
 import { useEffect, useState, type FormEvent } from "react";
-import { ArrowRight, Eye, EyeOff, Smartphone } from "lucide-react";
+import { ArrowRight, Eye, EyeOff } from "lucide-react";
 import type { Provider } from "@supabase/supabase-js";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -66,25 +66,6 @@ function GoogleLogo() {
   );
 }
 
-function FacebookLogo() {
-  return (
-    <svg aria-hidden="true" viewBox="0 0 24 24" className="size-4 shrink-0">
-      <circle cx="12" cy="12" r="12" fill="#1877F2" />
-      <path fill="#FFFFFF" d="M13.55 20v-6.2h2.08l.31-2.42h-2.39V9.84c0-.7.2-1.17 1.2-1.17h1.28V6.51c-.22-.03-.98-.1-1.86-.1-1.84 0-3.1 1.12-3.1 3.19v1.78H9v2.42h2.07V20h2.48Z" />
-    </svg>
-  );
-}
-
-function TikTokLogo() {
-  return (
-    <svg aria-hidden="true" viewBox="0 0 24 24" className="size-4 shrink-0">
-      <path d="M14.7 3.5v10.2a4 4 0 1 1-3.7-4" fill="none" stroke="#25F4EE" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M16.1 3.5v10.2a4 4 0 1 1-3.7-4" fill="none" stroke="#FE2C55" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M15.4 3.5v10.2a4 4 0 1 1-3.7-4M15.4 3.5c.3 2.2 1.6 3.6 3.8 4.2" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
-}
-
 export function AuthPage({
   onContinue,
   onStaffLogin,
@@ -109,7 +90,7 @@ export function AuthPage({
   const [notice, setNotice] = useState(initialNotice);
   const [noticeKind, setNoticeKind] = useState<NoticeKind>("info");
   const [pending, setPending] = useState(false);
-  const [phoneIntent, setPhoneIntent] = useState<"login" | "signup">("login");
+  const [phoneIntent] = useState<"login" | "signup">("login");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [unconfirmedEmail, setUnconfirmedEmail] = useState("");
 
@@ -135,7 +116,7 @@ export function AuthPage({
     setUnconfirmedEmail("");
   }
 
-  async function handleSocialSignIn(provider: Provider | "custom:tiktok") {
+  async function handleSocialSignIn(provider: Provider) {
     setNotice("");
     if (!isSupabaseConfigured) {
       showMessage("Sign-in setup is incomplete. Please try again later.", "error");
@@ -152,8 +133,7 @@ export function AuthPage({
         window.sessionStorage.setItem("auth-return-to-staff", "true");
       }
       const { error } = await supabase.auth.signInWithOAuth({
-        // Supabase supports custom OAuth identifiers, but this SDK's Provider type omits them.
-        provider: provider as Provider,
+        provider,
         options: { redirectTo: getAuthRedirectUrl() },
       });
       if (error) throw error;
@@ -629,7 +609,7 @@ export function AuthPage({
                 <span>or continue with</span>
                 <span className="h-px flex-1 bg-border" />
               </div>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-1 gap-2">
                 <Button
                   type="button"
                   variant="outline"
@@ -640,42 +620,6 @@ export function AuthPage({
                   <GoogleLogo />
                   Google
                 </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="w-full justify-start px-2"
-                  onClick={() => void handleSocialSignIn("facebook")}
-                  disabled={pending}
-                >
-                  <FacebookLogo />
-                  Facebook
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="w-full justify-start px-2"
-                  onClick={() => void handleSocialSignIn("custom:tiktok")}
-                  disabled={pending}
-                >
-                  <TikTokLogo />
-                  TikTok
-                </Button>
-                {!staffLogin && (
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className="col-span-2 w-full justify-start px-2 sm:col-span-1"
-                    onClick={() => {
-                      setPhoneIntent(mode);
-                      setPhoneNumber("");
-                      changeMode("phone");
-                    }}
-                    disabled={pending}
-                  >
-                    <Smartphone aria-hidden="true" />
-                    Continue with phone
-                  </Button>
-                )}
               </div>
             </div>
           )}
