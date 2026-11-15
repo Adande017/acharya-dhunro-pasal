@@ -28,7 +28,7 @@ function readableAuthError(error: Error): string {
     return "That email and password don’t match. Check them and try again.";
   }
   if (message.includes("email not confirmed")) {
-    return "Please confirm your email using the link we sent before logging in.";
+    return "Please confirm your email before logging in. Check your inbox and spam folder, or resend the link below.";
   }
   if (message.includes("too many requests") || message.includes("rate limit")) {
     return "Too many attempts. Please wait a little while and try again.";
@@ -46,6 +46,13 @@ function readableAuthError(error: Error): string {
     return "That verification code is invalid or expired. Request a new code and try again.";
   }
   return error.message;
+}
+
+function isUnconfirmedEmail(error: unknown): boolean {
+  if (!(error instanceof Error)) return false;
+  const code =
+    "code" in error && typeof error.code === "string" ? error.code.toLowerCase() : "";
+  return code === "email_not_confirmed" || error.message.toLowerCase().includes("email not confirmed");
 }
 
 function GoogleLogo() {
@@ -104,6 +111,7 @@ export function AuthPage({
   const [pending, setPending] = useState(false);
   const [phoneIntent, setPhoneIntent] = useState<"login" | "signup">("login");
   const [phoneNumber, setPhoneNumber] = useState("");
+  const [unconfirmedEmail, setUnconfirmedEmail] = useState("");
 
   useEffect(() => {
     if (recoveringPassword) setMode("reset");
@@ -124,6 +132,7 @@ export function AuthPage({
   function changeMode(nextMode: AuthMode) {
     setMode(nextMode);
     setNotice("");
+    setUnconfirmedEmail("");
   }
 
   async function handleSocialSignIn(provider: Provider | "custom:tiktok") {
@@ -163,6 +172,7 @@ export function AuthPage({
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setNotice("");
+    setUnconfirmedEmail("");
 
     if (!isSupabaseConfigured) {
       showMessage(
@@ -255,10 +265,39 @@ export function AuthPage({
         onPasswordChanged();
       }
     } catch (error: unknown) {
+      if (isUnconfirmedEmail(error)) setUnconfirmedEmail(email);
       if (error instanceof Error) {
         showMessage(readableAuthError(error), "error");
       } else {
         showMessage("We couldn’t complete that request. Please try again.", "error");
+      }
+    } finally {
+      setPending(false);
+    }
+  }
+
+  async function resendConfirmation(): Promise<void> {
+    if (!unconfirmedEmail) return;
+    setPending(true);
+    setNotice("");
+    try {
+      const { supabase } = await import("@/lib/supabase");
+      if (!supabase) throw new Error("Sign-in setup is incomplete.");
+      const { error } = await supabase.auth.resend({
+        type: "signup",
+        email: unconfirmedEmail,
+        options: { emailRedirectTo: getAuthRedirectUrl() },
+      });
+      if (error) throw error;
+      showMessage(
+        "If this address can be confirmed, a new link is on its way. Check your inbox and spam folder.",
+        "success",
+      );
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        showMessage(readableAuthError(error), "error");
+      } else {
+        showMessage("We couldn’t resend the confirmation link. Please try again.", "error");
       }
     } finally {
       setPending(false);
@@ -442,6 +481,12 @@ export function AuthPage({
                   type="email"
                   autoComplete="email"
                   placeholder="you@example.com"
+                  onChange={(event) => {
+                    if (unconfirmedEmail && event.target.value.trim() !== unconfirmedEmail) {
+                      setUnconfirmedEmail("");
+                      setNotice("");
+                    }
+                  }}
                   required
                   disabled={pending}
                 />
@@ -533,6 +578,16 @@ export function AuthPage({
             >
               {notice}
             </p>
+            {mode === "login" && unconfirmedEmail && (
+              <button
+                type="button"
+                className="w-full text-center text-sm font-medium text-primary underline-offset-4 hover:underline disabled:opacity-50"
+                onClick={() => void resendConfirmation()}
+                disabled={pending}
+              >
+                {pending ? "Sending confirmation link…" : "Resend confirmation email"}
+              </button>
+            )}
           </form>
 
           {mode === "phone-verify" && (
