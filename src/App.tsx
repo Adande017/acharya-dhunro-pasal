@@ -86,7 +86,12 @@ export default function App() {
             setRecoveringPassword(false);
             if (session) {
               setGuest(false);
-              if (window.location.hash === "#inventory") {
+              const returnToStaff =
+                window.location.hash === "#inventory" ||
+                window.sessionStorage.getItem("auth-return-to-staff") === "true";
+              if (returnToStaff) {
+                window.sessionStorage.removeItem("auth-return-to-staff");
+                window.history.replaceState(null, "", "#inventory");
                 setShowCommunity(false);
                 setShowInventory(true);
                 setShowProducts(false);
@@ -248,7 +253,7 @@ export default function App() {
           <div className="max-w-md">
             <h1 className="font-display text-3xl font-semibold">Staff access required</h1>
             <p className="mt-3 text-sm leading-relaxed text-muted">
-              This account is not approved for inventory. Ask the shop owner to add your email, then sign in again.
+              This account is not approved for inventory. Sign in with the shop owner account ({SHOP.email}), or ask the owner to approve this account’s email under Staff access.
             </p>
             <button
               type="button"

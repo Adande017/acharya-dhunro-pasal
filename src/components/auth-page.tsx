@@ -1,5 +1,5 @@
 import { useEffect, useState, type FormEvent } from "react";
-import { ArrowRight, Eye, EyeOff } from "lucide-react";
+import { ArrowRight, Eye, EyeOff, Smartphone } from "lucide-react";
 import type { Provider } from "@supabase/supabase-js";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,7 +11,19 @@ type AuthMode = "login" | "signup" | "forgot" | "reset" | "phone" | "phone-verif
 type NoticeKind = "error" | "info" | "success";
 
 function readableAuthError(error: Error): string {
-  const message = error.message.toLowerCase();
+  const code =
+    "code" in error && typeof error.code === "string" ? error.code.toLowerCase() : "";
+  const message = `${error.message} ${code}`.toLowerCase();
+  if (message.includes("otp_disabled")) {
+    return "Phone sign-in is not enabled yet. The shop owner needs to enable Phone Auth and configure an SMS provider in Supabase. SMS delivery may cost extra.";
+  }
+  if (
+    message.includes("provider is not enabled") ||
+    message.includes("provider_disabled") ||
+    message.includes("unsupported provider")
+  ) {
+    return "This sign-in provider is not enabled yet. The shop owner needs to configure it in Supabase Auth.";
+  }
   if (message.includes("invalid login credentials")) {
     return "That email and password don’t match. Check them and try again.";
   }
@@ -34,6 +46,36 @@ function readableAuthError(error: Error): string {
     return "That verification code is invalid or expired. Request a new code and try again.";
   }
   return error.message;
+}
+
+function GoogleLogo() {
+  return (
+    <svg aria-hidden="true" viewBox="0 0 48 48" className="size-4 shrink-0">
+      <path fill="#4285F4" d="M47.5 24.55c0-1.57-.14-3.08-.4-4.55H24v9.02h13.22a11.3 11.3 0 0 1-4.9 7.42l7.72 5.99c4.5-4.16 7.46-10.3 7.46-17.88Z" />
+      <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.91-5.8l-7.72-5.99c-2.14 1.44-4.87 2.3-8.19 2.3-6.29 0-11.63-4.24-13.53-9.95l-7.98 6.15C6.43 42.62 14.59 48 24 48Z" />
+      <path fill="#FBBC05" d="M10.47 28.56a14.4 14.4 0 0 1 0-9.12l-7.98-6.15a24 24 0 0 0 0 21.42l7.98-6.15Z" />
+      <path fill="#EA4335" d="M24 9.5c3.54 0 6.72 1.22 9.22 3.6l6.9-6.9C35.9 2.38 30.47 0 24 0 14.59 0 6.43 5.38 2.49 13.29l7.98 6.15C12.37 13.74 17.71 9.5 24 9.5Z" />
+    </svg>
+  );
+}
+
+function FacebookLogo() {
+  return (
+    <svg aria-hidden="true" viewBox="0 0 24 24" className="size-4 shrink-0">
+      <circle cx="12" cy="12" r="12" fill="#1877F2" />
+      <path fill="#FFFFFF" d="M13.55 20v-6.2h2.08l.31-2.42h-2.39V9.84c0-.7.2-1.17 1.2-1.17h1.28V6.51c-.22-.03-.98-.1-1.86-.1-1.84 0-3.1 1.12-3.1 3.19v1.78H9v2.42h2.07V20h2.48Z" />
+    </svg>
+  );
+}
+
+function TikTokLogo() {
+  return (
+    <svg aria-hidden="true" viewBox="0 0 24 24" className="size-4 shrink-0">
+      <path d="M14.7 3.5v10.2a4 4 0 1 1-3.7-4" fill="none" stroke="#25F4EE" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M16.1 3.5v10.2a4 4 0 1 1-3.7-4" fill="none" stroke="#FE2C55" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M15.4 3.5v10.2a4 4 0 1 1-3.7-4M15.4 3.5c.3 2.2 1.6 3.6 3.8 4.2" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
 }
 
 export function AuthPage({
@@ -93,6 +135,9 @@ export function AuthPage({
     try {
       const { supabase } = await import("@/lib/supabase");
       if (!supabase) throw new Error("Sign-in setup is incomplete.");
+      if (staffLogin) {
+        window.sessionStorage.setItem("auth-return-to-staff", "true");
+      }
       const { error } = await supabase.auth.signInWithOAuth({
         // Supabase supports custom OAuth identifiers, but this SDK's Provider type omits them.
         provider: provider as Provider,
@@ -100,6 +145,9 @@ export function AuthPage({
       });
       if (error) throw error;
     } catch (error: unknown) {
+      if (staffLogin) {
+        window.sessionStorage.removeItem("auth-return-to-staff");
+      }
       if (error instanceof Error) {
         showMessage(readableAuthError(error), "error");
       } else {
@@ -289,7 +337,7 @@ export function AuthPage({
               : mode === "phone-verify"
                 ? `Enter the code we sent to ${phoneNumber}.`
                 : staffLogin
-              ? "Use your own account. Inventory access is limited to emails approved by the shop owner."
+              ? "Use the shop owner’s account or an email approved for inventory. Configured social sign-in is also available."
               : mode === "login"
               ? "Sign in to your account, or browse our snacks as a guest."
               : mode === "signup"
@@ -516,65 +564,70 @@ export function AuthPage({
             </button>
           )}
 
-          <div className="my-4 flex items-center gap-4 text-xs text-subtle">
-            <span className="h-px flex-1 bg-border" />
-            <span>or</span>
-            <span className="h-px flex-1 bg-border" />
-          </div>
-
+          {(mode === "login" || mode === "signup") && (
+            <div className="mb-5">
+              <div className="my-4 flex items-center gap-4 text-xs text-subtle">
+                <span className="h-px flex-1 bg-border" />
+                <span>or continue with</span>
+                <span className="h-px flex-1 bg-border" />
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full justify-start"
+                  onClick={() => void handleSocialSignIn("google")}
+                  disabled={pending}
+                >
+                  <GoogleLogo />
+                  Google
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full justify-start"
+                  onClick={() => void handleSocialSignIn("facebook")}
+                  disabled={pending}
+                >
+                  <FacebookLogo />
+                  Facebook
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full justify-start"
+                  onClick={() => void handleSocialSignIn("custom:tiktok")}
+                  disabled={pending}
+                >
+                  <TikTokLogo />
+                  TikTok
+                </Button>
+                {!staffLogin && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="w-full justify-start"
+                    onClick={() => {
+                      setPhoneIntent(mode);
+                      setPhoneNumber("");
+                      changeMode("phone");
+                    }}
+                    disabled={pending}
+                  >
+                    <Smartphone aria-hidden="true" />
+                    Continue with phone
+                  </Button>
+                )}
+              </div>
+            </div>
+          )}
           {!staffLogin && (
             <>
-              {(mode === "login" || mode === "signup") && (
-                <div className="mb-5">
-                  <div className="my-4 flex items-center gap-4 text-xs text-subtle">
-                    <span className="h-px flex-1 bg-border" />
-                    <span>or continue with</span>
-                    <span className="h-px flex-1 bg-border" />
-                  </div>
-                  <div className="grid grid-cols-2 gap-2">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      className="w-full"
-                      onClick={() => void handleSocialSignIn("google")}
-                      disabled={pending}
-                    >
-                      Google
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      className="w-full"
-                      onClick={() => void handleSocialSignIn("facebook")}
-                      disabled={pending}
-                    >
-                      Facebook
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      className="w-full"
-                      onClick={() => void handleSocialSignIn("custom:tiktok")}
-                      disabled={pending}
-                    >
-                      TikTok
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      className="w-full"
-                      onClick={() => {
-                        setPhoneIntent(mode);
-                        setPhoneNumber("");
-                        changeMode("phone");
-                      }}
-                      disabled={pending}
-                    >
-                      Continue with phone
-                    </Button>
-                  </div>
-                </div>
-              )}
+              <div className="my-4 flex items-center gap-4 text-xs text-subtle">
+                <span className="h-px flex-1 bg-border" />
+                <span>or</span>
+                <span className="h-px flex-1 bg-border" />
+              </div>
               <Button
                 type="button"
                 variant="outline"
