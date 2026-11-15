@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { getAuthRedirectUrl, isSupabaseConfigured, supabase } from "@/lib/supabase";
 import { asset, SHOP } from "@/lib/shop";
 
-type AuthMode = "login" | "signup" | "forgot" | "reset";
+type AuthMode = "login" | "signup" | "forgot" | "reset" | "phone" | "phone-verify";
 type NoticeKind = "error" | "info" | "success";
 
 function readableAuthError(error: Error): string {
@@ -29,6 +29,9 @@ function readableAuthError(error: Error): string {
   }
   if (message.includes("already registered")) {
     return "An account may already use this email. Try logging in or resetting your password.";
+  }
+  if (message.includes("invalid otp") || message.includes("token has expired")) {
+    return "That verification code is invalid or expired. Request a new code and try again.";
   }
   return error.message;
 }
@@ -55,6 +58,8 @@ export function AuthPage({
   const [notice, setNotice] = useState(initialNotice);
   const [noticeKind, setNoticeKind] = useState<NoticeKind>("info");
   const [pending, setPending] = useState(false);
+  const [phoneIntent, setPhoneIntent] = useState<"login" | "signup">("login");
+  const [phoneNumber, setPhoneNumber] = useState("");
 
   useEffect(() => {
     if (recoveringPassword) setMode("reset");
@@ -77,7 +82,7 @@ export function AuthPage({
     setNotice("");
   }
 
-  async function handleSocialSignIn(provider: Provider) {
+  async function handleSocialSignIn(provider: Provider | "custom:tiktok") {
     setNotice("");
     if (!supabase) {
       showMessage("Sign-in setup is incomplete. Please try again later.", "error");
@@ -87,7 +92,8 @@ export function AuthPage({
     setPending(true);
     try {
       const { error } = await supabase.auth.signInWithOAuth({
-        provider,
+        // Supabase supports custom OAuth identifiers, but this SDK's Provider type omits them.
+        provider: provider as Provider,
         options: { redirectTo: getAuthRedirectUrl() },
       });
       if (error) throw error;
@@ -117,15 +123,42 @@ export function AuthPage({
     const email = String(formData.get("email") ?? "").trim();
     const password = String(formData.get("password") ?? "");
     const confirmPassword = String(formData.get("confirmPassword") ?? "");
+    const phone = String(formData.get("phone") ?? "").replace(/[\s()-]/g, "");
 
     if ((mode === "signup" || mode === "reset") && password !== confirmPassword) {
       showMessage("Those passwords don’t match. Please try again.", "error");
       return;
     }
 
+    if (mode === "phone" && !/^\+[1-9]\d{7,14}$/.test(phone)) {
+      showMessage("Enter a valid phone number with its country code, such as +977 98XXXXXXXX.", "error");
+      return;
+    }
+
     setPending(true);
     try {
-      if (mode === "signup") {
+      if (mode === "phone") {
+        const { error } = await supabase.auth.signInWithOtp({
+          phone,
+          options: {
+            shouldCreateUser: phoneIntent === "signup",
+            ...(phoneIntent === "signup" && {
+              data: { full_name: String(formData.get("name") ?? "").trim() },
+            }),
+          },
+        });
+        if (error) throw error;
+        setPhoneNumber(phone);
+        setMode("phone-verify");
+        showMessage("We sent a verification code by SMS.", "success");
+      } else if (mode === "phone-verify") {
+        const { error } = await supabase.auth.verifyOtp({
+          phone: phoneNumber,
+          token: String(formData.get("token") ?? "").trim(),
+          type: "sms",
+        });
+        if (error) throw error;
+      } else if (mode === "signup") {
         const { data, error } = await supabase.auth.signUp({
           email,
           password,
@@ -178,9 +211,11 @@ export function AuthPage({
   }
 
   const isRecovery = mode === "reset";
+  const isPhoneMode = mode === "phone" || mode === "phone-verify";
   const showsEmail = mode === "login" || mode === "signup" || mode === "forgot";
   const showsPassword = mode === "login" || mode === "signup" || isRecovery;
   const showsConfirmPassword = mode === "signup" || isRecovery;
+  const showsName = mode === "signup" || (mode === "phone" && phoneIntent === "signup");
 
   return (
     <main className="page-transition grid min-h-dvh bg-bg sm:grid-cols-[0.9fr_1.1fr]">
@@ -223,10 +258,20 @@ export function AuthPage({
       <section className="flex items-center justify-center px-5 py-8 sm:px-6 sm:py-10 lg:px-14">
         <div className="w-full max-w-md">
           <p className="text-sm font-medium text-primary">
-            {staffLogin ? "Staff inventory sign-in" : "Welcome to the pasal"}
+            {staffLogin
+              ? "Staff inventory sign-in"
+              : isPhoneMode
+                ? "Phone sign-in"
+                : "Welcome to the pasal"}
           </p>
           <h2 className="mt-2 font-display text-3xl font-medium tracking-tight sm:text-4xl">
-            {mode === "login"
+            {mode === "phone"
+              ? phoneIntent === "signup"
+                ? "Join with your phone."
+                : "Sign in with your phone."
+              : mode === "phone-verify"
+                ? "Check your messages."
+                : mode === "login"
               ? "Good to see you."
               : mode === "signup"
                 ? "Join our community."
@@ -235,7 +280,11 @@ export function AuthPage({
                   : "Choose a new password."}
           </h2>
           <p className="mt-2 text-sm leading-relaxed text-muted">
-            {staffLogin
+            {mode === "phone"
+              ? "We’ll text you a one-time verification code."
+              : mode === "phone-verify"
+                ? `Enter the code we sent to ${phoneNumber}.`
+                : staffLogin
               ? "Use your own account. Inventory access is limited to emails approved by the shop owner."
               : mode === "login"
               ? "Sign in to your account, or browse our snacks as a guest."
@@ -279,7 +328,7 @@ export function AuthPage({
           )}
 
           <form className="mt-5 space-y-3.5" onSubmit={handleSubmit}>
-            {mode === "signup" && (
+            {showsName && (
               <div className="space-y-2">
                 <Label htmlFor="fullName">Your name</Label>
                 <Input
@@ -288,6 +337,41 @@ export function AuthPage({
                   type="text"
                   autoComplete="name"
                   placeholder="Name"
+                  required
+                  disabled={pending}
+                />
+              </div>
+            )}
+
+            {mode === "phone" && (
+              <div className="space-y-2">
+                <Label htmlFor="phone">Phone number</Label>
+                <Input
+                  id="phone"
+                  name="phone"
+                  type="tel"
+                  inputMode="tel"
+                  autoComplete="tel"
+                  placeholder="+977 98XXXXXXXX"
+                  value={phoneNumber}
+                  onChange={(event) => setPhoneNumber(event.target.value)}
+                  required
+                  disabled={pending}
+                />
+                <p className="text-xs text-subtle">Include the +country code.</p>
+              </div>
+            )}
+
+            {mode === "phone-verify" && (
+              <div className="space-y-2">
+                <Label htmlFor="phoneToken">SMS verification code</Label>
+                <Input
+                  id="phoneToken"
+                  name="token"
+                  type="text"
+                  inputMode="numeric"
+                  autoComplete="one-time-code"
+                  placeholder="Enter your code"
                   required
                   disabled={pending}
                 />
@@ -371,7 +455,11 @@ export function AuthPage({
             <Button type="submit" size="lg" className="w-full" disabled={pending}>
               {pending
                 ? "Please wait…"
-                : mode === "login"
+                : mode === "phone"
+                  ? "Send verification code"
+                  : mode === "phone-verify"
+                    ? "Verify and continue"
+                    : mode === "login"
                   ? "Log in"
                   : mode === "signup"
                     ? "Create account"
@@ -391,6 +479,28 @@ export function AuthPage({
               {notice}
             </p>
           </form>
+
+          {mode === "phone-verify" && (
+            <button
+              type="button"
+              className="mt-2 w-full text-center text-sm font-medium text-primary underline-offset-4 hover:underline"
+              onClick={() => changeMode("phone")}
+              disabled={pending}
+            >
+              Change phone number
+            </button>
+          )}
+
+          {isPhoneMode && (
+            <button
+              type="button"
+              className="mt-2 w-full text-center text-sm font-medium text-primary underline-offset-4 hover:underline"
+              onClick={() => changeMode(phoneIntent)}
+              disabled={pending}
+            >
+              Use email instead
+            </button>
+          )}
 
           {(mode === "forgot" || isRecovery) && (
             <button
@@ -435,6 +545,28 @@ export function AuthPage({
                       disabled={pending}
                     >
                       Facebook
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="w-full"
+                      onClick={() => void handleSocialSignIn("custom:tiktok")}
+                      disabled={pending}
+                    >
+                      TikTok
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="w-full"
+                      onClick={() => {
+                        setPhoneIntent(mode);
+                        setPhoneNumber("");
+                        changeMode("phone");
+                      }}
+                      disabled={pending}
+                    >
+                      Continue with phone
                     </Button>
                   </div>
                 </div>
