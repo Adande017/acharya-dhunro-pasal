@@ -6,7 +6,7 @@
 <meta content='width=device-width, initial-scale=1, viewport-fit=cover' name='viewport'/>
 <meta content='#f3eee4' name='theme-color'/>
 <b:include data='blog' name='all-head-content'/>
-<title>Acharya Dhunro Pasal — Corn Puff Pipes</title>
+<title>Acharya Dhungro Pasal — Corn Puff Pipes</title>
 <b:skin><![CDATA[/* Blogger chrome off — shop fills the page */
 #navbar,#navbar-iframe,.navbar,.blog-pager,.post-footer,#comments,.footer-outer,.header-outer,.tabs-outer,.sidebar-wrapper,#Attribution1,.Attribution,#page{display:none!important}
 body{margin:0;padding:0!important;min-width:0!important;background:#f3eee4}
@@ -183,7 +183,7 @@ footer.site{background:var(--accent);color:var(--accent-fg);margin-top:0}
     <a class="brand" href="#top">
       <img src="https://adande017.github.io/acharya-dhunro-pasal/brand/acharya-dhunro-pasal-logo.webp" width="40" height="40" alt=""/>
       <span>
-        <strong>Acharya Dhunro Pasal</strong>
+        <strong>Acharya Dhungro Pasal</strong>
         <small>Corn Puff Pipes · Kathmandu</small>
       </span>
     </a>
@@ -206,7 +206,7 @@ footer.site{background:var(--accent);color:var(--accent-fg);margin-top:0}
       <div>
         <p class="kicker rise">Pasal · Kathmandu</p>
         <h1 class="rise">Corn Puff Pipes from traditional maize.</h1>
-        <p class="lede rise">Light, pipe-shaped puffs. Handmade in small batches at Acharya Dhunro Pasal. Call to book, then scan to pay.</p>
+        <p class="lede rise">Light, pipe-shaped puffs. Handmade in small batches at Acharya Dhungro Pasal. Call to book, then scan to pay.</p>
         <div class="cta-row rise">
           <a class="btn btn-primary btn-lg" href="tel:+9779845044572"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.79 19.79 0 0 1 2.12 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.81.36 1.6.68 2.35a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.73-1.73a2 2 0 0 1 2.11-.45c.75.32 1.54.55 2.35.68A2 2 0 0 1 22 16.92z"/></svg> Call to order</a>
           <a class="btn btn-outline btn-lg" href="#order">Place an order</a>
@@ -273,7 +273,7 @@ footer.site{background:var(--accent);color:var(--accent-fg);margin-top:0}
       <div>
         <p class="kicker">The craft</p>
         <h2>Maize, heat, and a pipe shape.</h2>
-        <p class="lede">Acharya Dhunro Pasal puffs traditional, non-hybrid maize into airy pipes — a familiar teatime snack with a clean crunch and a golden finish.</p>
+        <p class="lede">Acharya Dhungro Pasal puffs traditional, non-hybrid maize into airy pipes — a familiar teatime snack with a clean crunch and a golden finish.</p>
         <p class="lede">Batches stay small so the crunch stays even. Ask for a bag for the house, a pack for the gathering, or a sack if you sell snacks of your own.</p>
         <ul class="pips">
           <li>Non-hybrid maize</li>
@@ -360,7 +360,7 @@ footer.site{background:var(--accent);color:var(--accent-fg);margin-top:0}
     <div class="foot-brand">
       <img src="https://adande017.github.io/acharya-dhunro-pasal/brand/acharya-dhunro-pasal-logo.webp" width="44" height="44" alt=""/>
       <div>
-        <strong style="font-family:var(--display);font-size:1.2rem;font-weight:500">Acharya Dhunro Pasal</strong>
+        <strong style="font-family:var(--display);font-size:1.2rem;font-weight:500">Acharya Dhungro Pasal</strong>
         <p>Corn Puff Pipes · traditional maize · Kathmandu</p>
       </div>
     </div>
@@ -399,7 +399,7 @@ footer.site{background:var(--accent);color:var(--accent-fg);margin-top:0}
 <div class="drawer" id="menu">
   <button class="backdrop" type="button" data-close="menu" aria-label="Close menu"></button>
   <div class="drawer-panel">
-    <strong style="font-family:var(--display);font-size:1.2rem">Acharya Dhunro Pasal</strong>
+    <strong style="font-family:var(--display);font-size:1.2rem">Acharya Dhungro Pasal</strong>
     <p style="color:var(--muted);margin:0 0 1rem">Corn Puff Pipes from Kathmandu</p>
     <nav>
       <a href="#packs" data-close="menu">Packs</a>
@@ -434,7 +434,7 @@ footer.site{background:var(--accent);color:var(--accent-fg);margin-top:0}
     var phone = sanitize((document.getElementById("phone") || {}).value, 24) || "—";
     var note = sanitize((document.getElementById("note") || {}).value, 200);
     var lines = [
-      "Namaste, I would like to order Corn Puff Pipes from Acharya Dhunro Pasal.",
+      "Namaste, I would like to order Corn Puff Pipes from Acharya Dhungro Pasal.",
       "Name: " + name,
       "Phone: " + phone,
       "Pack: " + (PACKS[pack] || "Snack bag"),

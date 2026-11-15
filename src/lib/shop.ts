@@ -1,5 +1,5 @@
 export const SHOP = {
-  name: "Acharya Dhunro Pasal",
+  name: "Acharya Dhungro Pasal",
   product: "Corn Puff Pipes",
   tagline: "Pipe-shaped puffs from traditional maize.",
   city: "Kathmandu",

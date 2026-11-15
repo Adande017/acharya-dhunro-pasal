@@ -1,6 +1,6 @@
-# Acharya Dhunro Pasal — Corn Puff Pipes
+# Acharya Dhungro Pasal — Corn Puff Pipes
 
-Snack shop site for **Acharya Dhunro Pasal** (Kathmandu). Corn Puff Pipes from traditional maize.
+Snack shop site for **Acharya Dhungro Pasal** (Kathmandu). Corn Puff Pipes from traditional maize.
 
 ## What changed in 3.0
 

@@ -2,7 +2,7 @@
 	"version": "2.0.0",
 	"tasks": [
 		{
-			"label": "Dhunro Pasal dev server",
+			"label": "Dhungro Pasal dev server",
 			"type": "shell",
 			"command": "npm",
 			"args": [

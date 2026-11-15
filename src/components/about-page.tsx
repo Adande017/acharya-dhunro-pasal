@@ -7,7 +7,7 @@ const DETAILS = [
     category: "Our story",
     title: "A familiar teatime favorite.",
     description:
-      "Acharya Dhunro Pasal makes Corn Puff Pipes for families, gatherings, and neighborhood shops in Kathmandu.",
+      "Acharya Dhungro Pasal makes Corn Puff Pipes for families, gatherings, and neighborhood shops in Kathmandu.",
     icon: Sparkles,
   },
   {
