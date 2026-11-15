@@ -4,16 +4,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { AvailabilityBadge } from "@/components/availability-badge";
-import { asset, PACKS, SHOP, telHref, type PackId } from "@/lib/shop";
+import { asset, SHOP, telHref, type PackId } from "@/lib/shop";
 import { resetTilt, updateTilt } from "@/lib/tilt";
 import { useInventoryAvailability } from "@/lib/use-inventory-availability";
-
-const PRODUCT_FILTERS: Array<{ id: "all" | PackId; label: string }> = [
-  { id: "all", label: "All products" },
-  { id: "snack", label: "Everyday" },
-  { id: "party", label: "Gatherings" },
-  { id: "bulk", label: "Wholesale" },
-];
+import { useProductCatalog } from "@/lib/use-product-catalog";
 
 export function ProductsPage({
   onHome,
@@ -25,9 +19,17 @@ export function ProductsPage({
   const [productFilter, setProductFilter] = useState<"all" | PackId>("all");
   const [productSearch, setProductSearch] = useState("");
   const { availability, loading, error } = useInventoryAvailability();
+  const { products, error: catalogError } = useProductCatalog();
+  const productFilters = [
+    { id: "all", label: "All products" },
+    ...Array.from(new Set(products.map((product) => product.kicker).filter(Boolean))).map((kicker) => ({
+      id: kicker,
+      label: kicker,
+    })),
+  ];
   const search = productSearch.trim().toLocaleLowerCase();
-  const visiblePacks = PACKS.filter((item) => {
-    const matchesFilter = productFilter === "all" || item.id === productFilter;
+  const visiblePacks = products.filter((item) => {
+    const matchesFilter = productFilter === "all" || item.kicker === productFilter;
     const matchesSearch =
       !search ||
       `${item.name} ${item.kicker} ${item.description} ${item.suited}`
@@ -115,7 +117,7 @@ export function ProductsPage({
             </div>
 
             <div className="mt-7 flex flex-wrap gap-2" role="group" aria-label="Filter products">
-              {PRODUCT_FILTERS.map((filter) => (
+              {productFilters.map((filter) => (
                 <button
                   key={filter.id}
                   type="button"
@@ -155,12 +157,17 @@ export function ProductsPage({
                 {error}
               </p>
             )}
+            {catalogError && (
+              <p className="mt-3 rounded-xl border border-border bg-surface/90 px-4 py-3 text-sm text-muted" role="status">
+                {catalogError}
+              </p>
+            )}
 
             {visiblePacks.length > 0 ? (
               <div className="mt-4 grid gap-4 md:grid-cols-2">
                 {visiblePacks.map((item) => (
                   <article
-                    key={item.id}
+                    key={item.product_id}
                     className="pack-card-3d flex items-center gap-4 rounded-3xl bg-surface/90 p-3 shadow-[var(--shadow-border)] transition-[box-shadow] duration-180 ease-out hover:shadow-[var(--shadow-border-hover)] sm:gap-5 sm:p-4"
                     data-tilt-strength="4"
                     onPointerMove={updateTilt}
@@ -168,7 +175,7 @@ export function ProductsPage({
                   >
                     <img
                       src={asset(item.image)}
-                      alt={item.imageAlt}
+                      alt={item.image_alt}
                       width={96}
                       height={96}
                       loading="lazy"
@@ -185,11 +192,11 @@ export function ProductsPage({
                       <p className="mt-1 text-sm leading-relaxed text-muted">{item.description}</p>
                       <p className="mt-2 text-xs text-subtle">{item.suited}</p>
                       <AvailabilityBadge
-                        status={availability[item.id]}
+                        status={availability[item.product_id]}
                         loading={loading}
                         error={error}
                       />
-                      {availability[item.id] === "unavailable" && (
+                      {availability[item.product_id] === "unavailable" && (
                         <p className="mt-2 text-xs text-muted">
                           You can still ask us when this pack will be available.
                         </p>
@@ -198,9 +205,9 @@ export function ProductsPage({
                         type="button"
                         size="sm"
                         className="mt-4"
-                        onClick={() => onOrder(item.id)}
+                        onClick={() => onOrder(item.product_id)}
                       >
-                        {availability[item.id] === "unavailable" ? "Ask about this pack" : "Choose this pack"}
+                        {availability[item.product_id] === "unavailable" ? "Ask about this pack" : "Choose this pack"}
                         <ArrowUpRight />
                       </Button>
                     </div>

@@ -156,6 +156,51 @@ export type Database = {
         },
         never
       >;
+      inventory_audit_log: Table<
+        {
+          id: number;
+          entity_type: "inventory_items" | "inventory_products" | "inventory_staff_emails";
+          entity_id: string;
+          operation: "INSERT" | "UPDATE" | "DELETE";
+          actor_id: string | null;
+          actor_email: string | null;
+          details: Json;
+          created_at: string;
+        },
+        never,
+        never
+      >;
+      customer_orders: Table<
+        {
+          id: string;
+          customer_name: string;
+          customer_phone: string;
+          note: string;
+          product_id: string;
+          quantity: number;
+          created_by: string | null;
+          created_at: string;
+        },
+        never,
+        never
+      >;
+      inventory_products: Table<
+        {
+          product_id: string;
+          name: string;
+          kicker: string;
+          description: string;
+          image: string;
+          image_alt: string;
+          suited: string;
+          active: boolean;
+          sort_order: number;
+          created_at: string;
+          updated_at: string;
+        },
+        never,
+        never
+      >;
     };
     Views: {
       inventory_availability: {
@@ -194,6 +239,38 @@ export type Database = {
       is_inventory_owner: {
         Args: Record<string, never>;
         Returns: boolean;
+      };
+      place_customer_order: {
+        Args: {
+          p_customer_name: string;
+          p_customer_phone: string;
+          p_note: string;
+          p_items: Json;
+        };
+        Returns: {
+          order_id: string;
+          product_id: string;
+          quantity: number;
+          created_at: string;
+        };
+      };
+      save_inventory_product: {
+        Args: {
+          p_product_id: string;
+          p_name: string;
+          p_kicker: string;
+          p_description: string;
+          p_image: string;
+          p_image_alt: string;
+          p_suited: string;
+          p_barcode: string;
+          p_low_stock_threshold: number;
+        };
+        Returns: undefined;
+      };
+      set_inventory_product_active: {
+        Args: { p_product_id: string; p_active: boolean };
+        Returns: undefined;
       };
     };
     Enums: Record<string, never>;

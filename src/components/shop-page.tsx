@@ -1,7 +1,8 @@
-import { useId, useState } from "react";
+import { useEffect, useId, useState, type FormEvent } from "react";
 import {
   ArrowUpRight,
   BookOpen,
+  Check,
   Minus,
   Package,
   Phone,
@@ -28,7 +29,6 @@ import {
   buildWhatsAppUrl,
   clampQty,
   mailHref,
-  PACKS,
   sanitizeLine,
   SHOP,
   telHref,
@@ -37,7 +37,29 @@ import {
 } from "@/lib/shop";
 import { resetTilt, updateTilt } from "@/lib/tilt";
 import { useInventoryAvailability } from "@/lib/use-inventory-availability";
+import { useProductCatalog } from "@/lib/use-product-catalog";
 import { cn } from "@/lib/utils";
+import { supabase } from "@/lib/supabase";
+
+type CustomerOrderReceipt = {
+  order_id: string;
+  product_id: string;
+  quantity: number;
+  created_at: string;
+};
+
+function messageOf(error: unknown): string {
+  if (error instanceof Error) return error.message;
+  if (
+    typeof error === "object" &&
+    error !== null &&
+    "message" in error &&
+    typeof error.message === "string"
+  ) {
+    return error.message;
+  }
+  return "Something went wrong. Please try again.";
+}
 
 function BrandMark({ className }: { className?: string }) {
   return (
@@ -87,8 +109,21 @@ export function ShopPage({
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [note, setNote] = useState("");
+  const [orderReviewOpen, setOrderReviewOpen] = useState(false);
+  const [orderAcknowledged, setOrderAcknowledged] = useState(false);
+  const [orderPending, setOrderPending] = useState(false);
+  const [orderError, setOrderError] = useState("");
+  const [orderReceipt, setOrderReceipt] = useState<CustomerOrderReceipt | null>(null);
   const formId = useId();
-  const { availability, loading, error } = useInventoryAvailability();
+  const { availability, loading, error, refresh } = useInventoryAvailability();
+  const { products, error: catalogError } = useProductCatalog();
+
+  useEffect(() => {
+    if (!products.some((product) => product.product_id === pack) && products.length) {
+      setPack(products[0].product_id);
+    }
+  }, [pack, products]);
+  const selectedProduct = products.find((product) => product.product_id === pack);
 
   const order = {
     name,
@@ -96,7 +131,44 @@ export function ShopPage({
     pack,
     qty,
     note,
+    packName: selectedProduct?.name,
   };
+
+  function reviewOrder(event: FormEvent<HTMLFormElement>): void {
+    event.preventDefault();
+    setOrderError("");
+    setOrderAcknowledged(false);
+    setOrderReviewOpen(true);
+  }
+
+  async function confirmOrder(): Promise<void> {
+    if (!supabase) {
+      setOrderError("Online ordering is unavailable. Please contact us by phone or WhatsApp.");
+      return;
+    }
+
+    setOrderPending(true);
+    setOrderError("");
+    try {
+      const { data, error: orderErrorResult } = await supabase.rpc("place_customer_order", {
+        p_customer_name: name,
+        p_customer_phone: phone,
+        p_note: note,
+        p_items: [{ product_id: pack, quantity: qty }],
+      });
+      if (orderErrorResult) throw orderErrorResult;
+      if (!data) throw new Error("The shop did not return an order confirmation.");
+
+      setOrderReceipt(data);
+      setOrderReviewOpen(false);
+      void refresh();
+    } catch (error: unknown) {
+      setOrderError(`Your order was not placed: ${messageOf(error)}`);
+    } finally {
+      setOrderPending(false);
+    }
+  }
+
   return (
     <div className="page-transition pasal-watermark relative min-h-dvh bg-bg text-fg">
       <div
@@ -279,10 +351,7 @@ export function ShopPage({
 
             <form
               className="rounded-3xl bg-bg p-5 shadow-[var(--shadow-border)] sm:p-7"
-              onSubmit={(event) => {
-                event.preventDefault();
-                window.open(buildWhatsAppUrl(order), "_blank", "noopener,noreferrer");
-              }}
+              onSubmit={reviewOrder}
             >
               <div className="grid gap-5 sm:grid-cols-2">
                 <div className="grid gap-2">
@@ -295,6 +364,7 @@ export function ShopPage({
                     value={name}
                     onChange={(e) => setName(sanitizeLine(e.target.value, 80))}
                     placeholder="Your name"
+                    required
                   />
                 </div>
                 <div className="grid gap-2">
@@ -309,6 +379,7 @@ export function ShopPage({
                     value={phone}
                     onChange={(e) => setPhone(sanitizeLine(e.target.value, 24))}
                     placeholder="98XXXXXXXX"
+                    required
                   />
                 </div>
               </div>
@@ -316,11 +387,11 @@ export function ShopPage({
               <fieldset className="mt-5">
                 <legend className="text-sm font-medium">Pack</legend>
                 <div className="mt-2 grid gap-2 sm:grid-cols-3">
-                  {PACKS.map((item) => {
-                    const selected = pack === item.id;
+                  {products.map((item) => {
+                    const selected = pack === item.product_id;
                     return (
                       <label
-                        key={item.id}
+                        key={item.product_id}
                         className={cn(
                           "depth-card-3d cursor-pointer rounded-2xl bg-surface px-3 py-3 text-sm shadow-[var(--shadow-border)] transition-[box-shadow] duration-180 ease-out",
                           selected && "shadow-[var(--shadow-border-hover)] ring-2 ring-ring",
@@ -332,15 +403,15 @@ export function ShopPage({
                         <input
                           type="radio"
                           name="pack"
-                          value={item.id}
+                          value={item.product_id}
                           checked={selected}
-                          onChange={() => setPack(item.id)}
+                          onChange={() => setPack(item.product_id)}
                           className="sr-only"
                         />
                         <span className="block font-medium">{item.name}</span>
                         <span className="text-xs text-muted">{item.kicker}</span>
                         <AvailabilityBadge
-                          status={availability[item.id]}
+                          status={availability[item.product_id]}
                           loading={loading}
                           error={error}
                         />
@@ -349,13 +420,13 @@ export function ShopPage({
                   })}
                 </div>
                 <p className="mt-2 text-xs leading-relaxed text-muted">
-                  {availability[pack] === "unavailable"
-                    ? "This pack is currently unavailable, but you can still send an inquiry and we’ll confirm by phone."
-                    : "Availability can change; we’ll confirm your request before payment."}
+                        {availability[pack] === "unavailable"
+                          ? "This pack is currently unavailable. You can still send an inquiry by WhatsApp or email."
+                          : "Confirming an online order reserves available stock immediately; we’ll contact you about fulfillment and payment."}
                 </p>
                 {error && (
                   <p className="mt-2 text-xs text-muted" role="status">
-                    {error}
+                    {error || catalogError}
                   </p>
                 )}
               </fieldset>
@@ -409,10 +480,34 @@ export function ShopPage({
                 />
               </div>
 
+              {orderReceipt && (
+                <div className="mt-5 rounded-2xl border border-emerald-300 bg-emerald-50 p-4 text-emerald-950" role="status" aria-live="polite">
+                  <p className="flex items-center gap-2 font-semibold">
+                    <Check className="size-4" />
+                    Order confirmed — {products.find((item) => item.product_id === orderReceipt.product_id)?.name ?? orderReceipt.product_id}, {orderReceipt.quantity} {orderReceipt.quantity === 1 ? "unit" : "units"} reserved.
+                  </p>
+                  <p className="mt-1 break-all text-xs">
+                    Reference: <span className="font-mono">{orderReceipt.order_id}</span>
+                  </p>
+                  <p className="mt-2 text-xs leading-relaxed">
+                    We’ll contact you to confirm fulfillment and payment. No payment was collected online.
+                  </p>
+                </div>
+              )}
+              {orderError && (
+                <p className="mt-4 rounded-2xl border border-primary/20 bg-primary/5 p-3 text-sm text-primary" role="alert">
+                  {orderError}
+                </p>
+              )}
               <div className="mt-6 flex flex-col gap-2 sm:flex-row">
                 <Button type="submit" className="flex-1">
-                  <WhatsAppIcon className="size-4" />
-                  Send on WhatsApp
+                  Review and place order
+                </Button>
+                <Button asChild variant="outline" className="flex-1">
+                  <a href={buildWhatsAppUrl(order)} target="_blank" rel="noopener noreferrer">
+                    <WhatsAppIcon className="size-4" />
+                    WhatsApp inquiry
+                  </a>
                 </Button>
                 <Button asChild variant="outline" className="flex-1">
                   <a href={buildMailtoUrl(order)}>Email the order</a>
@@ -425,7 +520,7 @@ export function ShopPage({
                 onClick={() => setPayOpen(true)}
               >
                 <QrCode />
-                Scan to pay after you confirm
+                Scan to pay after the shop confirms
               </Button>
             </form>
           </div>
@@ -457,7 +552,7 @@ export function ShopPage({
         </div>
         <Separator className="bg-accent-foreground/10" />
         <p className="mx-auto max-w-6xl px-4 py-5 text-xs text-accent-foreground/55 sm:px-6">
-          Handmade snacks. Confirm the order by phone before paying.
+          Handmade snacks. Placing an online order reserves stock; we’ll contact you to confirm fulfillment and payment.
         </p>
       </footer>
 
@@ -482,13 +577,53 @@ export function ShopPage({
       </div>
       <div className="h-20 sm:hidden" aria-hidden="true" />
 
+      <Dialog
+        open={orderReviewOpen}
+        onOpenChange={(open) => {
+          if (!orderPending) setOrderReviewOpen(open);
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Review your order</DialogTitle>
+            <DialogDescription>
+              Confirming reserves this quantity from available stock. No payment is collected online; the shop will contact you about fulfillment and payment.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-2 rounded-2xl bg-bg p-4 text-sm">
+            <p><span className="text-muted">Customer:</span> {name}</p>
+            <p><span className="text-muted">Phone:</span> {phone}</p>
+            <p><span className="text-muted">Product:</span> {selectedProduct?.name ?? pack}</p>
+            <p><span className="text-muted">Quantity:</span> {qty}</p>
+            {note && <p className="break-words"><span className="text-muted">Note:</span> {note}</p>}
+          </div>
+          <label className="flex items-start gap-3 text-sm leading-relaxed">
+            <input
+              type="checkbox"
+              checked={orderAcknowledged}
+              onChange={(event) => setOrderAcknowledged(event.target.checked)}
+              className="mt-1 size-4 accent-primary"
+            />
+            <span>I have reviewed these order details and acknowledge that placing this order reserves the selected stock.</span>
+          </label>
+          {orderError && (
+            <p className="rounded-2xl border border-primary/20 bg-primary/5 p-3 text-sm text-primary" role="alert">
+              {orderError}
+            </p>
+          )}
+          <Button type="button" onClick={() => void confirmOrder()} disabled={!orderAcknowledged || orderPending}>
+            {orderPending ? "Placing order…" : "Confirm and reserve stock"}
+          </Button>
+        </DialogContent>
+      </Dialog>
+
       <Dialog open={payOpen} onOpenChange={setPayOpen}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Scan to pay</DialogTitle>
             <DialogDescription>
-              {SHOP.payNetwork} · {SHOP.payName}. Call {SHOP.phoneDisplay} to confirm the
-              order before you send money.
+              {SHOP.payNetwork} · {SHOP.payName}. The shop will contact you to confirm fulfillment.
+              Do not send payment before the shop confirms your order.
             </DialogDescription>
           </DialogHeader>
           <div className="rounded-2xl bg-bg p-4">

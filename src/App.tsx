@@ -294,6 +294,7 @@ export default function App() {
         onAbout={() => navigateTo("about")}
         onCommunity={() => navigateTo("community")}
         onSignOut={signOut}
+        onStaffLogin={() => navigateTo("inventory")}
         onInventory={
           inventoryAccess ? () => navigateTo("inventory") : undefined
         }

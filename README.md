@@ -8,7 +8,7 @@ The previous build wrapped an 880 KB Three.js “CompleteShelf” iframe (WebGL 
 
 This rewrite is a real shop page:
 
-- Supabase email/password sign-up, login, email confirmation, and password reset (requires project configuration), plus guest access
+- Supabase email/password and phone OTP sign-up/login, Google and Facebook sign-in, and TikTok via a custom OAuth provider (requires project configuration), plus guest access
 - Product photos, packs (snack / party / bulk)
 - Call, WhatsApp, email, scan-to-pay (Global IME)
 - No iframe, no WebGL, no third-party JS CDN
@@ -19,14 +19,43 @@ Live: https://adande017.github.io/acharya-dhunro-pasal/
 
 ## Account sign-in setup
 
-Email/password accounts use Supabase Auth. The app stores the name as Supabase user metadata; passwords are sent directly to Supabase Auth and are never stored by this site. Auth does not use a service-role key or an auth-specific user table. Orders still go through WhatsApp/email; the site does not yet save order history to an account.
+Email/password, phone OTP, and social accounts use Supabase Auth. The app stores the name as Supabase user metadata; passwords are sent directly to Supabase Auth and are never stored by this site. Phone sign-in uses SMS codes and phone numbers must include the country code (for example, `+977`). Auth does not use a service-role key or an auth-specific user table. Online guest orders reserve inventory and are visible to staff; they are not saved to a customer account. WhatsApp and email inquiries are also available.
 
 1. In Supabase, enable the Email provider and choose whether email confirmation is required.
-2. In **Authentication → URL Configuration**, add `http://localhost:5173/` and `https://adande017.github.io/acharya-dhunro-pasal/` to the allowed redirect URLs.
-3. Copy `.env.example` to `.env.local` and set `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` using the project URL and browser-safe publishable/anon key from **Project Settings → API**.
-4. For GitHub Pages, add those same two values as repository **Actions variables** named `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` under **Settings → Secrets and variables → Actions → Variables**, then rerun the Pages workflow.
+2. To enable Google and Facebook, configure their OAuth client credentials under **Authentication → Providers** and add the Supabase callback URL shown there to each provider's app settings.
+3. To enable TikTok, create and enable a [custom OAuth provider](https://supabase.com/docs/guides/auth/custom-oauth-providers) with the identifier `custom:tiktok`, then configure its callback URL and TikTok OAuth endpoints/credentials.
+4. To enable phone sign-in, enable the Phone provider and configure an SMS provider and message template. SMS delivery may incur provider charges.
+5. In **Authentication → URL Configuration**, add `http://localhost:5173/` and `https://adande017.github.io/acharya-dhunro-pasal/` to the allowed redirect URLs.
+6. Copy `.env.example` to `.env.local` and set `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` using the project URL and browser-safe publishable/anon key from **Project Settings → API**.
+7. For GitHub Pages, add those same two values as repository **Actions variables** named `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` under **Settings → Secrets and variables → Actions → Variables**, then rerun the Pages workflow.
 
 Never put a service-role key, secret key, database password, or email credentials in the frontend or GitHub Actions variables. Without the two public project values, account actions show an explicit setup message while guest browsing remains available.
+
+## Inventory scanning and online orders
+
+Inventory staff can scan product labels with a camera or a Bluetooth barcode scanner that types into the focused barcode field. Customers can review an order, explicitly acknowledge that stock will be reserved, and place it online. The backend checks stock and records the order and stock deduction atomically; the customer receives an order reference, and staff can see customer contact details in the inventory page. Payment is not collected online.
+
+Apply these migrations in order from **Supabase → SQL Editor → New query** before using inventory scanning or online orders:
+
+1. [`supabase/migrations/20261113184731_barcode_inventory.sql`](supabase/migrations/20261113184731_barcode_inventory.sql)
+2. [`supabase/migrations/20261113185756_staff_inventory_access.sql`](supabase/migrations/20261113185756_staff_inventory_access.sql)
+3. [`supabase/migrations/20261114000000_customer_orders.sql`](supabase/migrations/20261114000000_customer_orders.sql)
+4. [`supabase/migrations/20261114010000_inventory_product_catalog.sql`](supabase/migrations/20261114010000_inventory_product_catalog.sql)
+5. [`supabase/migrations/20261114190000_inventory_audit_log.sql`](supabase/migrations/20261114190000_inventory_audit_log.sql)
+
+Camera access requires HTTPS (or localhost). Staff can add/edit catalog products, update barcodes and low-stock thresholds, and archive/restore products; archiving hides a product from customers while preserving its stock and history. Customers see availability status rather than exact stock counts.
+
+### Accessing staff shop edits
+
+1. Open the live shop and select **Staff sign-in** in the shop header.
+2. Sign in with the email/password for your Supabase account. The shop owner account (`roms7291@gmail.com`) has staff access automatically. Other accounts must first be approved by the owner.
+3. To approve a staff member, the owner signs in, opens **Staff access** on the staff page, enters the staff member's account email, and selects **Approve staff**. The staff member can then sign in with that same email.
+4. On the **Stock desk**, select **Manage products** in the Staff workspace to reach the product editor. Use **Add product** for a new listing or **Edit** beside a product to update its name, category/short label, customer description, image, image description, “Best for” text, barcode, or low-stock alert threshold. Select **Save product changes** to apply edits.
+5. To hide a listing from the customer shop, choose **Delete from shop**. This archives it rather than permanently deleting it, so stock and transaction history are retained; choose **Restore** to list it again.
+
+The product editor does not change product prices. Staff access and inventory editing require the Supabase setup above, including the inventory and product-catalog migrations.
+
+The owner (`roms7291@gmail.com`) can review the **Owner activity log** on the same inventory page. The log records stock, product, and staff-access changes with the acting account and before/after values. Records remain in Supabase; the page loads them in batches, with older activity available on demand. Only the owner account can read this log.
 
 ## Member community
 
