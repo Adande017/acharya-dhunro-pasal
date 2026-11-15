@@ -83,6 +83,7 @@ export function AuthPage({
   onStaffLogin,
   onCustomerLogin,
   staffLogin = false,
+  ownerLogin = false,
   initialNotice = "",
   recoveringPassword = false,
   onPasswordChanged,
@@ -91,6 +92,7 @@ export function AuthPage({
   onStaffLogin: () => void;
   onCustomerLogin: () => void;
   staffLogin?: boolean;
+  ownerLogin?: boolean;
   initialNotice?: string;
   recoveringPassword?: boolean;
   onPasswordChanged: () => void;
@@ -135,7 +137,9 @@ export function AuthPage({
     try {
       const { supabase } = await import("@/lib/supabase");
       if (!supabase) throw new Error("Sign-in setup is incomplete.");
-      if (staffLogin) {
+      if (ownerLogin) {
+        window.sessionStorage.setItem("auth-return-to-owner", "true");
+      } else if (staffLogin) {
         window.sessionStorage.setItem("auth-return-to-staff", "true");
       }
       const { error } = await supabase.auth.signInWithOAuth({
@@ -145,9 +149,8 @@ export function AuthPage({
       });
       if (error) throw error;
     } catch (error: unknown) {
-      if (staffLogin) {
-        window.sessionStorage.removeItem("auth-return-to-staff");
-      }
+      window.sessionStorage.removeItem("auth-return-to-owner");
+      window.sessionStorage.removeItem("auth-return-to-staff");
       if (error instanceof Error) {
         showMessage(readableAuthError(error), "error");
       } else {

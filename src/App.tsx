@@ -118,12 +118,15 @@ export default function App() {
             setInventoryAccess(null);
             setRecoveringPassword(false);
             setGuest(false);
-            const returnToOwner = currentHash === "#owner";
+            const returnToOwner =
+              currentHash === "#owner" ||
+              window.sessionStorage.getItem("auth-return-to-owner") === "true";
             const returnToStaff =
               !returnToOwner &&
               (currentHash === "#inventory" ||
                 window.sessionStorage.getItem("auth-return-to-staff") === "true");
             window.sessionStorage.removeItem("auth-return-to-staff");
+            window.sessionStorage.removeItem("auth-return-to-owner");
             if (returnToOwner) {
               window.history.replaceState(null, "", "#owner");
               setShowOwner(true);
@@ -441,6 +444,7 @@ export default function App() {
         onStaffLogin={() => navigateTo("inventory")}
         onCustomerLogin={() => navigateTo("shop")}
         staffLogin={showInventory || showOwner}
+        ownerLogin={showOwner}
         initialNotice={notice}
         recoveringPassword={recoveringPassword}
         onPasswordChanged={() => {
