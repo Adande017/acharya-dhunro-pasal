@@ -8,7 +8,7 @@ The previous build wrapped an 880 KB Three.js “CompleteShelf” iframe (WebGL 
 
 This rewrite is a real shop page:
 
-- Supabase email/password and phone OTP sign-up/login, Google and Facebook sign-in, and TikTok via a custom OAuth provider (requires project configuration), plus guest access
+- Supabase email/password sign-up/login and Google and Facebook sign-in (requires project configuration), plus guest access
 - Product photos, packs (snack / party / bulk)
 - Call, WhatsApp, email, scan-to-pay (Global IME)
 - No iframe, no WebGL, no third-party JS CDN
@@ -19,15 +19,13 @@ Live: https://adande017.github.io/acharya-dhunro-pasal/
 
 ## Account sign-in setup
 
-Email/password, phone OTP, and social accounts use Supabase Auth. The app stores the name as Supabase user metadata; passwords are sent directly to Supabase Auth and are never stored by this site. Phone sign-in uses SMS codes and phone numbers must include the country code (for example, `+977`). Auth does not use a service-role key or an auth-specific user table. Online guest orders reserve inventory and are visible to staff; they are not saved to a customer account. WhatsApp and email inquiries are also available.
+Email/password and social accounts use Supabase Auth. The app stores the name as Supabase user metadata; passwords are sent directly to Supabase Auth and are never stored by this site. Auth does not use a service-role key or an auth-specific user table. Online guest orders reserve inventory and are visible to staff; they are not saved to a customer account. WhatsApp and email inquiries are also available.
 
 1. In Supabase, enable the Email provider and choose whether email confirmation is required.
 2. To enable Google and Facebook, configure their OAuth client credentials under **Authentication → Providers** and add the Supabase callback URL shown there to each provider's app settings.
-3. To enable TikTok, create and enable a [custom OAuth provider](https://supabase.com/docs/guides/auth/custom-oauth-providers) with the identifier `custom:tiktok`, then configure its callback URL and TikTok OAuth endpoints/credentials.
-4. To enable phone sign-in, enable the Phone provider and configure an SMS provider and message template. SMS delivery may incur provider charges.
-5. In **Authentication → URL Configuration**, add `http://localhost:5173/` and `https://adande017.github.io/acharya-dhunro-pasal/` to the allowed redirect URLs.
-6. Copy `.env.example` to `.env.local` and set `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` using the project URL and browser-safe publishable/anon key from **Project Settings → API**.
-7. For GitHub Pages, add those same two values as repository **Actions variables** named `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` under **Settings → Secrets and variables → Actions → Variables**, then rerun the Pages workflow.
+3. In **Authentication → URL Configuration**, add `http://localhost:5173/` and `https://adande017.github.io/acharya-dhunro-pasal/` to the allowed redirect URLs.
+4. Copy `.env.example` to `.env.local` and set `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` using the project URL and browser-safe publishable/anon key from **Project Settings → API**.
+5. For GitHub Pages, add those same two values as repository **Actions variables** named `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` under **Settings → Secrets and variables → Actions → Variables**, then rerun the Pages workflow.
 
 Never put a service-role key, secret key, database password, or email credentials in the frontend or GitHub Actions variables. Without the two public project values, account actions show an explicit setup message while guest browsing remains available.
 
